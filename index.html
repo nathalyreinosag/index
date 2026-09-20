@@ -16,12 +16,12 @@ body{
   align-items:center;
   justify-content:center;
   position:relative;
-  padding-bottom: 70px;
 }
 
+/* Fondo dinámico asegurado con colores degradados vivos de alta visibilidad y soporte garantizado */
 body::before {
   content: "";
-  position: fixed;
+  position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(135deg, #180b2e 0%, #3a0f52 50%, #101a45 100%);
   background-size: cover;
@@ -30,13 +30,17 @@ body::before {
 }
 
 @keyframes changeBackground {
-  0% { filter: hue-rotate(0deg) brightness(1); }
-  100% { filter: hue-rotate(30deg) brightness(1.15); }
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  100% {
+    filter: hue-rotate(30deg) brightness(1.15);
+  }
 }
 
 .screen{
   width:100%;
-  min-height:90vh;
+  min-height:100vh;
   display:none;
   align-items:center;
   justify-content:center;
@@ -140,25 +144,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 }
 iframe{width:100%;height:320px;border:0;display:block;}
 
-/* Barra inferior fija para la música de fondo */
-.bg-music-bar {
-  position: fixed;
-  bottom: 0; left: 0; width: 100%;
-  background: rgba(15, 5, 30, 0.95);
-  border-top: 1px solid rgba(255,255,255,0.2);
-  backdrop-filter: blur(10px);
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 1000;
-}
-.bg-music-bar span {
-  font-size: 16px;
-  font-weight: bold;
-  color: #ffd54a;
-}
-
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -172,6 +157,14 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
+
+    <!-- Control de música invisible en segundo plano -->
+    <div style="margin:15px auto 10px;text-align:center;">
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -198,15 +191,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
   </div>
 </section>
 
-<!-- Barra fija inferior con el reproductor visible de la playlist para evitar el bloqueo del navegador -->
-<div class="bg-music-bar">
-  <span>🎵 Playlist de Fondo (Ofi)</span>
-  <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 25px;font-size:15px;">▶️ ACTIVAR MÚSICA</button>
-  <div style="width: 180px; height: 40px; overflow: hidden; border-radius: 6px; background:#000;">
-    <iframe id="ambientFrame" src="" style="width: 260px; height: 160px; margin-top: -60px; margin-left: -40px; pointer-events: none;" allow="autoplay"></iframe>
-  </div>
-</div>
-
 <script>
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
@@ -219,7 +203,7 @@ const songs = [
 ];
 
 let ambientPlaying = false;
-const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E&list=RDMM";
+const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -377,9 +361,9 @@ function renderChallenge(i){
   currentSong = pickSong();
 
   if(i === 0){
-    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
+    box.innerHTML = <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>;
   } else if(i === 1){
-    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+    box.innerHTML = <p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
@@ -389,7 +373,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
+    box.innerHTML = <p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>;
   }
 }
 
@@ -432,12 +416,6 @@ function backHome(){
   
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  // Al volver a la ruleta, opcionalmente puedes reanudar la playlist si gustas
-  const frame = document.getElementById("ambientFrame");
-  frame.src = customMusicUrl;
-  ambientPlaying = true;
-  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
 }
 </script>
 </body>
