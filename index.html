@@ -158,12 +158,10 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Contenedor de música ambiental con iframe directo -->
+    <!-- Contenedor para la API de YouTube -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
-      <div id="ambientWrapper" style="width:1px;height:1px;opacity:0;overflow:hidden;position:absolute;pointer-events:none;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
+      <div id="youtubePlayerAPI" style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -191,24 +189,37 @@ iframe{width:100%;height:280px;border:0;display:block;}
   </div>
 </section>
 
+<!-- Script oficial de la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
+let player;
 let ambientPlaying = false;
 let wasPlayingBeforeChallenge = false;
-// Enlace correcto de la playlist mix de YouTube
-const playlistUrl = "https://www.youtube.com/embed/?listType=playlist&list=RDOPms-BZ5a5I&autoplay=1&loop=1";
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtubePlayerAPI', {
+    height: '1',
+    width: '1',
+    videoId: 'fEWhm_TVvUw',
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': 'fEWhm_TVvUw'
+    }
+  });
+}
 
 window.toggleAmbientMusic = function() {
   const musicBtn = document.getElementById("musicBtn");
-  const ambientFrame = document.getElementById("ambientFrame");
-
+  if(!player || typeof player.playVideo !== 'function') return;
+  
   if(!ambientPlaying){
-    if(!ambientFrame.src || ambientFrame.src === "" || ambientFrame.src === window.location.href){
-      ambientFrame.src = playlistUrl;
-    }
+    player.playVideo();
     ambientPlaying = true;
     musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    ambientFrame.src = ""; // Al pausar manualmente se detiene por completo
+    player.pauseVideo();
     ambientPlaying = false;
     musicBtn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -349,12 +360,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.startChallenge = function(){
-    const ambientFrame = document.getElementById("ambientFrame");
-    if(ambientPlaying){
+    if(ambientPlaying && player && typeof player.pauseVideo === 'function'){
       wasPlayingBeforeChallenge = true;
-      // Almacenamos temporalmente la URL actual en un atributo para pausar sin perder la sesión/minuto exacto
-      ambientFrame.dataset.currentSrc = ambientFrame.src;
-      ambientFrame.src = ""; 
+      player.pauseVideo();
     } else {
       wasPlayingBeforeChallenge = false;
     }
@@ -429,10 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("challenge").classList.remove("active");
     document.getElementById("home").classList.add("active");
 
-    const ambientFrame = document.getElementById("ambientFrame");
-    if(wasPlayingBeforeChallenge && ambientFrame.dataset.currentSrc){
-      // Restauramos la sesión exacta de la playlist
-      ambientFrame.src = ambientFrame.dataset.currentSrc;
+    if(wasPlayingBeforeChallenge && player && typeof player.playVideo === 'function'){
+      player.playVideo();
       ambientPlaying = true;
       document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
     }
