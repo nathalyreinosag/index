@@ -137,11 +137,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente oculto -->
+    <!-- Control de música ambiente corregido con contenedor visible y funcional -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <div id="ambientContainer" style="display:none;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:0;height:0;border:0;display:none;"></iframe>
+      <div id="ambientContainer" style="display:none; margin-top:15px;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:100%;max-width:400px;height:120px;border-radius:14px;border:0;"></iframe>
       </div>
     </div>
 
@@ -172,33 +172,27 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 const songs = [
-  { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=ca48oMV59LU", emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"https://www.youtube.com/watch?v=BeUOBoSPWvA", emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"https://www.youtube.com/watch?v=cD5T1Y4b7wA", emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", url:"https://www.youtube.com/watch?v=ZA7ZKB8Mo9k", emojis:"🌙🐺💚" },
-  { title:"Aventurero", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=mxGwsZGEXuM", emojis:"🤠🐎🍻" },
-  { title:"El Desmadre", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=IORcue9-6tw", emojis:"🥃🎵🤠" }
+  { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
+  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", emojis:"💎💋🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", emojis:"🕶️🟢🔥" },
+  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", emojis:"🌙🐺💚" },
+  { title:"Aventurero", artist:"Yeison Jiménez", url:"mxGwsZGEXuM", emojis:"🤠🐎🍻" },
+  { title:"El Desmadre", artist:"Yeison Jiménez", url:"IORcue9-6tw", emojis:"🥃🎵🤠" }
 ];
 
-function getYouTubeId(urlOrId) {
-  if (!urlOrId) return "";
-  if (urlOrId.length === 11) return urlOrId;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = urlOrId.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : urlOrId;
-}
-
 let ambientPlaying = false;
-// Se configuró con una lista de reproducción formada por tus dos canciones para que suenen una tras otra solas
+// Reproductor embebido directo con tus dos canciones en bucle/lista
 const customMusicUrl = "https://www.youtube.com/embed/ru7cc5jZeuU?playlist=LypslWGSvSI&autoplay=1&loop=1";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
     frame.src = customMusicUrl;
+    container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
@@ -207,10 +201,12 @@ function toggleAmbientMusic(){
 }
 
 function closeAmbientMusic(){
+  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
   const btn = document.getElementById("musicBtn");
 
   frame.src = "";
+  if(container) container.style.display = "none";
   ambientPlaying = false;
   if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA";
 }
@@ -230,8 +226,7 @@ function pickSong(){
   return songs[Math.floor(Math.random() * songs.length)];
 }
 
-function youtubePlayer(songUrl){
-  const videoId = getYouTubeId(songUrl);
+function youtubePlayer(videoId){
   return `
     <div class="player-container" id="songPlayerContainer">
       <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -367,8 +362,8 @@ function renderChallenge(i){
       <div style="margin:15px 0;">
         <button onclick="toggleChallengeMusic()" id="wordMusicBtn" style="font-size:18px;padding:14px 30px;">▶️ REPRODUCIR MÚSICA</button>
       </div>
-      <div id="wordContainer" style="display:none;">
-        <iframe id="wordFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      <div id="wordContainer" style="display:none; margin-top:15px;">
+        <iframe id="wordFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:100%;max-width:400px;height:120px;border-radius:14px;border:0;"></iframe>
       </div>
       <button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>
     `;
@@ -380,14 +375,17 @@ function renderChallenge(i){
 let wordMusicPlaying = false;
 function toggleChallengeMusic(){
   const btn = document.getElementById("wordMusicBtn");
+  const container = document.getElementById("wordContainer");
   const frame = document.getElementById("wordFrame");
   
   if(!wordMusicPlaying){
     frame.src = customMusicUrl;
+    container.style.display = "block";
     wordMusicPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
     frame.src = "";
+    container.style.display = "none";
     wordMusicPlaying = false;
     btn.textContent = "▶️ REPRODUCIR MÚSICA";
   }
