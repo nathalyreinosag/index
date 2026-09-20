@@ -153,10 +153,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
+    <!-- Contenedor visible y controlado de música de fondo para evitar bloqueos de YouTube -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div id="ambientContainer" style="margin-top:10px; display:none;">
-        <iframe id="ambientIframe" width="1" height="1" src="" allow="autoplay" style="border:0; opacity:0; position:absolute; pointer-events:none;"></iframe>
+      <div id="ambientContainer" style="margin-top:15px; display:none; max-width:400px; margin-left:auto; margin-right:auto; border-radius:14px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
+        <iframe id="ambientIframe" width="100%" height="200" src="" allow="autoplay" style="border:0; display:block;"></iframe>
       </div>
     </div>
 
@@ -196,8 +197,8 @@ function toggleAmbientMusic(){
 
   if(!ambientPlaying){
     container.style.display = "block";
-    // Parámetros estrictos para evitar listas de reproducción automáticas o radios ajenas
-    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&controls=0&disablekb=1`;
+    // Parámetros estrictos que bloquean listas externas y fuerzan repetición limpia
+    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
@@ -418,7 +419,7 @@ function backHome(){
 
   if(ambientPlaying){
     document.getElementById("ambientContainer").style.display = "block";
-    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&controls=0&disablekb=1`;
+    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
   }
 }
 </script>
