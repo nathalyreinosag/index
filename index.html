@@ -144,6 +144,8 @@ iframe{width:100%;height:320px;border:0;display:block;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<!-- Cargamos la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -153,12 +155,10 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor compacto integrado que no estorba -->
+    <!-- Control de música invisible pero controlada por API -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div id="ambientWrapper" style="display:none; width:220px; height:45px; margin:10px auto; border-radius:8px; overflow:hidden; opacity:0.85;">
-        <iframe id="ambientFrame" width="100%" height="45" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
+      <div id="hiddenPlayer" style="display:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -187,23 +187,35 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
+let player;
 let ambientPlaying = false;
 const videoIdAmbient = "ru7cc5jZeuU";
 const listIdAmbient = "RDru7cc5jZeuU";
 
+// Inicializa el reproductor oculto de YouTube mediante la API
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('hiddenPlayer', {
+    height: '0',
+    width: '0',
+    videoId: videoIdAmbient,
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': videoIdAmbient
+    }
+  });
+}
+
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const wrapper = document.getElementById("ambientWrapper");
-  const frame = document.getElementById("ambientFrame");
+  if(!player) return;
 
   if(!ambientPlaying){
-    wrapper.style.display = "block";
-    frame.src = `https://www.youtube.com/embed/${videoIdAmbient}?list=${listIdAmbient}&autoplay=1&loop=1`;
+    player.playVideo();
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    frame.src = "";
-    wrapper.style.display = "none";
+    player.pauseVideo();
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
@@ -342,9 +354,9 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying){
-    document.getElementById("ambientFrame").src = "";
-    document.getElementById("ambientWrapper").style.display = "none";
+  // Pausar música de fondo manteniendo el punto exacto
+  if(ambientPlaying && player && typeof player.pauseVideo === 'function'){
+    player.pauseVideo();
   }
 
   const c = challenges[selectedIndex];
@@ -417,9 +429,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if(ambientPlaying){
-    document.getElementById("ambientWrapper").style.display = "block";
-    document.getElementById("ambientFrame").src = `https://www.youtube.com/embed/${videoIdAmbient}?list=${listIdAmbient}&autoplay=1&loop=1`;
+  // Reanudar la música de fondo exactamente en el segundo donde se quedó
+  if(ambientPlaying && player && typeof player.playVideo === 'function'){
+    player.playVideo();
   }
 }
 </script>
