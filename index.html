@@ -56,6 +56,11 @@ h1{font-size:clamp(35px, 5vw, 55px);margin:0 0 5px;font-weight:900;}
 p{font-size:18px;opacity:.9;}
 .subtitle{margin-bottom:15px;font-size:20px;}
 
+/* Estilo para el botón de activar música de fondo */
+.music-trigger-container {
+  margin-bottom: 20px;
+}
+
 .wheel-wrap{
   position:relative;
   width:min(420px, 70vw);
@@ -150,7 +155,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- Contenedor invisible para la música de fondo -->
+<!-- Reproductor oculto en el fondo -->
 <div id="ambient-player" style="display:none;"></div>
 
 <section id="home" class="screen active">
@@ -158,6 +163,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
+
+    <!-- Botón obligatorio para saltar la restricción de audio del navegador -->
+    <div class="music-trigger-container" id="musicTrigger">
+      <button onclick="playAmbientMusic()" style="font-size:16px;padding:12px 28px;background:#00bfa6;color:#fff;">🎵 ACTIVAR MÚSICA AMBIENTAL</button>
+    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -194,12 +204,23 @@ function onYouTubeIframeAPIReady() {
     playerVars: {
       'listType': 'playlist',
       'list': 'RDMMmxGwsZGEXuM',
-      'autoplay': 1,
+      'autoplay': 0,
       'loop': 1,
       'shuffle': 1,
       'controls': 0
     }
   });
+}
+
+// Función que arranca la música al hacer clic en el botón y oculta el botón
+function playAmbientMusic() {
+  if (player && typeof player.playVideo === 'function') {
+    player.playVideo();
+    const trigger = document.getElementById("musicTrigger");
+    if (trigger) {
+      trigger.style.display = "none"; // Desaparece el botón una vez activado
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
