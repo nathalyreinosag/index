@@ -153,13 +153,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música con la lista de YouTube configurada correctamente -->
+    <!-- Control de música con la API de YouTube -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
       
-      <div id="ambientWrapper" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
+      <!-- Contenedor donde se montará el reproductor invisible de la API -->
+      <div id="youtube-audio-container" style="display:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -187,6 +186,9 @@ iframe{width:100%;height:320px;border:0;display:block;}
   </div>
 </section>
 
+<!-- Script oficial de la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
@@ -198,20 +200,38 @@ const songs = [
   { title:"El Desmadre", artist:"Yeison Jiménez", url:"IORcue9-6tw", emojis:"🥃🎵🤠" }
 ];
 
+let player;
 let ambientPlaying = false;
-// Enlace adaptado formalmente para incrustar listas de reproducción de YouTube (Mix RDMM)
-const customPlaylistUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E&list=RDMM";
+let apiReady = false;
+
+// Esta función la llama automáticamente el script de YouTube cuando carga
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtube-audio-container', {
+    height: '0',
+    width: '0',
+    videoId: '7lK96EoAw9E',
+    playerVars: {
+      'listType': 'playlist',
+      'list': 'RDMM',
+      'autoplay': 0,
+      'loop': 1
+    },
+    events: {
+      'onReady': () => { apiReady = true; }
+    }
+  });
+}
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const frame = document.getElementById("ambientFrame");
+  if(!apiReady || !player) return;
 
   if(!ambientPlaying){
-    frame.src = customPlaylistUrl;
+    player.playVideo();
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    frame.src = "";
+    player.pauseVideo();
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -340,8 +360,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  const frame = document.getElementById("ambientFrame");
-  frame.src = "";
+  // Pausamos el reproductor de la API para que no compita con el reto
+  if(player && apiReady) {
+    player.pauseVideo();
+  }
   ambientPlaying = false;
   document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
 
@@ -415,11 +437,12 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Al volver a la ruleta, la lista vuelve a sonar sola
-  const frame = document.getElementById("ambientFrame");
-  frame.src = customPlaylistUrl;
-  ambientPlaying = true;
-  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
+  // Al volver a la ruleta, reanudamos el reproductor desde el segundo exacto donde se quedó
+  if(player && apiReady) {
+    player.playVideo();
+    ambientPlaying = true;
+    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
+  }
 }
 </script>
 </body>
