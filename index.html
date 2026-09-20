@@ -197,7 +197,8 @@ function toggleAmbientMusic(){
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    frame.src = "https://www.youtube.com/embed/C0n3gfHfqlU?autoplay=1";
+    // Incluye el link con la playlist y la lista de reproducción activa
+    frame.src = "https://www.youtube.com/embed/C0n3gfHfqlU?list=RDC0n3gfHfqlU&autoplay=1";
     container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
