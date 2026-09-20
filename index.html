@@ -401,8 +401,11 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  // Detiene y borra el reproductor de la dinámica activa para que se pause la música al salir
+  // Limpia el contenido de los desafíos y el reproductor de emojis para pausar la música al salir
   document.getElementById("challengeContent").innerHTML = "";
+  const emojiMusic = document.getElementById("emojiMusic");
+  if(emojiMusic) emojiMusic.innerHTML = "";
+  
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 }
