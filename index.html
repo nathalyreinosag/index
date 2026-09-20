@@ -157,13 +157,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API oficial de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-
-<!-- Contenedor invisible para la música de fondo -->
-<div id="ambient-player" style="display:none;"></div>
 
 <section id="home" class="screen active">
   <div class="card">
@@ -171,11 +166,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Botón visible y destacado para cumplir con las políticas de audio del navegador -->
+    <!-- Caja interactiva que activa la música al hacer clic -->
     <div class="music-box" id="musicBox">
-      <span style="font-size: 15px; font-weight: bold; color: #ffd54a;">🎵 Haz clic aquí para activar la música de fondo</span>
+      <span style="font-size: 15px; font-weight: bold; color: #ffd54a;">🎵 Haz clic para activar la música de ambiente</span>
       <button onclick="activateMusic()" style="font-size: 16px; padding: 10px 24px;">▶️ REPRODUCIR MÚSICA</button>
     </div>
+
+    <!-- Contenedor oculto o dinámico para el iframe de YouTube -->
+    <div id="iframeContainer"></div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -203,32 +201,20 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let player;
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('ambient-player', {
-    height: '0',
-    width: '0',
-    videoId: 'mxGwsZGEXuM',
-    playerVars: {
-      'listType': 'playlist',
-      'list': 'RDMMmxGwsZGEXuM',
-      'autoplay': 0,
-      'loop': 1,
-      'shuffle': 1,
-      'controls': 0
-    }
-  });
-}
-
+// Función que inyecta el reproductor de YouTube al hacer clic (saltándose restricciones de autoplay)
 function activateMusic() {
-  if (player && typeof player.playVideo === 'function') {
-    player.playVideo();
-    const box = document.getElementById("musicBox");
-    if (box) {
-      box.style.display = "none"; // Oculta el aviso al activarse
-    }
-  } else {
-    alert("El reproductor aún está cargando. Espera un segundo y vuelve a intentar.");
+  const container = document.getElementById("iframeContainer");
+  // Usamos el ID del video y la mezcla que enviaste de fondo (mxGwsZGEXuM)
+  container.innerHTML = `
+    <div style="display:none;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/mxGwsZGEXuM?autoplay=1&loop=1&playlist=mxGwsZGEXuM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  `;
+  
+  const box = document.getElementById("musicBox");
+  if (box) {
+    box.innerHTML = "<span style='font-size: 16px; font-weight: bold; color: #00bfa6;'>✅ ¡Música ambiental activada con éxito!</span>";
+    setTimeout(() => { box.style.display = "none"; }, 2500);
   }
 }
 
