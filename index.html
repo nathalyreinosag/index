@@ -18,7 +18,6 @@ body{
   position:relative;
 }
 
-/* Fondo dinámico asegurado con colores degradados vivos de alta visibilidad y soporte garantizado */
 body::before {
   content: "";
   position: absolute;
@@ -30,12 +29,8 @@ body::before {
 }
 
 @keyframes changeBackground {
-  0% {
-    filter: hue-rotate(0deg) brightness(1);
-  }
-  100% {
-    filter: hue-rotate(30deg) brightness(1.15);
-  }
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  100% { filter: hue-rotate(30deg) brightness(1.15); }
 }
 
 .screen{
@@ -149,6 +144,8 @@ iframe{width:100%;height:320px;border:0;display:block;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<!-- Cargamos la API de YouTube de forma oficial -->
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -158,11 +155,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música invisible en segundo plano -->
+    <!-- Control de música de ambiente -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      <!-- Contenedor oculto donde la API inyectará el reproductor de fondo -->
       <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        <div id="ambientPlayer"></div>
       </div>
     </div>
 
@@ -192,6 +190,42 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
+let ambientPlayer;
+let ambientPlaying = false;
+const videoIdAmbient = "7lK96EoAw9E"; // ID extraído de tu enlace de ambiente
+
+// Inicialización de la API de YouTube para la música de fondo
+function onYouTubeIframeAPIReady() {
+  ambientPlayer = new YT.Player('ambientPlayer', {
+    height: '1',
+    width: '1',
+    videoId: videoIdAmbient,
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': videoIdAmbient
+    }
+  });
+}
+
+function toggleAmbientMusic(){
+  const btn = document.getElementById("musicBtn");
+  if (!ambientPlayer || typeof ambientPlayer.playVideo !== 'function') {
+    alert("El reproductor de ambiente se está cargando. Espera un segundo.");
+    return;
+  }
+
+  if(!ambientPlaying){
+    ambientPlayer.playVideo();
+    ambientPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    ambientPlayer.pauseVideo();
+    ambientPlaying = false;
+    btn.textContent = "▶️ ACTIVAR MÚSICA";
+  }
+}
+
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
   { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
@@ -201,24 +235,6 @@ const songs = [
   { title:"Aventurero", artist:"Yeison Jiménez", url:"mxGwsZGEXuM", emojis:"🤠🐎🍻" },
   { title:"El Desmadre", artist:"Yeison Jiménez", url:"IORcue9-6tw", emojis:"🥃🎵🤠" }
 ];
-
-let ambientPlaying = false;
-const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
-
-function toggleAmbientMusic(){
-  const btn = document.getElementById("musicBtn");
-  const frame = document.getElementById("ambientFrame");
-
-  if(!ambientPlaying){
-    frame.src = customMusicUrl;
-    ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-  } else {
-    frame.src = "";
-    ambientPlaying = false;
-    btn.textContent = "▶️ ACTIVAR MÚSICA";
-  }
-}
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción se detiene y debes continuar la letra.", color:"#ff5c8a" },
@@ -343,9 +359,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  ambientPlaying = false;
-  document.getElementById("ambientFrame").src = "";
-  document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
+  // Pausar la música de fondo al entrar al desafío (sin perder el segundo en el que iba)
+  if(ambientPlayer && typeof ambientPlayer.pauseVideo === 'function' && ambientPlaying){
+    ambientPlayer.pauseVideo();
+  }
 
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
@@ -361,9 +378,9 @@ function renderChallenge(i){
   currentSong = pickSong();
 
   if(i === 0){
-    box.innerHTML = <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>;
+    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
   } else if(i === 1){
-    box.innerHTML = <p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>;
+    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
@@ -373,7 +390,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    box.innerHTML = <p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>;
+    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
   }
 }
 
@@ -416,6 +433,11 @@ function backHome(){
   
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
+
+  // Reanudar la música de fondo justo en el segundo en el que se pausó
+  if(ambientPlayer && typeof ambientPlayer.playVideo === 'function' && ambientPlaying){
+    ambientPlayer.playVideo();
+  }
 }
 </script>
 </body>
