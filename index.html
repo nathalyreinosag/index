@@ -144,8 +144,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -155,12 +153,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música con contenedor totalmente invisible mediante opacidad y sin rastro visual -->
+    <!-- Audio nativo oculto para la música de fondo (cero recuadros molestos) -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div style="position:relative; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none; margin:0 auto;">
-        <div id="hiddenPlayer"></div>
-      </div>
+      <audio id="bgAudio" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+      </audio>
     </div>
 
     <div class="wheel-wrap">
@@ -189,33 +187,21 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
-let player;
 let ambientPlaying = false;
-const videoIdAmbient = "ru7cc5jZeuU";
-
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('hiddenPlayer', {
-    height: '1',
-    width: '1',
-    videoId: videoIdAmbient,
-    playerVars: {
-      'autoplay': 0,
-      'loop': 1,
-      'playlist': videoIdAmbient
-    }
-  });
-}
+const bgAudio = document.getElementById("bgAudio");
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  if(!player) return;
 
   if(!ambientPlaying){
-    player.playVideo();
-    ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    bgAudio.play().then(() => {
+      ambientPlaying = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    }).catch(e => {
+      console.log("Error al reproducir audio:", e);
+    });
   } else {
-    player.pauseVideo();
+    bgAudio.pause();
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
@@ -354,9 +340,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar la música ambiental de fondo al entrar a la dinámica
-  if(ambientPlaying && player && typeof player.pauseVideo === 'function'){
-    player.pauseVideo();
+  if(ambientPlaying){
+    bgAudio.pause();
   }
 
   const c = challenges[selectedIndex];
@@ -429,9 +414,8 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar la música de fondo exactamente en el segundo donde se quedó al volver a la ruleta
-  if(ambientPlaying && player && typeof player.playVideo === 'function'){
-    player.playVideo();
+  if(ambientPlaying){
+    bgAudio.play();
   }
 }
 </script>
