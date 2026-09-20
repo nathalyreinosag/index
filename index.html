@@ -373,7 +373,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
+    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
   }
 }
 
@@ -416,11 +416,6 @@ function backHome(){
   
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  // Reproducir música ambiente automáticamente al volver a la ruleta
-  document.getElementById("ambientFrame").src = customMusicUrl;
-  ambientPlaying = true;
-  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
 }
 </script>
 </body>
