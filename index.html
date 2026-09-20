@@ -116,7 +116,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente oculto -->
+    <!-- Control de música ambiente en la pantalla principal (completamente oculto visualmente) -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
       <div id="ambientContainer" style="display:none;">
@@ -146,7 +146,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h2 id="challengeTitle" style="font-size:40px;"></h2>
     <div id="challengeContent" class="challenge-box"></div>
     
-    <!-- Contenedor oculto para reproducir la canción automáticamente sin mostrar video -->
+    <!-- Contenedor oculto para reproducir la canción automáticamente sin mostrar video en la ruleta de palabras -->
     <div id="wordContainer" style="display:none;">
       <iframe id="wordFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
     </div>
@@ -291,7 +291,7 @@ function showResult(){
 }
 
 function startChallenge(){
-  closeAmbientMusic();
+  closeAmbientMusic(); // Apaga la música principal al entrar al reto
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -304,10 +304,10 @@ function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
 
+  // Si cae específicamente en la Ruleta de palabras (índice 2)
   if(i === 2){
-    // Reproducir música automáticamente de forma oculta al entrar al reto
     const wordFrame = document.getElementById("wordFrame");
-    wordFrame.src = customMusicUrl;
+    wordFrame.src = customMusicUrl; // Reproduce automáticamente la música de manera oculta
 
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
@@ -318,15 +318,17 @@ function renderChallenge(i){
       <button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>
     `;
   } else {
+    // Para los otros retos
+    const wordFrame = document.getElementById("wordFrame");
+    wordFrame.src = ""; // Asegurar que no suene si es otro reto
     box.innerHTML = `<p style="font-size:22px;">¡Disfruta este desafío con buena energía en la oficina! ✨</p>`;
   }
 }
 
 function backHome(){
   clearInterval(timer);
-  // Detener la música al regresar a la ruleta
   const wordFrame = document.getElementById("wordFrame");
-  wordFrame.src = "";
+  wordFrame.src = ""; // Detiene la música de la dinámica al volver
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
