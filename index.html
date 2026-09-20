@@ -102,6 +102,20 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
 .spark{font-size:28px;margin-bottom:5px;}
 
+/* Estilo para el reproductor de música ambiente discreto y sin estorbar */
+.music-box{
+  margin:15px auto 10px;
+  text-align:center;
+}
+#ambientFrame{
+  width: 250px;
+  height: 80px;
+  border: 0;
+  border-radius: 12px;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -116,11 +130,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente en la pantalla principal (completamente oculto visualmente) -->
-    <div style="margin:15px auto 10px;text-align:center;">
+    <!-- Control de música ambiente con botón y reproductor limpio -->
+    <div class="music-box">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
       <div id="ambientContainer" style="display:none;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:0;height:0;border:0;display:none;"></iframe>
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
     </div>
 
@@ -146,9 +160,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h2 id="challengeTitle" style="font-size:40px;"></h2>
     <div id="challengeContent" class="challenge-box"></div>
     
-    <!-- Contenedor oculto para reproducir la canción automáticamente sin mostrar video en la ruleta de palabras -->
-    <div id="wordContainer" style="display:none;">
-      <iframe id="wordFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    <!-- Contenedor para el reto de palabras con botón propio de control -->
+    <div id="wordMusicContainer" style="display:none; margin:15px auto;">
+      <button id="wordMusicBtn" onclick="toggleWordMusic()" style="font-size:18px;padding:14px 30px;background:#00bfa6;color:#fff;">▶️ REPRODUCIR MÚSICA</button>
+      <div style="margin-top:10px;">
+        <iframe id="wordFrame" src="" style="width:250px;height:80px;border:0;border-radius:12px;display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
     </div>
 
     <button onclick="backHome()" style="font-size:18px;padding:14px 30px;margin-top:15px;">🎡 VOLVER A LA RULETA</button>
@@ -161,22 +178,29 @@ const customMusicUrl = "https://www.youtube.com/embed/aBM-571wvhM?list=RDaBM-571
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
     frame.src = customMusicUrl;
+    container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    closeAmbientMusic();
+    frame.src = "";
+    container.style.display = "none";
+    ambientPlaying = false;
+    btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
 }
 
 function closeAmbientMusic(){
+  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
   const btn = document.getElementById("musicBtn");
 
   frame.src = "";
+  if(container) container.style.display = "none";
   ambientPlaying = false;
   if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA";
 }
@@ -291,7 +315,7 @@ function showResult(){
 }
 
 function startChallenge(){
-  closeAmbientMusic(); // Apaga la música principal al entrar al reto
+  closeAmbientMusic();
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -300,15 +324,22 @@ function startChallenge(){
   renderChallenge(selectedIndex);
 }
 
+let wordMusicPlaying = false;
+
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
+  const wordMusicContainer = document.getElementById("wordMusicContainer");
+  const wordFrame = document.getElementById("wordFrame");
+  const wordBtn = document.getElementById("wordMusicBtn");
+  
   clearInterval(timer);
+  wordMusicPlaying = false;
+  wordFrame.src = "";
+  wordFrame.style.display = "none";
+  wordBtn.textContent = "▶️ REPRODUCIR MÚSICA";
 
-  // Si cae específicamente en la Ruleta de palabras (índice 2)
   if(i === 2){
-    const wordFrame = document.getElementById("wordFrame");
-    wordFrame.src = customMusicUrl; // Reproduce automáticamente la música de manera oculta
-
+    wordMusicContainer.style.display = "block";
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
@@ -318,17 +349,34 @@ function renderChallenge(i){
       <button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>
     `;
   } else {
-    // Para los otros retos
-    const wordFrame = document.getElementById("wordFrame");
-    wordFrame.src = ""; // Asegurar que no suene si es otro reto
+    wordMusicContainer.style.display = "none";
     box.innerHTML = `<p style="font-size:22px;">¡Disfruta este desafío con buena energía en la oficina! ✨</p>`;
+  }
+}
+
+function toggleWordMusic(){
+  const btn = document.getElementById("wordMusicBtn");
+  const frame = document.getElementById("wordFrame");
+  
+  if(!wordMusicPlaying){
+    frame.src = customMusicUrl;
+    frame.style.display = "block";
+    wordMusicPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    frame.src = "";
+    frame.style.display = "none";
+    wordMusicPlaying = false;
+    btn.textContent = "▶️ REPRODUCIR MÚSICA";
   }
 }
 
 function backHome(){
   clearInterval(timer);
+  wordMusicPlaying = false;
   const wordFrame = document.getElementById("wordFrame");
-  wordFrame.src = ""; // Detiene la música de la dinámica al volver
+  wordFrame.src = "";
+  document.getElementById("wordMusicContainer").style.display = "none";
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
