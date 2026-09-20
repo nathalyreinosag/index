@@ -137,9 +137,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Botón de música ambiente restaurado -->
+    <!-- Botón y reproductor de música ambiente integrado en la misma página -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA AMBIENTE</button>
+      <div id="ambientContainer" style="display:none;margin-top:15px;max-width:600px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,.5);">
+        <iframe id="ambientFrame" src="" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:220px;border:0;display:block;"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -178,28 +181,31 @@ const songs = [
   { title:"El Desmadre", artist:"Yeison Jiménez", id:"R9ZqW8V6K0I", emojis:"🥃🎵🤠" }
 ];
 
-let ambientWindow = null;
 let ambientPlaying = false;
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const container = document.getElementById("ambientContainer");
+  const frame = document.getElementById("ambientFrame");
+
   if(!ambientPlaying){
-    ambientWindow = window.open("https://www.youtube-nocookie.com/embed/h8Vvhba2vJ0?autoplay=1", "YouTubeAmbient", "width=400,height=300");
+    frame.src = "https://www.youtube-nocookie.com/embed/h8Vvhba2vJ0?autoplay=1";
+    container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTE";
   } else {
     closeAmbientMusic();
-    btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
   }
 }
 
 function closeAmbientMusic(){
-  if(ambientWindow && !ambientWindow.closed){
-    ambientWindow.close();
-  }
-  ambientWindow = null;
-  ambientPlaying = false;
+  const container = document.getElementById("ambientContainer");
+  const frame = document.getElementById("ambientFrame");
   const btn = document.getElementById("musicBtn");
+
+  frame.src = "";
+  container.style.display = "none";
+  ambientPlaying = false;
   if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
 }
 
@@ -329,7 +335,6 @@ function startChallenge(){
   closeAmbientMusic();
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
-  document.getElementById("challenge").classList.active = true;
   document.getElementById("challenge").classList.add("active");
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
