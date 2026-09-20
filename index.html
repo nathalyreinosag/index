@@ -153,13 +153,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de audio nativo optimizado -->
+    <!-- Reproductor de fondo de YouTube integrado sin errores -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <audio id="bgAudio" loop preload="auto">
-        <source src="https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg" type="audio/ogg">
-        <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
-      </audio>
+      <div id="ambientContainer" style="margin-top:10px; display:none;">
+        <iframe id="ambientIframe" width="1" height="1" src="" allow="autoplay" style="border:0; opacity:0; position:absolute; pointer-events:none;"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -189,21 +188,21 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 let ambientPlaying = false;
-const bgAudio = document.getElementById("bgAudio");
+const ambientId = "LypslWGSvSI";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const container = document.getElementById("ambientContainer");
+  const iframe = document.getElementById("ambientIframe");
 
   if(!ambientPlaying){
-    bgAudio.play().then(() => {
-      ambientPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }).catch(error => {
-      console.warn("Reproducción bloqueada o fallida:", error);
-      alert("Haz clic una vez más en el botón para permitir la reproducción de audio.");
-    });
+    container.style.display = "block";
+    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    ambientPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    bgAudio.pause();
+    iframe.src = "";
+    container.style.display = "none";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
@@ -343,11 +342,13 @@ function showResult(){
 
 function startChallenge(){
   if(ambientPlaying){
-    bgAudio.pause();
+    document.getElementById("ambientIframe").src = "";
+    document.getElementById("ambientContainer").style.display = "none";
   }
 
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
+  document.getElementById("challenge").classList.active = true;
   document.getElementById("challenge").classList.add("active");
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
@@ -417,7 +418,8 @@ function backHome(){
   document.getElementById("home").classList.add("active");
 
   if(ambientPlaying){
-    bgAudio.play();
+    document.getElementById("ambientContainer").style.display = "block";
+    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
   }
 }
 </script>
