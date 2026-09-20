@@ -56,9 +56,16 @@ h1{font-size:clamp(35px, 5vw, 55px);margin:0 0 5px;font-weight:900;}
 p{font-size:18px;opacity:.9;}
 .subtitle{margin-bottom:15px;font-size:20px;}
 
-/* Estilo para el botón de activar música de fondo */
-.music-trigger-container {
-  margin-bottom: 20px;
+.music-box {
+  background: rgba(255, 213, 74, 0.15);
+  border: 2px solid #ffd54a;
+  padding: 15px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .wheel-wrap{
@@ -150,12 +157,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API de YouTube -->
+<!-- Cargamos la API oficial de YouTube -->
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<!-- Reproductor oculto en el fondo -->
+<!-- Contenedor invisible para la música de fondo -->
 <div id="ambient-player" style="display:none;"></div>
 
 <section id="home" class="screen active">
@@ -164,9 +171,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Botón obligatorio para saltar la restricción de audio del navegador -->
-    <div class="music-trigger-container" id="musicTrigger">
-      <button onclick="playAmbientMusic()" style="font-size:16px;padding:12px 28px;background:#00bfa6;color:#fff;">🎵 ACTIVAR MÚSICA AMBIENTAL</button>
+    <!-- Botón visible y destacado para cumplir con las políticas de audio del navegador -->
+    <div class="music-box" id="musicBox">
+      <span style="font-size: 15px; font-weight: bold; color: #ffd54a;">🎵 Haz clic aquí para activar la música de fondo</span>
+      <button onclick="activateMusic()" style="font-size: 16px; padding: 10px 24px;">▶️ REPRODUCIR MÚSICA</button>
     </div>
 
     <div class="wheel-wrap">
@@ -212,14 +220,15 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
-// Función que arranca la música al hacer clic en el botón y oculta el botón
-function playAmbientMusic() {
+function activateMusic() {
   if (player && typeof player.playVideo === 'function') {
     player.playVideo();
-    const trigger = document.getElementById("musicTrigger");
-    if (trigger) {
-      trigger.style.display = "none"; // Desaparece el botón una vez activado
+    const box = document.getElementById("musicBox");
+    if (box) {
+      box.style.display = "none"; // Oculta el aviso al activarse
     }
+  } else {
+    alert("El reproductor aún está cargando. Espera un segundo y vuelve a intentar.");
   }
 }
 
