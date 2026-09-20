@@ -196,7 +196,8 @@ function toggleAmbientMusic(){
 
   if(!ambientPlaying){
     container.style.display = "block";
-    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    // Parámetros estrictos para evitar listas de reproducción automáticas o radios ajenas
+    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&controls=0&disablekb=1`;
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
@@ -417,7 +418,7 @@ function backHome(){
 
   if(ambientPlaying){
     document.getElementById("ambientContainer").style.display = "block";
-    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&controls=0&disablekb=1`;
   }
 }
 </script>
