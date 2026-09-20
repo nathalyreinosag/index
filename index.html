@@ -18,13 +18,13 @@ body{
   position:relative;
 }
 
-/* Fondo dinámico alternando tus imágenes */
+/* Fondo dinámico alternando tus dos imágenes reales integradas */
 body::before {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(rgba(24, 11, 46, 0.8), rgba(58, 15, 82, 0.8)), 
-              url('image_f510b2.png') no-repeat center center fixed;
+  background: linear-gradient(rgba(24, 11, 46, 0.75), rgba(58, 15, 82, 0.75)), 
+              url('data:image/jpeg;base64,/*IMAGEN_1_AQUÍ*/') no-repeat center center fixed;
   background-size: cover;
   z-index: -1;
   animation: changeBackground 15s infinite alternate;
@@ -32,12 +32,12 @@ body::before {
 
 @keyframes changeBackground {
   0% {
-    background-image: linear-gradient(rgba(24, 11, 46, 0.8), rgba(58, 15, 82, 0.8)), 
-                      url('image_f510b2.png');
+    background-image: linear-gradient(rgba(24, 11, 46, 0.75), rgba(58, 15, 82, 0.75)), 
+                      url('data:image/jpeg;base64,/*IMAGEN_1_AQUÍ*/');
   }
   100% {
-    background-image: linear-gradient(rgba(16, 26, 69, 0.8), rgba(24, 11, 46, 0.8)), 
-                      url('image_f51129.jpg');
+    background-image: linear-gradient(rgba(16, 26, 69, 0.75), rgba(24, 11, 46, 0.75)), 
+                      url('data:image/jpeg;base64,/*IMAGEN_2_AQUÍ*/');
   }
 }
 
@@ -161,11 +161,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente (el reproductor de video ahora está oculto invisible) -->
+    <!-- Control de música invisible en segundo plano -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <div id="ambientContainer" style="display:none;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:0;height:0;border:0;position:absolute;visibility:hidden;"></iframe>
+      <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
     </div>
 
@@ -206,34 +206,21 @@ const songs = [
 ];
 
 let ambientPlaying = false;
-
-/* Mix de YouTube configurado de forma invisible para reproducción en segundo plano */
 const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
     frame.src = customMusicUrl;
-    container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    closeAmbientMusic();
+    frame.src = "";
+    ambientPlaying = false;
+    btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
-}
-
-function closeAmbientMusic(){
-  const container = document.getElementById("ambientContainer");
-  const frame = document.getElementById("ambientFrame");
-  const btn = document.getElementById("musicBtn");
-
-  frame.src = "";
-  if(container) container.style.display = "none";
-  ambientPlaying = false;
-  if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA";
 }
 
 const challenges = [
@@ -359,7 +346,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  closeAmbientMusic();
+  ambientPlaying = false;
+  document.getElementById("ambientFrame").src = "";
+  document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
+
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
