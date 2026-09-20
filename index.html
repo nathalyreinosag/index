@@ -56,11 +56,6 @@ h1{font-size:clamp(35px, 5vw, 55px);margin:0 0 5px;font-weight:900;}
 p{font-size:18px;opacity:.9;}
 .subtitle{margin-bottom:15px;font-size:20px;}
 
-/* Ocultamos por completo el contenedor del reproductor ambiental */
-.ambient-hidden {
-  display: none;
-}
-
 .wheel-wrap{
   position:relative;
   width:min(420px, 70vw);
@@ -155,16 +150,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
+<!-- Contenedor invisible para la música de fondo -->
+<div id="ambient-player" style="display:none;"></div>
+
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
-
-    <!-- Reproductor oculto pero activo en segundo plano -->
-    <div class="ambient-hidden">
-      <div id="ambient-player"></div>
-    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -195,8 +188,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let player;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('ambient-player', {
-    height: '1',
-    width: '1',
+    height: '0',
+    width: '0',
     videoId: 'mxGwsZGEXuM',
     playerVars: {
       'listType': 'playlist',
