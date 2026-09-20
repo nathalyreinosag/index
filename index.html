@@ -144,7 +144,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API de YouTube de forma oficial -->
+<!-- Cargamos la API oficial de YouTube -->
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
@@ -158,7 +158,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <!-- Control de música de ambiente -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <!-- Contenedor oculto donde la API inyectará el reproductor de fondo -->
       <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
         <div id="ambientPlayer"></div>
       </div>
@@ -192,9 +191,9 @@ iframe{width:100%;height:320px;border:0;display:block;}
 <script>
 let ambientPlayer;
 let ambientPlaying = false;
-const videoIdAmbient = "7lK96EoAw9E"; // ID extraído de tu enlace de ambiente
+// Usamos el ID correcto de tu enlace original de música de fondo (mxGwsZGEXuM)
+const videoIdAmbient = "mxGwsZGEXuM";
 
-// Inicialización de la API de YouTube para la música de fondo
 function onYouTubeIframeAPIReady() {
   ambientPlayer = new YT.Player('ambientPlayer', {
     height: '1',
@@ -211,7 +210,7 @@ function onYouTubeIframeAPIReady() {
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
   if (!ambientPlayer || typeof ambientPlayer.playVideo !== 'function') {
-    alert("El reproductor de ambiente se está cargando. Espera un segundo.");
+    alert("El reproductor se está cargando, espera un segundo.");
     return;
   }
 
@@ -359,7 +358,7 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar la música de fondo al entrar al desafío (sin perder el segundo en el que iba)
+  // Pausa la música de fondo al entrar a la dinámica
   if(ambientPlayer && typeof ambientPlayer.pauseVideo === 'function' && ambientPlaying){
     ambientPlayer.pauseVideo();
   }
@@ -434,7 +433,7 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar la música de fondo justo en el segundo en el que se pausó
+  // Reanuda la música de fondo exactamente donde se quedó al volver
   if(ambientPlayer && typeof ambientPlayer.playVideo === 'function' && ambientPlaying){
     ambientPlayer.playVideo();
   }
