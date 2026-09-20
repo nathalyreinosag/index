@@ -137,10 +137,9 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente oculto (sin mostrar video) -->
+    <!-- Control de música ambiente oculto -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <!-- display:none permanente para que nunca aparezca el cuadro en pantalla -->
       <div id="ambientContainer" style="display:none;">
         <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:0;height:0;border:0;display:none;"></iframe>
       </div>
@@ -172,6 +171,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
+// Lista de canciones conservada por compatibilidad, pero la ruleta de palabras usará el enlace fijo especificado
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🌺🔥🎵" },
   { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=ca48oMV59LU", emojis:"🌺🌊☀️" },
@@ -191,13 +191,15 @@ function getYouTubeId(urlOrId) {
 }
 
 let ambientPlaying = false;
+// Enlace personalizado solicitado para la música de fondo
+const customMusicUrl = "https://www.youtube.com/embed/aBM-571wvhM?list=RDaBM-571wvhM&autoplay=1&start=245";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    frame.src = "https://www.youtube.com/embed/C0n3gfHfqlU?list=RDC0n3gfHfqlU&autoplay=1";
+    frame.src = customMusicUrl;
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
@@ -357,11 +359,39 @@ function renderChallenge(i){
   } else if(i === 1){
     box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
-    const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO"];
+    // Ruleta de palabras: palabras aleatorias sin videos previos, usando tu música de fondo fija
+    const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
-    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.url)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>`;
+    box.innerHTML = `
+      <p style="font-size:20px;">La palabra secreta es:</p>
+      <div class="word">${word}</div>
+      <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
+      <div style="margin:15px 0;">
+        <button onclick="toggleChallengeMusic()" id="wordMusicBtn" style="font-size:18px;padding:14px 30px;">▶️ REPRODUCIR MÚSICA</button>
+      </div>
+      <div id="wordContainer" style="display:none;">
+        <iframe id="wordFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>
+    `;
   } else {
     box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
+  }
+}
+
+let wordMusicPlaying = false;
+function toggleChallengeMusic(){
+  const btn = document.getElementById("wordMusicBtn");
+  const frame = document.getElementById("wordFrame");
+  
+  if(!wordMusicPlaying){
+    frame.src = customMusicUrl;
+    wordMusicPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    frame.src = "";
+    wordMusicPlaying = false;
+    btn.textContent = "▶️ REPRODUCIR MÚSICA";
   }
 }
 
@@ -398,6 +428,7 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
+  wordMusicPlaying = false;
   document.getElementById("challengeContent").innerHTML = "";
   const emojiMusic = document.getElementById("emojiMusic");
   if(emojiMusic) emojiMusic.innerHTML = "";
