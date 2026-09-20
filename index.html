@@ -18,26 +18,23 @@ body{
   position:relative;
 }
 
-/* Fondo dinámico alternando tus dos imágenes reales integradas */
+/* Fondo dinámico asegurado con colores degradados vivos de alta visibilidad y soporte garantizado */
 body::before {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(rgba(24, 11, 46, 0.75), rgba(58, 15, 82, 0.75)), 
-              url('data:image/jpeg;base64,/*IMAGEN_1_AQUÍ*/') no-repeat center center fixed;
+  background: linear-gradient(135deg, #180b2e 0%, #3a0f52 50%, #101a45 100%);
   background-size: cover;
   z-index: -1;
-  animation: changeBackground 15s infinite alternate;
+  animation: changeBackground 12s infinite alternate;
 }
 
 @keyframes changeBackground {
   0% {
-    background-image: linear-gradient(rgba(24, 11, 46, 0.75), rgba(58, 15, 82, 0.75)), 
-                      url('data:image/jpeg;base64,/*IMAGEN_1_AQUÍ*/');
+    filter: hue-rotate(0deg) brightness(1);
   }
   100% {
-    background-image: linear-gradient(rgba(16, 26, 69, 0.75), rgba(24, 11, 46, 0.75)), 
-                      url('data:image/jpeg;base64,/*IMAGEN_2_AQUÍ*/');
+    filter: hue-rotate(30deg) brightness(1.15);
   }
 }
 
@@ -52,12 +49,12 @@ body::before {
 .screen.active{display:flex;}
 .card{
   width:min(1150px, 98vw);
-  background:rgba(0,0,0,0.45);
-  border:1px solid rgba(255,255,255,.18);
-  backdrop-filter:blur(14px);
+  background:rgba(0,0,0,0.55);
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(16px);
   border-radius:32px;
   padding:40px 30px;
-  box-shadow:0 25px 70px rgba(0,0,0,.6);
+  box-shadow:0 25px 70px rgba(0,0,0,.7);
   text-align:center;
 }
 h1{font-size:clamp(40px, 5vw, 62px);margin:0 0 10px;font-weight:900;}
@@ -419,6 +416,11 @@ function backHome(){
   
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
+
+  // Reproducir música ambiente automáticamente al volver a la ruleta
+  document.getElementById("ambientFrame").src = customMusicUrl;
+  ambientPlaying = true;
+  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
 }
 </script>
 </body>
