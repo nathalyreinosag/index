@@ -16,11 +16,12 @@ body{
   align-items:center;
   justify-content:center;
   position:relative;
+  padding-bottom: 70px;
 }
 
 body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(135deg, #180b2e 0%, #3a0f52 50%, #101a45 100%);
   background-size: cover;
@@ -35,7 +36,7 @@ body::before {
 
 .screen{
   width:100%;
-  min-height:100vh;
+  min-height:90vh;
   display:none;
   align-items:center;
   justify-content:center;
@@ -139,6 +140,25 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 }
 iframe{width:100%;height:320px;border:0;display:block;}
 
+/* Barra inferior fija para la música de fondo */
+.bg-music-bar {
+  position: fixed;
+  bottom: 0; left: 0; width: 100%;
+  background: rgba(15, 5, 30, 0.9);
+  border-top: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+}
+.bg-music-bar span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd54a;
+}
+
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -152,14 +172,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
-
-    <!-- Control de música con la API de YouTube -->
-    <div style="margin:15px auto 10px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      
-      <!-- Contenedor donde se montará el reproductor invisible de la API -->
-      <div id="youtube-audio-container" style="display:none;"></div>
-    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -186,8 +198,17 @@ iframe{width:100%;height:320px;border:0;display:block;}
   </div>
 </section>
 
-<!-- Script oficial de la API de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
+<!-- Mini barra fija inferior con el reproductor incrustado de la lista -->
+<div class="bg-music-bar">
+  <span>🎵 Playlist de Fondo (Ofi)</span>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:8px 20px;font-size:14px;">▶️ ACTIVAR MÚSICA</button>
+  </div>
+  <!-- Contenedor visible y funcional para evitar bloqueos del navegador -->
+  <div style="width: 200px; height: 45px; overflow: hidden; border-radius: 8px;">
+    <iframe id="ambientFrame" src="" style="width: 300px; height: 180px; margin-top: -65px; margin-left: -50px; pointer-events: none;" allow="autoplay"></iframe>
+  </div>
+</div>
 
 <script>
 const songs = [
@@ -200,40 +221,21 @@ const songs = [
   { title:"El Desmadre", artist:"Yeison Jiménez", url:"IORcue9-6tw", emojis:"🥃🎵🤠" }
 ];
 
-let player;
 let ambientPlaying = false;
-let apiReady = false;
-
-// Esta función la llama automáticamente el script de YouTube cuando carga
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('youtube-audio-container', {
-    height: '0',
-    width: '0',
-    videoId: '7lK96EoAw9E',
-    playerVars: {
-      'listType': 'playlist',
-      'list': 'RDMM',
-      'autoplay': 0,
-      'loop': 1
-    },
-    events: {
-      'onReady': () => { apiReady = true; }
-    }
-  });
-}
+const playlistEmbedUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E&list=RDMM";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  if(!apiReady || !player) return;
+  const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    player.playVideo();
+    frame.src = playlistEmbedUrl;
     ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    btn.textContent = "⏸️ PAUSAR";
   } else {
-    player.pauseVideo();
+    frame.src = "";
     ambientPlaying = false;
-    btn.textContent = "▶️ ACTIVAR MÚSICA";
+    btn.textContent = "▶️ ACTIVAR";
   }
 }
 
@@ -360,12 +362,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausamos el reproductor de la API para que no compita con el reto
-  if(player && apiReady) {
-    player.pauseVideo();
-  }
+  const frame = document.getElementById("ambientFrame");
+  frame.src = "";
   ambientPlaying = false;
-  document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
+  document.getElementById("musicBtn").textContent = "▶️ ACTIVAR";
 
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
@@ -437,12 +437,10 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Al volver a la ruleta, reanudamos el reproductor desde el segundo exacto donde se quedó
-  if(player && apiReady) {
-    player.playVideo();
-    ambientPlaying = true;
-    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
-  }
+  const frame = document.getElementById("ambientFrame");
+  frame.src = playlistEmbedUrl;
+  ambientPlaying = true;
+  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR";
 }
 </script>
 </body>
