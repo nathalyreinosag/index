@@ -137,7 +137,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música ambiente corregido con contenedor visible y funcional -->
+    <!-- Control de música ambiente automática -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
       <div id="ambientContainer" style="display:none; margin-top:15px;">
@@ -182,8 +182,10 @@ const songs = [
 ];
 
 let ambientPlaying = false;
-// Reproductor embebido directo con tus dos canciones en bucle/lista
-const customMusicUrl = "https://www.youtube.com/embed/ru7cc5jZeuU?playlist=LypslWGSvSI&autoplay=1&loop=1";
+
+// Creamos una lista de reproducción automática combinando los IDs de todas tus canciones para que pasen una tras otra solas en bucle
+const allSongIds = songs.map(s => s.url).join(",");
+const customMusicUrl = `https://www.youtube.com/embed/${songs[0].url}?playlist=${allSongIds}&autoplay=1&loop=1`;
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
