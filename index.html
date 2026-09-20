@@ -153,11 +153,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música de ambiente -->
-    <div style="margin:15px auto 10px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    <!-- Control de música de ambiente con reproductor visible y elegante -->
+    <div style="margin:15px auto 15px;text-align:center;">
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
+      <div id="ambientWrapper" style="display:none; max-width:400px; margin:15px auto; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
+        <iframe id="ambientFrame" width="100%" height="90" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
     </div>
 
@@ -188,27 +188,29 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 let ambientPlaying = false;
-let musicStartTime = 0; // Guarda el momento exacto en segundos
-let musicStartedAtRealTime = 0; // Referencia de tiempo real para calcular por dónde iba la música
+let musicStartTime = 0; 
+let musicStartedAtRealTime = 0; 
 const videoIdAmbient = "mxGwsZGEXuM";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const wrapper = document.getElementById("ambientWrapper");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
     musicStartedAtRealTime = Date.now();
+    wrapper.style.display = "block";
     frame.src = `https://www.youtube.com/embed/${videoIdAmbient}?autoplay=1&loop=1&playlist=${videoIdAmbient}&start=${Math.floor(musicStartTime)}`;
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    // Calculamos cuántos segundos transcurrieron antes de pausar y los acumulamos
     const elapsed = Math.floor((Date.now() - musicStartedAtRealTime) / 1000);
     musicStartTime += elapsed;
     
     frame.src = "";
+    wrapper.style.display = "none";
     ambientPlaying = false;
-    btn.textContent = "▶️ ACTIVAR MÚSICA";
+    btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
 }
 
@@ -345,11 +347,11 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Si la música estaba sonando, calculamos el segundo actual y la pausamos limpiando el src
   if(ambientPlaying){
     const elapsed = Math.floor((Date.now() - musicStartedAtRealTime) / 1000);
     musicStartTime += elapsed;
     document.getElementById("ambientFrame").src = "";
+    document.getElementById("ambientWrapper").style.display = "none";
   }
 
   const c = challenges[selectedIndex];
@@ -422,9 +424,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Si la música estaba activa al irse al reto, la reanudamos exactamente en el segundo guardado
   if(ambientPlaying){
     musicStartedAtRealTime = Date.now();
+    document.getElementById("ambientWrapper").style.display = "block";
     document.getElementById("ambientFrame").src = `https://www.youtube.com/embed/${videoIdAmbient}?autoplay=1&loop=1&playlist=${videoIdAmbient}&start=${Math.floor(musicStartTime)}`;
   }
 }
