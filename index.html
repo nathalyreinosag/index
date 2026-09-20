@@ -153,11 +153,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música de fondo (Sin cuadros visibles en pantalla) -->
+    <!-- Reproductor compacto integrado que no estorba -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div style="display:none;">
-        <iframe id="ambientFrame" width="0" height="0" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      <div id="ambientWrapper" style="display:none; width:220px; height:45px; margin:10px auto; border-radius:8px; overflow:hidden; opacity:0.85;">
+        <iframe id="ambientFrame" width="100%" height="45" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
     </div>
 
@@ -193,14 +193,17 @@ const listIdAmbient = "RDru7cc5jZeuU";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
+  const wrapper = document.getElementById("ambientWrapper");
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
+    wrapper.style.display = "block";
     frame.src = `https://www.youtube.com/embed/${videoIdAmbient}?list=${listIdAmbient}&autoplay=1&loop=1`;
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
     frame.src = "";
+    wrapper.style.display = "none";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
@@ -341,6 +344,7 @@ function showResult(){
 function startChallenge(){
   if(ambientPlaying){
     document.getElementById("ambientFrame").src = "";
+    document.getElementById("ambientWrapper").style.display = "none";
   }
 
   const c = challenges[selectedIndex];
@@ -414,6 +418,7 @@ function backHome(){
   document.getElementById("home").classList.add("active");
 
   if(ambientPlaying){
+    document.getElementById("ambientWrapper").style.display = "block";
     document.getElementById("ambientFrame").src = `https://www.youtube.com/embed/${videoIdAmbient}?list=${listIdAmbient}&autoplay=1&loop=1`;
   }
 }
