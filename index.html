@@ -158,12 +158,12 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
+    <!-- Control de música ambiental con tu enlace correcto de YouTube -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
-      <audio id="ambientAudio" loop>
-        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
-        Tu navegador no soporta audio.
-      </audio>
+      <div style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -212,19 +212,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let ambientPlaying = false;
   let wasPlayingBeforeChallenge = false;
-  const audio = document.getElementById("ambientAudio");
+  const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
   const musicBtn = document.getElementById("musicBtn");
+  const ambientFrame = document.getElementById("ambientFrame");
 
   window.toggleAmbientMusic = function() {
     if(!ambientPlaying){
-      audio.play().then(() => {
-        ambientPlaying = true;
-        musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
-      }).catch(e => {
-        console.log("Bloqueado por navegador", e);
-      });
+      ambientFrame.src = customMusicUrl;
+      ambientPlaying = true;
+      musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
     } else {
-      audio.pause();
+      ambientFrame.src = "";
       ambientPlaying = false;
       musicBtn.textContent = "▶️ ACTIVAR MÚSICA";
     }
@@ -349,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.startChallenge = function(){
     if(ambientPlaying){
       wasPlayingBeforeChallenge = true;
-      audio.pause();
+      ambientFrame.src = "";
     } else {
       wasPlayingBeforeChallenge = false;
     }
@@ -425,14 +423,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("home").classList.add("active");
 
     if(wasPlayingBeforeChallenge){
-      audio.play().then(() => {
-        ambientPlaying = true;
-        musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
-      }).catch(e => {
-        // Si el navegador bloquea la reproducción automática, habilitamos el botón visualmente para un toque rápido
-        ambientPlaying = false;
-        musicBtn.textContent = "▶️ TOCA PARA REANUDAR MÚSICA";
-      });
+      ambientFrame.src = customMusicUrl;
+      ambientPlaying = true;
+      musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
     }
   };
 });
