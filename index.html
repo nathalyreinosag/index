@@ -153,14 +153,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de audio nativo y fluido -->
-    <div style="margin:15px auto 10px;text-align:center;">
+    <!-- Control de música ambiental mediante iframe seguro de YouTube -->
+    <div style="margin:15px auto 20px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <audio id="ambientAudio" loop>
-        <!-- Enlace directo a un stream de música libre de fondo o lofi corporativo/alegre -->
-        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
-        Tu navegador no soporta audio.
-      </audio>
+      <div style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -200,20 +198,18 @@ const songs = [
 ];
 
 let ambientPlaying = false;
+const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const audio = document.getElementById("ambientAudio");
+  const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    audio.play().then(() => {
-      ambientPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }).catch(e => {
-      console.log("Bloqueado por navegador", e);
-    });
+    frame.src = customMusicUrl;
+    ambientPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    audio.pause();
+    frame.src = "";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -342,10 +338,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar música ambiente al entrar al reto para que no compita con el video de YouTube del reto
-  const audio = document.getElementById("ambientAudio");
-  audio.pause();
   ambientPlaying = false;
+  document.getElementById("ambientFrame").src = "";
   document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
 
   const c = challenges[selectedIndex];
@@ -364,7 +358,7 @@ function renderChallenge(i){
   if(i === 0){
     box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
   } else if(i === 1){
-    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
@@ -417,15 +411,6 @@ function backHome(){
   
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  // Reactivar música de fondo automáticamente al regresar a la ruleta
-  const audio = document.getElementById("ambientAudio");
-  audio.play().then(() => {
-    ambientPlaying = true;
-    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
-  }).catch(e => {
-    console.log("Reproducción automática bloqueada por políticas del navegador", e);
-  });
 }
 </script>
 </body>
