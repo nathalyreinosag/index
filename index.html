@@ -155,10 +155,10 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música con contenedor oculto por fuera de la vista para evitar recuadros -->
+    <!-- Reproductor oculto visualmente pero activo para el navegador -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden;">
+      <div style="width: 1px; height: 1px; overflow: hidden; opacity: 0.01; margin: 0 auto; pointer-events: none;">
         <div id="hiddenPlayer"></div>
       </div>
     </div>
@@ -196,8 +196,8 @@ const listIdAmbient = "RDru7cc5jZeuU";
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('hiddenPlayer', {
-    height: '200',
-    width: '200',
+    height: '100',
+    width: '100',
     videoId: videoIdAmbient,
     playerVars: {
       'autoplay': 0,
