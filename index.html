@@ -137,7 +137,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de música ambiente interno y optimizado -->
+    <!-- Reproductor de música ambiente integrado -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA AMBIENTE</button>
       <div id="ambientContainer" style="display:none;margin-top:15px;max-width:500px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,.5);">
@@ -172,14 +172,22 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 const songs = [
-  { title:"PROVENZA", artist:"Karol G", id:"MThe-0VwQ9U", emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", id:"5j36m-L0W6o", emojis:"💎💋🔥" },
-  { title:"AMARGURA", artist:"Karol G", id:"3M8Jp9wY4v0", emojis:"💔🥀😢" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", id:"6T7b39m45wU", emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", id:"mN7S3l6J8-8", emojis:"🌙🐺💚" },
-  { title:"Aventurero", artist:"Yeison Jiménez", id:"p7U8K0oYl4M", emojis:"🤠🐎🍻" },
-  { title:"El Desmadre", artist:"Yeison Jiménez", id:"R9ZqW8V6K0I", emojis:"🥃🎵🤠" }
+  { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌺🔥🎵" },
+  { title:"PROVENZA", artist:"Karol G", url:"MThe-0VwQ9U", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"5j36m-L0W6o", emojis:"💎💋🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"6T7b39m45wU", emojis:"🕶️🟢🔥" },
+  { title:"LUNA", artist:"Feid & ATL Jacob", url:"mN7S3l6J8-8", emojis:"🌙🐺💚" },
+  { title:"Aventurero", artist:"Yeison Jiménez", url:"p7U8K0oYl4M", emojis:"🤠🐎🍻" },
+  { title:"El Desmadre", artist:"Yeison Jiménez", url:"R9ZqW8V6K0I", emojis:"🥃🎵🤠" }
 ];
+
+function getYouTubeId(urlOrId) {
+  if (!urlOrId) return "";
+  if (urlOrId.length === 11) return urlOrId;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = urlOrId.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : urlOrId;
+}
 
 let ambientPlaying = false;
 
@@ -224,10 +232,11 @@ function pickSong(){
   return songs[Math.floor(Math.random() * songs.length)];
 }
 
-function youtubePlayer(songId){
+function youtubePlayer(songUrl){
+  const videoId = getYouTubeId(songUrl);
   return `
     <div class="player-container" id="songPlayerContainer">
-      <iframe src="https://www.youtube.com/embed/${songId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
   `;
 }
@@ -347,13 +356,13 @@ function renderChallenge(i){
   currentSong = pickSong();
 
   if(i === 0){
-    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.id)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
+    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
   } else if(i === 1){
-    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.id)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO"];
     const word = words[Math.floor(Math.random() * words.length)];
-    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.id)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;">🔄 OTRA PALABRA</button>`;
+    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.url)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;">🔄 OTRA PALABRA</button>`;
   } else {
     box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
   }
@@ -368,7 +377,7 @@ function revealEmojiSong(){
   const a = document.getElementById("emojiAnswer");
   const m = document.getElementById("emojiMusic");
   if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
-  if(m){ m.innerHTML = youtubePlayer(currentSong.id); }
+  if(m){ m.innerHTML = youtubePlayer(currentSong.url); }
 }
 
 function startTimer(){
