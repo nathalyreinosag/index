@@ -153,11 +153,10 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de audio nativo y fluido -->
+    <!-- Reproductor de audio nativo -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
       <audio id="ambientAudio" loop>
-        <!-- Enlace directo a un stream de música libre de fondo o lofi corporativo/alegre -->
         <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
         Tu navegador no soporta audio.
       </audio>
@@ -213,7 +212,7 @@ function toggleAmbientMusic(){
       console.log("Bloqueado por navegador", e);
     });
   } else {
-    audio.pause();
+    audio.pause(); // Al pausar, NO se borra currentTime, por lo que guarda el segundo actual
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -342,7 +341,7 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar música ambiente al entrar al reto para que no compita con el video de YouTube del reto
+  // Solo pausamos el audio para conservar exactamente el segundo en el que iba
   const audio = document.getElementById("ambientAudio");
   audio.pause();
   ambientPlaying = false;
@@ -418,7 +417,7 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reactivar música de fondo automáticamente al regresar a la ruleta
+  // Reanudamos la música desde el segundo exacto donde se quedó al salir
   const audio = document.getElementById("ambientAudio");
   audio.play().then(() => {
     ambientPlaying = true;
