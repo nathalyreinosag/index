@@ -158,12 +158,10 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Contenedor de música ambiental que se oculta en lugar de borrarse -->
+    <!-- Contenedor invisible para la API de YouTube -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
-      <div id="ambientWrapper" style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
+      <div id="youtubePlayerAPI" style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -191,7 +189,43 @@ iframe{width:100%;height:280px;border:0;display:block;}
   </div>
 </section>
 
+<!-- Script oficial de la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
+let player;
+let ambientPlaying = false;
+let wasPlayingBeforeChallenge = false;
+
+// Esta función se ejecuta automáticamente cuando carga la API de YouTube
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtubePlayerAPI', {
+    height: '1',
+    width: '1',
+    videoId: '7lK96EoAw9E',
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': '7lK96EoAw9E'
+    }
+  });
+}
+
+window.toggleAmbientMusic = function() {
+  const musicBtn = document.getElementById("musicBtn");
+  if(!player) return;
+  
+  if(!ambientPlaying){
+    player.playVideo();
+    ambientPlaying = true;
+    musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    player.pauseVideo();
+    ambientPlaying = false;
+    musicBtn.textContent = "▶️ ACTIVAR MÚSICA";
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const songs = [
     { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
@@ -209,29 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
     { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
   ];
-
-  let ambientPlaying = false;
-  let wasPlayingBeforeChallenge = false;
-  const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
-  const musicBtn = document.getElementById("musicBtn");
-  const ambientFrame = document.getElementById("ambientFrame");
-  const ambientWrapper = document.getElementById("ambientWrapper");
-
-  window.toggleAmbientMusic = function() {
-    if(!ambientPlaying){
-      if(!ambientFrame.src || ambientFrame.src === "" || ambientFrame.src === window.location.href){
-        ambientFrame.src = customMusicUrl;
-      }
-      ambientWrapper.style.display = "block";
-      ambientPlaying = true;
-      musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
-    } else {
-      ambientWrapper.style.display = "none";
-      ambientFrame.src = ""; // Al pausar manualmente sí se reinicia, lo cual es correcto
-      ambientPlaying = false;
-      musicBtn.textContent = "▶️ ACTIVAR MÚSICA";
-    }
-  };
 
   let currentSong = null;
   let selectedIndex = 0;
@@ -350,10 +361,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.startChallenge = function(){
-    if(ambientPlaying){
+    if(ambientPlaying && player){
       wasPlayingBeforeChallenge = true;
-      // Ocultamos el reproductor en lugar de borrar su fuente para que mantenga el segundo exacto
-      ambientWrapper.style.display = "none";
+      // Pausamos con la API manteniendo el segundo actual guardado en la memoria del reproductor
+      player.pauseVideo();
     } else {
       wasPlayingBeforeChallenge = false;
     }
@@ -428,11 +439,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("challenge").classList.remove("active");
     document.getElementById("home").classList.add("active");
 
-    if(wasPlayingBeforeChallenge){
-      // Volvemos a mostrar el reproductor manteniéndose exactamente en el segundo donde iba
-      ambientWrapper.style.display = "block";
+    if(wasPlayingBeforeChallenge && player){
+      // Reanudamos exactamente en el segundo donde se había quedado
+      player.playVideo();
       ambientPlaying = true;
-      musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
+      document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
     }
   };
 });
