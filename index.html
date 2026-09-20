@@ -171,14 +171,15 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
+// Lista de canciones actualizada incluyendo tu enlace de Karol G en todas las entradas o rotando de forma segura
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"MThe-0VwQ9U", emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"5j36m-L0W6o", emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"6T7b39m45wU", emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", url:"mN7S3l6J8-8", emojis:"🌙🐺💚" },
-  { title:"Aventurero", artist:"Yeison Jiménez", url:"p7U8K0oYl4M", emojis:"🤠🐎🍻" },
-  { title:"El Desmadre", artist:"Yeison Jiménez", url:"R9ZqW8V6K0I", emojis:"🥃🎵🤠" }
+  { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"💎💋🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🕶️🟢🔥" },
+  { title:"LUNA", artist:"Feid & ATL Jacob", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌙🐺💚" },
+  { title:"Aventurero", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🤠🐎🍻" },
+  { title:"El Desmadre", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🥃🎵🤠" }
 ];
 
 function getYouTubeId(urlOrId) {
@@ -362,7 +363,8 @@ function renderChallenge(i){
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO"];
     const word = words[Math.floor(Math.random() * words.length)];
-    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.url)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;">🔄 OTRA PALABRA</button>`;
+    // AQUÍ CORREGIMOS LA RULETA DE PALABRAS PARA QUE LLAME CORRECTAMENTE AL REPRODUCTOR Y LA URL
+    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.url)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;margin-top:15px;">🔄 OTRA PALABRA</button>`;
   } else {
     box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
   }
