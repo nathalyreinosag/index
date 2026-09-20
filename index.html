@@ -171,7 +171,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </section>
 
 <script>
-// Lista de canciones conservada por compatibilidad, pero la ruleta de palabras usará el enlace fijo especificado
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🌺🔥🎵" },
   { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=ca48oMV59LU", emojis:"🌺🌊☀️" },
@@ -191,8 +190,8 @@ function getYouTubeId(urlOrId) {
 }
 
 let ambientPlaying = false;
-// Enlace personalizado solicitado para la música de fondo
-const customMusicUrl = "https://www.youtube.com/embed/aBM-571wvhM?list=RDaBM-571wvhM&autoplay=1&start=245";
+// Se configuró con una lista de reproducción formada por tus dos canciones para que suenen una tras otra solas
+const customMusicUrl = "https://www.youtube.com/embed/ru7cc5jZeuU?playlist=LypslWGSvSI&autoplay=1&loop=1";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -359,7 +358,6 @@ function renderChallenge(i){
   } else if(i === 1){
     box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
-    // Ruleta de palabras: palabras aleatorias sin videos previos, usando tu música de fondo fija
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
