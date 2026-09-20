@@ -173,11 +173,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
 <script>
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌺🌊☀️" },
+  { title:"PROVENZA", artist:"Karol G", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🌺🌊☀️" },
   { title:"QLONA", artist:"Karol G & Peso Pluma", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🕶️🟢🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🕶️🟢🔥" },
   { title:"LUNA", artist:"Feid & ATL Jacob", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🌙🐺💚" },
-  { title:"Aventurero", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🤠🐎🍻" },
+  { title:"Aventurero", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=fEWhm_TVvUw", emojis:"🤠🐎🍻" },
   { title:"El Desmadre", artist:"Yeison Jiménez", url:"https://www.youtube.com/watch?v=f1admXeMQ8k", emojis:"🥃🎵🤠" }
 ];
 
@@ -401,7 +401,6 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  // Limpia el contenido de los desafíos y el reproductor de emojis para pausar la música al salir
   document.getElementById("challengeContent").innerHTML = "";
   const emojiMusic = document.getElementById("emojiMusic");
   if(emojiMusic) emojiMusic.innerHTML = "";
