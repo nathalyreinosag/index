@@ -155,10 +155,10 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor oculto visualmente pero activo para el navegador -->
+    <!-- Control de música con contenedor totalmente invisible mediante opacidad y sin rastro visual -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div style="width: 1px; height: 1px; overflow: hidden; opacity: 0.01; margin: 0 auto; pointer-events: none;">
+      <div style="position:relative; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none; margin:0 auto;">
         <div id="hiddenPlayer"></div>
       </div>
     </div>
@@ -192,12 +192,11 @@ iframe{width:100%;height:320px;border:0;display:block;}
 let player;
 let ambientPlaying = false;
 const videoIdAmbient = "ru7cc5jZeuU";
-const listIdAmbient = "RDru7cc5jZeuU";
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('hiddenPlayer', {
-    height: '100',
-    width: '100',
+    height: '1',
+    width: '1',
     videoId: videoIdAmbient,
     playerVars: {
       'autoplay': 0,
@@ -355,6 +354,7 @@ function showResult(){
 }
 
 function startChallenge(){
+  // Pausar la música ambiental de fondo al entrar a la dinámica
   if(ambientPlaying && player && typeof player.pauseVideo === 'function'){
     player.pauseVideo();
   }
@@ -429,6 +429,7 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
+  // Reanudar la música de fondo exactamente en el segundo donde se quedó al volver a la ruleta
   if(ambientPlaying && player && typeof player.playVideo === 'function'){
     player.playVideo();
   }
