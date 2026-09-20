@@ -137,11 +137,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de música ambiente integrado -->
+    <!-- Control de música ambiente (sin mostrar video en pantalla) -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <div id="ambientContainer" style="display:none;margin-top:15px;max-width:500px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,.5);">
-        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:180px;border:0;display:block;"></iframe>
+      <!-- Se mantiene oculto el contenedor visual pero el audio se reproduce internamente -->
+      <div id="ambientContainer" style="display:none;margin-top:15px;max-width:500px;margin-left:auto;margin-right:auto;border-radius:16px;overflow:hidden;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="width:0;height:0;border:0;display:none;"></iframe>
       </div>
     </div>
 
@@ -197,9 +198,7 @@ function toggleAmbientMusic(){
   const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    // Incluye el link con la playlist y la lista de reproducción activa
     frame.src = "https://www.youtube.com/embed/C0n3gfHfqlU?list=RDC0n3gfHfqlU&autoplay=1";
-    container.style.display = "block";
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
@@ -208,12 +207,10 @@ function toggleAmbientMusic(){
 }
 
 function closeAmbientMusic(){
-  const container = document.getElementById("ambientContainer");
   const frame = document.getElementById("ambientFrame");
   const btn = document.getElementById("musicBtn");
 
   frame.src = "";
-  container.style.display = "none";
   ambientPlaying = false;
   if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA";
 }
