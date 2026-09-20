@@ -158,7 +158,6 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de audio nativo optimizado -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
       <audio id="ambientAudio" loop>
@@ -348,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.startChallenge = function(){
-    // Guardamos si la música ambiental estaba sonando para reanudarla después
     if(ambientPlaying){
       wasPlayingBeforeChallenge = true;
       audio.pause();
@@ -382,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <p style="font-size:18px;">🎤 Canta una canción que contenga esta palabra.</p>
       `;
     } else {
-      box.innerHTML = `<p style="font-size:18px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:16px;padding:12px 26px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:10px;font-size:26px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:10px;font-size:16px;padding:12px 26px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
+      box.innerHTML = `<p style="font-size:18px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:16px;padding:12px 26px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin-top:10px;font-size:26px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:10px;font-size:16px;padding:12px 26px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
     }
   }
 
@@ -426,13 +424,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("challenge").classList.remove("active");
     document.getElementById("home").classList.add("active");
 
-    // Si la música estaba activa antes del reto, se reanuda sola automáticamente
     if(wasPlayingBeforeChallenge){
       audio.play().then(() => {
         ambientPlaying = true;
         musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
       }).catch(e => {
-        console.log("No se pudo reanudar automáticamente", e);
+        // Si el navegador bloquea la reproducción automática, habilitamos el botón visualmente para un toque rápido
+        ambientPlaying = false;
+        musicBtn.textContent = "▶️ TOCA PARA REANUDAR MÚSICA";
       });
     }
   };
