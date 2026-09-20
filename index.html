@@ -153,7 +153,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Contenedor visible y controlado de música de fondo para evitar bloqueos de YouTube -->
+    <!-- Contenedor fijo de música que no se destruye, solo se oculta/muestra -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
       <div id="ambientContainer" style="margin-top:15px; display:none; max-width:400px; margin-left:auto; margin-right:auto; border-radius:14px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
@@ -197,12 +197,18 @@ function toggleAmbientMusic(){
 
   if(!ambientPlaying){
     container.style.display = "block";
-    // Parámetros estrictos que bloquean listas externas y fuerzan repetición limpia
-    iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    // Si el iframe no tiene fuente cargada, se la asignamos
+    if(!iframe.src || iframe.src === "" || iframe.src === window.location.href){
+      iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    } else {
+      // Si ya estaba cargado, le enviamos la orden de reproducción por postMessage para continuar donde iba
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    iframe.src = "";
+    // Pausar enviando comando sin borrar la fuente
+    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
     container.style.display = "none";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
@@ -342,8 +348,12 @@ function showResult(){
 }
 
 function startChallenge(){
+  // Si la música de fondo está sonando, le enviamos pausa pero NO vaciamos su src para que guarde el segundo exacto
   if(ambientPlaying){
-    document.getElementById("ambientIframe").src = "";
+    const iframe = document.getElementById("ambientIframe");
+    try {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    } catch(e) {}
     document.getElementById("ambientContainer").style.display = "none";
   }
 
@@ -417,9 +427,14 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
+  // Al regresar, si estaba activada la música de fondo, se vuelve a mostrar y se reanuda exactamente donde se dejó
   if(ambientPlaying){
-    document.getElementById("ambientContainer").style.display = "block";
-    document.getElementById("ambientIframe").src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}`;
+    const container = document.getElementById("ambientContainer");
+    const iframe = document.getElementById("ambientIframe");
+    container.style.display = "block";
+    try {
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    } catch(e) {}
   }
 }
 </script>
