@@ -158,7 +158,7 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Contenedor invisible para la API de YouTube -->
+    <!-- Contenedor para la API de YouTube -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
       <div id="youtubePlayerAPI" style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;"></div>
@@ -197,7 +197,6 @@ let player;
 let ambientPlaying = false;
 let wasPlayingBeforeChallenge = false;
 
-// Esta función se ejecuta automáticamente cuando carga la API de YouTube
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayerAPI', {
     height: '1',
@@ -213,7 +212,7 @@ function onYouTubeIframeAPIReady() {
 
 window.toggleAmbientMusic = function() {
   const musicBtn = document.getElementById("musicBtn");
-  if(!player) return;
+  if(!player || typeof player.playVideo !== 'function') return;
   
   if(!ambientPlaying){
     player.playVideo();
@@ -361,9 +360,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.startChallenge = function(){
-    if(ambientPlaying && player){
+    // Verificamos si estaba sonando la música ambiental para pausarla correctamente
+    if(ambientPlaying && player && typeof player.pauseVideo === 'function'){
       wasPlayingBeforeChallenge = true;
-      // Pausamos con la API manteniendo el segundo actual guardado en la memoria del reproductor
       player.pauseVideo();
     } else {
       wasPlayingBeforeChallenge = false;
@@ -439,8 +438,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("challenge").classList.remove("active");
     document.getElementById("home").classList.add("active");
 
-    if(wasPlayingBeforeChallenge && player){
-      // Reanudamos exactamente en el segundo donde se había quedado
+    // Al volver, si estaba sonando antes del desafío, reanudamos exactamente donde iba
+    if(wasPlayingBeforeChallenge && player && typeof player.playVideo === 'function'){
       player.playVideo();
       ambientPlaying = true;
       document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
