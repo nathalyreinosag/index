@@ -117,7 +117,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   max-width:720px;
   margin:15px auto;
   border-radius:18px;
-  overflow:hidden;
+        overflow:hidden;
   box-shadow:0 12px 30px rgba(0,0,0,.6);
   background:#000;
 }
@@ -136,10 +136,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
-
-    <div style="margin:15px auto 10px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA AMBIENTE</button>
-    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -168,41 +164,19 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 const songs = [
-  { title:"Despacito", artist:"Luis Fonsi", id:"FbmQhys-wKk", emojis:"🌴💃🎶" },
-  { title:"La Camisa Negra", artist:"Juanes", id:"xjNdiI35JmU", emojis:"👕🖤🎸" },
-  { title:"Vivir Mi Vida", artist:"Marc Anthony", id:"FGArPQ_SIxc", emojis:"❤️🎉💃" },
-  { title:"Danza Kuduro", artist:"Don Omar", id:"QSWmgNMK-VM", emojis:"💃🔥🌴" }
+  { title:"PROVENZA", artist:"Karol G", id:"MThe-0VwQ9U", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", id:"5j36m-L0W6o", emojis:"💎💋🔥" },
+|  { title:"AMARGURA", artist:"Karol G", id:"3M8Jp9wY4v0", emojis:"💔🥀😢" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", id:"6T7b39m45wU", emojis:"🕶️🟢🔥" },
+|  { title:"LUNA", artist:"Feid & ATL Jacob", id:"mN7S3l6J8-8", emojis:"🌙🐺💚" },
+  { title:"PERROS SALVAJES", artist:"Feid", id:"V0N62LqKj-I", emojis:"🐕🟢👟" },
+  { title:"Aventurero", artist:"Yeison Jiménez", id:"p7U8K0oYl4M", emojis:"🤠🐎🍻" },
+  { title:"El Desmadre", artist:"Yeison Jiménez", id:"R9ZqW8V6K0I", emojis:"🥃🎵🤠" }
 ];
-
-let ambientWindow = null;
-let ambientPlaying = false;
-
-function toggleAmbientMusic(){
-  const btn = document.getElementById("musicBtn");
-
-  if(!ambientPlaying){
-    ambientWindow = window.open("https://www.youtube-nocookie.com/embed/h8Vvhba2vJ0?autoplay=1", "YouTubeAmbient", "width=400,height=300");
-    ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTE";
-  } else {
-    closeAmbientMusic();
-    btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
-  }
-}
-
-function closeAmbientMusic(){
-  if(ambientWindow && !ambientWindow.closed){
-    ambientWindow.close();
-  }
-  ambientWindow = null;
-  ambientPlaying = false;
-  const btn = document.getElementById("musicBtn");
-  if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
-}
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción se detiene y debes continuar la letra.", color:"#ff5c8a" },
-  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha una introducción y descubre el título.", color:"#7c5cff" },
+  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
 ];
@@ -248,7 +222,6 @@ function drawWheel(){
 
     ctx.save();
     ctx.translate(cx, cy);
-    // Rotamos para centrar el texto perfectamente dentro de su porción de pastel
     ctx.rotate(a + slice / 2);
     
     ctx.textAlign = "right";
@@ -256,21 +229,16 @@ function drawWheel(){
     ctx.shadowColor = "rgba(0,0,0,0.6)";
     ctx.shadowBlur = 6;
 
-    // Línea 1 del nombre
     ctx.font = "bold 34px Arial";
     ctx.fillText(c.name[0], 340, -15);
-    
-    // Línea 2 del nombre
     ctx.fillText(c.name[1], 340, 25);
 
-    // Emoji del desafío más centrado y visible
     ctx.font = "bold 44px Arial";
     ctx.fillText(c.emoji, 340, 75);
     
     ctx.restore();
   });
 
-  // Centro de la ruleta
   ctx.beginPath();
   ctx.arc(cx, cy, 75, 0, Math.PI*2);
   ctx.fillStyle = "#24102f";
@@ -322,7 +290,6 @@ function spin(){
 function showResult(){
   const c = challenges[selectedIndex];
   document.getElementById("resultEmoji").textContent = c.emoji;
-  // Unimos el array de texto para el título del resultado
   const fullName = c.name.join(" ");
   document.getElementById("resultTitle").textContent = "¡Te tocó: " + fullName + "!";
   document.getElementById("resultDesc").textContent = c.desc;
@@ -330,8 +297,6 @@ function showResult(){
 }
 
 function startChallenge(){
-  closeAmbientMusic();
-  
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -346,9 +311,9 @@ function renderChallenge(i){
   currentSong = pickSong();
 
   if(i === 0){
-    box.innerHTML = `<p style="font-size:20px;">🎤 Escucha la canción y, cuando se pause, ¡continúa!</p>${youtubePlayer(currentSong.id)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA</strong><br>Pausa el video en un punto y deja que continúen la letra.</div>`;
+    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.id)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
   } else if(i === 1){
-    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la intro y adivina el título.</p>${youtubePlayer(currentSong.id)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.id)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO"];
     const word = words[Math.floor(Math.random() * words.length)];
