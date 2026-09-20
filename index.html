@@ -158,10 +158,10 @@ iframe{width:100%;height:280px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Control de música con el formato embed correcto para tu enlace de YouTube -->
+    <!-- Contenedor de música ambiental que se oculta en lugar de borrarse -->
     <div class="top-bar">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:10px 28px;font-size:16px;">▶️ ACTIVAR MÚSICA</button>
-      <div style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;">
+      <div id="ambientWrapper" style="width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px;">
         <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
     </div>
@@ -212,20 +212,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let ambientPlaying = false;
   let wasPlayingBeforeChallenge = false;
-  
-  // URL en formato embed correcto para tu video de YouTube
   const customMusicUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E";
-  
   const musicBtn = document.getElementById("musicBtn");
   const ambientFrame = document.getElementById("ambientFrame");
+  const ambientWrapper = document.getElementById("ambientWrapper");
 
   window.toggleAmbientMusic = function() {
     if(!ambientPlaying){
-      ambientFrame.src = customMusicUrl;
+      if(!ambientFrame.src || ambientFrame.src === "" || ambientFrame.src === window.location.href){
+        ambientFrame.src = customMusicUrl;
+      }
+      ambientWrapper.style.display = "block";
       ambientPlaying = true;
       musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
     } else {
-      ambientFrame.src = "";
+      ambientWrapper.style.display = "none";
+      ambientFrame.src = ""; // Al pausar manualmente sí se reinicia, lo cual es correcto
       ambientPlaying = false;
       musicBtn.textContent = "▶️ ACTIVAR MÚSICA";
     }
@@ -350,7 +352,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.startChallenge = function(){
     if(ambientPlaying){
       wasPlayingBeforeChallenge = true;
-      ambientFrame.src = "";
+      // Ocultamos el reproductor en lugar de borrar su fuente para que mantenga el segundo exacto
+      ambientWrapper.style.display = "none";
     } else {
       wasPlayingBeforeChallenge = false;
     }
@@ -426,7 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("home").classList.add("active");
 
     if(wasPlayingBeforeChallenge){
-      ambientFrame.src = customMusicUrl;
+      // Volvemos a mostrar el reproductor manteniéndose exactamente en el segundo donde iba
+      ambientWrapper.style.display = "block";
       ambientPlaying = true;
       musicBtn.textContent = "⏸️ PAUSAR MÚSICA";
     }
