@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 El plan es en la ofi</title>
+<style>
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:linear-gradient(135deg,#180b2e,#3a0f52 55%,#101a45);
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.screen{
+  width:100%;
+  min-height:100vh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.screen.active{display:flex;}
+.card{
+  width:min(1150px, 98vw);
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(14px);
+  border-radius:32px;
+  padding:40px 30px;
+  box-shadow:0 25px 70px rgba(0,0,0,.45);
+  text-align:center;
+}
+h1{font-size:clamp(40px, 5vw, 62px);margin:0 0 10px;font-weight:900;}
+p{font-size:20px;opacity:.9;}
+.subtitle{margin-bottom:20px;font-size:22px;}
+.wheel-wrap{
+  position:relative;
+  width:min(520px, 75vw);
+  aspect-ratio:1;
+  margin:20px auto 30px;
+}
+.pointer{
+  position:absolute;
+  z-index:5;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:24px solid transparent;
+  border-right:24px solid transparent;
+  border-top:44px solid #ffd54a;
+  filter:drop-shadow(0 4px 6px #000);
+}
+canvas{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  box-shadow:0 15px 40px rgba(0,0,0,.5);
+}
+button{
+  border:0;
+  border-radius:999px;
+  padding:16px 36px;
+  font-size:20px;
+  font-weight:800;
+  cursor:pointer;
+  color:#24102f;
+  background:#ffd54a;
+  box-shadow:0 8px 25px rgba(0,0,0,0.3);
+  transition:.2s;
+}
+button:hover{transform:translateY(-2px) scale(1.03);}
+button.secondary{
+  background:rgba(255,255,255,.2);
+  color:#fff;
+  margin-left:12px;
+}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.result{
+  display:none;
+  margin:20px auto 15px;
+  padding:20px;
+  border-radius:22px;
+  background:rgba(0,0,0,.22);
+}
+.result.show{display:block;animation:pop .5s ease;}
+.challenge-icon{font-size:75px;}
+.challenge-box{
+  margin:20px auto;
+  max-width:800px;
+  padding:30px;
+  border-radius:24px;
+  background:rgba(0,0,0,.22);
+}
+.timer{font-size:75px;font-weight:900;}
+.progress{
+  height:12px;
+  background:rgba(255,255,255,.18);
+  border-radius:20px;
+  overflow:hidden;
+  margin:20px 0;
+}
+.bar{height:100%;width:100%;background:#ffd54a;transition:width 1s linear;}
+.emoji-song{font-size:70px;letter-spacing:15px;margin:20px 0;}
+.word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
+.lyrics{font-size:24px;line-height:1.5;margin:15px auto;max-width:720px;}
+.spark{font-size:28px;margin-bottom:5px;}
+.player-container{
+  width:100%;
+  max-width:720px;
+  margin:15px auto;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.6);
+  background:#000;
+}
+iframe{width:100%;height:320px;border:0;display:block;}
+
+@keyframes pop{
+  0%{transform:scale(.85);opacity:0;}
+  100%{transform:scale(1);opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen active">
+  <div class="card">
+    <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
+    <h1>El plan es en la ofi</h1>
+    <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
+
+    <div style="margin:15px auto 10px;text-align:center;">
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA AMBIENTE</button>
+    </div>
+
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="1000" height="1000"></canvas>
+    </div>
+
+    <button id="spinBtn" onclick="spin()" style="font-size:22px;padding:18px 40px;">🎡 GIRAR RULETA</button>
+
+    <div id="result" class="result">
+      <div id="resultEmoji" style="font-size:55px;"></div>
+      <h2 id="resultTitle" style="font-size:34px;margin:8px 0;"></h2>
+      <p id="resultDesc" style="font-size:20px;margin-bottom:15px;"></p>
+      <button onclick="startChallenge()" style="font-size:18px;padding:14px 30px;">🎤 COMENZAR DESAFÍO</button>
+    </div>
+  </div>
+</section>
+
+<section id="challenge" class="screen">
+  <div class="card">
+    <div id="challengeIcon" class="challenge-icon"></div>
+    <h2 id="challengeTitle" style="font-size:40px;"></h2>
+    <div id="challengeContent" class="challenge-box"></div>
+    <button onclick="backHome()" style="font-size:18px;padding:14px 30px;">🎡 VOLVER A LA RULETA</button>
+  </div>
+</section>
+
+<script>
+const songs = [
+  { title:"Despacito", artist:"Luis Fonsi", id:"FbmQhys-wKk", emojis:"🌴💃🎶" },
+  { title:"La Camisa Negra", artist:"Juanes", id:"xjNdiI35JmU", emojis:"👕🖤🎸" },
+  { title:"Vivir Mi Vida", artist:"Marc Anthony", id:"FGArPQ_SIxc", emojis:"❤️🎉💃" },
+  { title:"Danza Kuduro", artist:"Don Omar", id:"QSWmgNMK-VM", emojis:"💃🔥🌴" }
+];
+
+let ambientWindow = null;
+let ambientPlaying = false;
+
+function toggleAmbientMusic(){
+  const btn = document.getElementById("musicBtn");
+
+  if(!ambientPlaying){
+    ambientWindow = window.open("https://www.youtube-nocookie.com/embed/h8Vvhba2vJ0?autoplay=1", "YouTubeAmbient", "width=400,height=300");
+    ambientPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTE";
+  } else {
+    closeAmbientMusic();
+    btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
+  }
+}
+
+function closeAmbientMusic(){
+  if(ambientWindow && !ambientWindow.closed){
+    ambientWindow.close();
+  }
+  ambientWindow = null;
+  ambientPlaying = false;
+  const btn = document.getElementById("musicBtn");
+  if(btn) btn.textContent = "▶️ ACTIVAR MÚSICA AMBIENTE";
+}
+
+const challenges = [
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción se detiene y debes continuar la letra.", color:"#ff5c8a" },
+  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha una introducción y descubre el título.", color:"#7c5cff" },
+  { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
+  { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
+];
+
+let currentSong = null;
+let selectedIndex = 0;
+let timer = null;
+
+function pickSong(){
+  return songs[Math.floor(Math.random() * songs.length)];
+}
+
+function youtubePlayer(songId){
+  return `
+    <div class="player-container" id="songPlayerContainer">
+      <iframe src="https://www.youtube-nocookie.com/embed/${songId}?autoplay=1" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  `;
+}
+
+const wheel = document.getElementById("wheel");
+const ctx = wheel.getContext("2d");
+let rotation = 0;
+let spinning = false;
+
+function drawWheel(){
+  const size = 1000;
+  const cx = size / 2, cy = size / 2, r = 450;
+  const slice = 2 * Math.PI / challenges.length;
+  ctx.clearRect(0, 0, size, size);
+
+  challenges.forEach((c,i)=>{
+    const a = rotation + i * slice;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, a, a + slice);
+    ctx.closePath();
+    ctx.fillStyle = c.color;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.9)";
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Rotamos para centrar el texto perfectamente dentro de su porción de pastel
+    ctx.rotate(a + slice / 2);
+    
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 6;
+
+    // Línea 1 del nombre
+    ctx.font = "bold 34px Arial";
+    ctx.fillText(c.name[0], 340, -15);
+    
+    // Línea 2 del nombre
+    ctx.fillText(c.name[1], 340, 25);
+
+    // Emoji del desafío más centrado y visible
+    ctx.font = "bold 44px Arial";
+    ctx.fillText(c.emoji, 340, 75);
+    
+    ctx.restore();
+  });
+
+  // Centro de la ruleta
+  ctx.beginPath();
+  ctx.arc(cx, cy, 75, 0, Math.PI*2);
+  ctx.fillStyle = "#24102f";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.3)";
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffd54a";
+  ctx.font = "bold 38px Arial";
+  ctx.textAlign = "center";
+  ctx.shadowBlur = 0;
+  ctx.fillText("🏢", cx, cy+14);
+}
+drawWheel();
+
+function spin(){
+  if(spinning) return;
+  spinning = true;
+  document.getElementById("spinBtn").disabled = true;
+  document.getElementById("result").classList.remove("show");
+
+  const start = rotation;
+  const turns = 7 + Math.random()*3;
+  const target = start + turns * 2 * Math.PI + Math.random()*2*Math.PI;
+  const duration = 4200;
+  const t0 = performance.now();
+
+  function animate(t){
+    const p = Math.min(1, (t-t0)/duration);
+    const ease = 1 - Math.pow(1-p, 4);
+    rotation = start + (target-start)*ease;
+    drawWheel();
+
+    if(p < 1){
+      requestAnimationFrame(animate);
+    } else {
+      const slice = 2*Math.PI / challenges.length;
+      let angle = ((-Math.PI/2 - rotation) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+      selectedIndex = Math.floor(angle/slice) % challenges.length;
+      showResult();
+      spinning = false;
+      document.getElementById("spinBtn").disabled = false;
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult(){
+  const c = challenges[selectedIndex];
+  document.getElementById("resultEmoji").textContent = c.emoji;
+  // Unimos el array de texto para el título del resultado
+  const fullName = c.name.join(" ");
+  document.getElementById("resultTitle").textContent = "¡Te tocó: " + fullName + "!";
+  document.getElementById("resultDesc").textContent = c.desc;
+  document.getElementById("result").classList.add("show");
+}
+
+function startChallenge(){
+  closeAmbientMusic();
+  
+  const c = challenges[selectedIndex];
+  document.getElementById("home").classList.remove("active");
+  document.getElementById("challenge").classList.add("active");
+  document.getElementById("challengeIcon").textContent = c.emoji;
+  document.getElementById("challengeTitle").textContent = c.name.join(" ");
+  renderChallenge(selectedIndex);
+}
+
+function renderChallenge(i){
+  const box = document.getElementById("challengeContent");
+  clearInterval(timer);
+  currentSong = pickSong();
+
+  if(i === 0){
+    box.innerHTML = `<p style="font-size:20px;">🎤 Escucha la canción y, cuando se pause, ¡continúa!</p>${youtubePlayer(currentSong.id)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA</strong><br>Pausa el video en un punto y deja que continúen la letra.</div>`;
+  } else if(i === 1){
+    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la intro y adivina el título.</p>${youtubePlayer(currentSong.id)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+  } else if(i === 2){
+    const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO"];
+    const word = words[Math.floor(Math.random() * words.length)];
+    box.innerHTML = `<p style="font-size:20px;">La palabra secreta es:</p><div class="word">${word}</div><p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>${youtubePlayer(currentSong.id)}<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;">🔄 OTRA PALABRA</button>`;
+  } else {
+    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO RETO</button>`;
+  }
+}
+
+function revealSong(){
+  const a = document.getElementById("answer");
+  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
+}
+
+function revealEmojiSong(){
+  const a = document.getElementById("emojiAnswer");
+  const m = document.getElementById("emojiMusic");
+  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
+  if(m){ m.innerHTML = youtubePlayer(currentSong.id); }
+}
+
+function startTimer(){
+  clearInterval(timer);
+  let seconds = 10;
+  const t = document.getElementById("timer");
+  const bar = document.getElementById("bar");
+  t.textContent = seconds;
+  bar.style.width = "100%";
+  timer = setInterval(()=>{
+    seconds--;
+    t.textContent = seconds;
+    bar.style.width = (seconds * 10) + "%";
+    if(seconds <= 0){
+      clearInterval(timer);
+      t.textContent = "⏰";
+      bar.style.width = "0%";
+    }
+  }, 1000);
+}
+
+function backHome(){
+  clearInterval(timer);
+  document.getElementById("challenge").classList.remove("active");
+  document.getElementById("home").classList.add("active");
+}
+</script>
+</body>
+</html>
