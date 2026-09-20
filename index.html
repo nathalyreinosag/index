@@ -147,18 +147,20 @@ iframe{width:100%;height:320px;border:0;display:block;}
 </head>
 <body>
 
+<!-- Iframe oculto en segundo plano exclusivamente para la música de fondo -->
+<div style="display:none;">
+  <iframe id="ambientIframe" src="" allow="autoplay"></iframe>
+</div>
+
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark">🏢 ✨ 🎤 ✨ 🍻</div>
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Música de fondo con soporte API (enablejsapi=1) para pausar y reanudar sin perder el segundo -->
+    <!-- Único botón para activar/pausar la música de fondo -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <div id="ambientContainer" style="margin-top:15px; display:none; max-width:400px; margin-left:auto; margin-right:auto; border-radius:14px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
-        <iframe id="ambientIframe" width="100%" height="200" src="" allow="autoplay" style="border:0; display:block;"></iframe>
-      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -188,26 +190,25 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 let ambientPlaying = false;
+let userActivatedMusic = false; // Guarda si el usuario decidió prender la música
 const ambientId = "LypslWGSvSI";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const container = document.getElementById("ambientContainer");
   const iframe = document.getElementById("ambientIframe");
 
   if(!ambientPlaying){
-    container.style.display = "block";
+    userActivatedMusic = true;
     if(!iframe.src || iframe.src === "" || iframe.src === window.location.href){
-      // Nota el parámetro enablejsapi=1 indispensable para controlar la reproducción por comandos
       iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&enablejsapi=1`;
     } else {
       iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     }
     ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    btn.textContent = "⏸️ PAUSAR MÚSICA DE FONDO";
   } else {
+    userActivatedMusic = false;
     iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-    container.style.display = "none";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA DE FONDO";
   }
@@ -346,13 +347,12 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar exclusivamente la música de fondo de la ruleta y ocultar su caja visual
+  // Si la música de fondo estaba sonando, la pausamos en segundo plano sin perder su posición
   if(ambientPlaying){
     const iframe = document.getElementById("ambientIframe");
     try {
       iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
     } catch(e) {}
-    document.getElementById("ambientContainer").style.display = "none";
   }
 
   const c = challenges[selectedIndex];
@@ -425,11 +425,10 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Al regresar a la ruleta, si la música estaba activada, mostramos el contenedor y reanudamos exactamente en el segundo donde iba
-  if(ambientPlaying){
-    const container = document.getElementById("ambientContainer");
+  // Al regresar a la ruleta, si el usuario la tenía activada, se reanuda exactamente donde se quedó
+  if(userActivatedMusic){
     const iframe = document.getElementById("ambientIframe");
-    container.style.display = "block";
+    ambientPlaying = true;
     try {
       iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     } catch(e) {}
