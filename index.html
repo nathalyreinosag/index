@@ -56,28 +56,9 @@ h1{font-size:clamp(35px, 5vw, 55px);margin:0 0 5px;font-weight:900;}
 p{font-size:18px;opacity:.9;}
 .subtitle{margin-bottom:15px;font-size:20px;}
 
-.top-bar {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ambient-container {
-  width: 100%;
-  max-width: 480px;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
-  padding: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
-#ambient-player {
-  width: 100%;
-  height: 160px;
-  border-radius: 10px;
-  overflow: hidden;
+/* Ocultamos por completo el contenedor del reproductor ambiental */
+.ambient-hidden {
+  display: none;
 }
 
 .wheel-wrap{
@@ -180,12 +161,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor ambiental con la mezcla exacta solicitada -->
-    <div class="top-bar">
-      <div style="font-size:14px;margin-bottom:6px;opacity:0.8;font-weight:bold;">🎵 MÚSICA AMBIENTAL (MEZCLA OFICIAL)</div>
-      <div class="ambient-container">
-        <div id="ambient-player"></div>
-      </div>
+    <!-- Reproductor oculto pero activo en segundo plano -->
+    <div class="ambient-hidden">
+      <div id="ambient-player"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -217,15 +195,16 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let player;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('ambient-player', {
-    height: '160',
-    width: '100%',
+    height: '1',
+    width: '1',
     videoId: 'mxGwsZGEXuM',
     playerVars: {
       'listType': 'playlist',
       'list': 'RDMMmxGwsZGEXuM',
       'autoplay': 1,
       'loop': 1,
-      'shuffle': 1
+      'shuffle': 1,
+      'controls': 0
     }
   });
 }
