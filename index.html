@@ -153,11 +153,12 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Audio nativo oculto para la música de fondo (cero recuadros molestos) -->
+    <!-- Reproductor de audio nativo optimizado -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA DE FONDO</button>
-      <audio id="bgAudio" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+      <audio id="bgAudio" loop preload="auto">
+        <source src="https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg" type="audio/ogg">
+        <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
       </audio>
     </div>
 
@@ -197,8 +198,9 @@ function toggleAmbientMusic(){
     bgAudio.play().then(() => {
       ambientPlaying = true;
       btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }).catch(e => {
-      console.log("Error al reproducir audio:", e);
+    }).catch(error => {
+      console.warn("Reproducción bloqueada o fallida:", error);
+      alert("Haz clic una vez más en el botón para permitir la reproducción de audio.");
     });
   } else {
     bgAudio.pause();
