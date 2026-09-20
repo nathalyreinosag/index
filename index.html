@@ -153,13 +153,14 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>El plan es en la ofi</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Reproductor de audio nativo -->
+    <!-- Control de música con tu enlace de lista de YouTube -->
     <div style="margin:15px auto 10px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      <audio id="ambientAudio" loop>
-        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
-        Tu navegador no soporta audio.
-      </audio>
+      
+      <!-- Contenedor oculto que mantiene la música viva en segundo plano sin destruirse -->
+      <div id="ambientWrapper" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+        <iframe id="ambientFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -199,20 +200,26 @@ const songs = [
 ];
 
 let ambientPlaying = false;
+// Tu enlace adaptado para embed con reproducción automática y loop continuo de la lista
+const customPlaylistUrl = "https://www.youtube.com/embed/7lK96EoAw9E?autoplay=1&loop=1&playlist=7lK96EoAw9E&list=RDMM&start_radio=1";
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const audio = document.getElementById("ambientAudio");
+  const frame = document.getElementById("ambientFrame");
 
   if(!ambientPlaying){
-    audio.play().then(() => {
-      ambientPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }).catch(e => {
-      console.log("Bloqueado por navegador", e);
-    });
+    // Si aún no tiene la fuente cargada, se la asignamos para que inicie
+    if(!frame.src.includes("7lK96EoAw9E")){
+      frame.src = customPlaylistUrl;
+    } else {
+      // Si ya la tenía, la recargamos o forzamos play volviendo a setear el src para el navegador
+      frame.src = customPlaylistUrl;
+    }
+    ambientPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    audio.pause(); // Al pausar, NO se borra currentTime, por lo que guarda el segundo actual
+    // Al pausar limpiamos el src para silenciarla por completo
+    frame.src = "";
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -341,9 +348,9 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Solo pausamos el audio para conservar exactamente el segundo en el que iba
-  const audio = document.getElementById("ambientAudio");
-  audio.pause();
+  // Al entrar al reto, apagamos la música de fondo para que no choque con la canción del reto
+  const frame = document.getElementById("ambientFrame");
+  frame.src = "";
   ambientPlaying = false;
   document.getElementById("musicBtn").textContent = "▶️ ACTIVAR MÚSICA";
 
@@ -417,14 +424,11 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudamos la música desde el segundo exacto donde se quedó al salir
-  const audio = document.getElementById("ambientAudio");
-  audio.play().then(() => {
-    ambientPlaying = true;
-    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
-  }).catch(e => {
-    console.log("Reproducción automática bloqueada por políticas del navegador", e);
-  });
+  // Al volver a la ruleta, reactivamos automáticamente tu lista de YouTube
+  const frame = document.getElementById("ambientFrame");
+  frame.src = customPlaylistUrl;
+  ambientPlaying = true;
+  document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
 }
 </script>
 </body>
