@@ -137,15 +137,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 }
 #youtubePlayerElement{width:100%;height:320px;}
 
-/* Contenedor invisible para que el mix suene en la misma página sin estorbar */
-#hiddenMixWrapper {
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  position: absolute;
-  left: -9999px;
-}
-
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -155,19 +146,20 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- Contenedor invisible del reproductor de fondo -->
-<div id="hiddenMixWrapper">
-  <div id="ambientMixPlayer"></div>
-</div>
+<!-- Elemento de audio invisible para reproducir música localmente sin videos -->
+<audio id="bgAudio" preload="auto" loop>
+  <!-- Enlace directo de audio compatible o respaldo de streaming limpio -->
+  <source src="" type="audio/mp4">
+</audio>
 
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- BOTÓN DE ACTIVAR MÚSICA (Activa el audio directamente aquí mismo) -->
+    <!-- BOTÓN DE ACTIVAR MÚSICA (Audio puro interno sin pestañas ni videos) -->
     <div style="margin:20px auto;text-align:center;">
-      <button id="musicBtn" onclick="toggleMixMusic()" style="padding:16px 38px;font-size:20px;">▶️ ACTIVAR MÚSICA</button>
+      <button id="musicBtn" onclick="toggleAudio()" style="padding:16px 38px;font-size:20px;">▶️ ACTIVAR MÚSICA</button>
       <p style="font-size:14px;opacity:0.8;margin-top:8px;">Haz clic para escuchar el mix de fondo mientras juegas con la ruleta 👇</p>
     </div>
 
@@ -197,51 +189,41 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let ambientMixYT = null;
-let mixPlaying = false;
-let userActivatedMix = false;
 let challengePlayer = null;
+let isAudioPlaying = false;
+let userActivatedAudio = false;
 
 function onYouTubeIframeAPIReady() {
-  // Inicializamos el reproductor oculto con tu enlace exacto P-auj2ElqzI
-  ambientMixYT = new YT.Player('ambientMixPlayer', {
-    height: '100',
-    width: '100',
-    videoId: 'P-auj2ElqzI',
-    playerVars: {
-      'autoplay': 0,
-      'controls': 0,
-      'playsinline': 1,
-      'enablejsapi': 1
-    },
-    events: {
-      'onReady': (event) => {
-        event.target.setVolume(100);
-      }
-    }
-  });
+  // API lista para los retos de canciones individuales
 }
 
-function toggleMixMusic(){
-  const btn = document.getElementById("musicBtn");
+// Nota: Como YouTube bloquea la extracción directa de enlaces de audio por políticas de copyright, 
+// puedes colocar aquí abajo el enlace directo a un archivo de audio MP3 (por ejemplo, alojado en Google Drive, Dropbox o tu servidor) 
+// para que suene de fondo 100% limpio sin videos ni pestañas.
+const audioStreamUrl = ""; // Pega aquí el enlace directo a tu archivo .mp3 si lo tienes, o usaremos la ruta de respaldo.
 
-  if(!mixPlaying){
-    if(ambientMixYT && typeof ambientMixYT.playVideo === 'function'){
-      ambientMixYT.unMute();
-      ambientMixYT.setVolume(100);
-      ambientMixYT.playVideo();
-      mixPlaying = true;
-      userActivatedMix = true;
+function toggleAudio() {
+  const btn = document.getElementById("musicBtn");
+  const audio = document.getElementById("bgAudio");
+
+  if (!isAudioPlaying) {
+    // Si no hay un enlace MP3 directo configurado, te sugerimos colocar uno o usamos un respaldo de audio seguro
+    if(!audio.src || audio.src === window.location.href){
+      // Usamos un archivo de audio de ejemplo o puedes cambiarlo por tu enlace directo .mp3 de la oficina
+      audio.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
+    }
+    
+    audio.play().then(() => {
+      isAudioPlaying = true;
+      userActivatedAudio = true;
       btn.textContent = "⏸️ PAUSAR MÚSICA";
-    } else {
-      alert("El reproductor se está cargando, inténtalo de nuevo en un segundo.");
-    }
+    }).catch(error => {
+      alert("Haz clic de nuevo en el botón para permitir la reproducción de audio.");
+    });
   } else {
-    if(ambientMixYT && typeof ambientMixYT.pauseVideo === 'function'){
-      ambientMixYT.pauseVideo();
-    }
-    mixPlaying = false;
-    userActivatedMix = false;
+    audio.pause();
+    isAudioPlaying = false;
+    userActivatedAudio = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
 }
@@ -270,9 +252,9 @@ let selectedIndex = 0;
 let timer = null;
 
 function initYTPlayer(videoId, startTime = "0") {
-  // Si el mix está sonando de fondo, lo pausamos momentáneamente para que no se encimen los audios
-  if(mixPlaying && ambientMixYT && typeof ambientMixYT.pauseVideo === 'function'){
-    ambientMixYT.pauseVideo();
+  // Pausamos el audio de fondo si está sonando para que no se encime con el reto
+  if(isAudioPlaying){
+    document.getElementById("bgAudio").pause();
   }
 
   let startSeconds = 0;
@@ -505,10 +487,10 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Si el usuario tenía su mix activo antes de entrar al reto, lo reanudamos al volver
-  if(userActivatedMix && ambientMixYT && typeof ambientMixYT.playVideo === 'function'){
-    ambientMixYT.playVideo();
-    mixPlaying = true;
+  // Reanudamos el audio de fondo si estaba activo
+  if(userActivatedAudio){
+    document.getElementById("bgAudio").play();
+    isAudioPlaying = true;
   }
 }
 </script>
