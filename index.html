@@ -144,7 +144,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API de YouTube oficiales -->
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
@@ -275,10 +274,12 @@ function initYTPlayer(videoId, startTime = "0", onReadyCallback) {
     playerVars: {
       'autoplay': 1,
       'start': startSeconds,
-      'playsinline': 1
+      'playsinline': 1,
+      'mute': 0
     },
     events: {
       'onReady': (event) => {
+        event.target.unMute();
         event.target.setVolume(100);
         event.target.playVideo();
         if(onReadyCallback) onReadyCallback(event.target);
@@ -420,9 +421,10 @@ function renderChallenge(i){
     `;
 
     initYTPlayer(currentSong.url, currentSong.time, (player) => {
-      // A los 20 segundos bajamos volumen a 0%
+      // A los 20 segundos bajamos volumen a 0% y nos aseguramos de desmutear
       let t1 = setTimeout(() => {
         if(player && typeof player.setVolume === 'function') {
+          player.unMute();
           player.setVolume(0);
         }
       }, 20000);
@@ -430,6 +432,7 @@ function renderChallenge(i){
       // A los 30 segundos (20s + 10s de canto) subimos volumen a 100%
       let t2 = setTimeout(() => {
         if(player && typeof player.setVolume === 'function') {
+          player.unMute();
           player.setVolume(100);
         }
       }, 30000);
