@@ -157,7 +157,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:15px auto 15px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;" disabled>⏳ CARGANDO MÚSICA...</button>
     </div>
 
     <div class="wheel-wrap">
@@ -211,6 +211,10 @@ function onYouTubeIframeAPIReady() {
     events: {
       'onReady': (event) => {
         event.target.setVolume(100);
+        // Habilitamos el botón una vez el reproductor está listo
+        const btn = document.getElementById("musicBtn");
+        btn.disabled = false;
+        btn.textContent = "▶️ ACTIVAR MÚSICA";
       }
     }
   });
@@ -219,7 +223,10 @@ function onYouTubeIframeAPIReady() {
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
 
-  if(!ambientPlayer) return;
+  if(!ambientPlayer || typeof ambientPlayer.playVideo !== 'function'){
+    alert("El reproductor aún se está conectando, espera un segundo.");
+    return;
+  }
 
   if(!ambientPlaying){
     userActivatedMusic = true;
