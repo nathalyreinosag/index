@@ -498,4 +498,64 @@ function backHome(){
 }
 </script>
 </body>
+</html>    const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
+    const word = words[Math.floor(Math.random() * words.length)];
+    box.innerHTML = `
+      <p style="font-size:20px;">La palabra secreta es:</p>
+      <div class="word">${word}</div>
+      <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
+    `;
+  } else {
+    const item = emojiDatabase[Math.floor(Math.random() * emojiDatabase.length)];
+    currentAnswer = item.name;
+    box.innerHTML = `
+      <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
+      <div class="emoji-song">${item.emojis}</div>
+      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
+      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
+    `;
+  }
+}
+
+function revealEmojiSong(){
+  const a = document.getElementById("emojiAnswer");
+  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
+}
+
+function startTimer(){
+  clearInterval(timer);
+  let seconds = 10;
+  const t = document.getElementById("timer");
+  const bar = document.getElementById("bar");
+  t.textContent = seconds;
+  bar.style.width = "100%";
+  timer = setInterval(()=>{
+    seconds--;
+    t.textContent = seconds;
+    bar.style.width = (seconds * 10) + "%";
+    if(seconds <= 0){
+      clearInterval(timer);
+    }
+  }, 1000);
+}
+
+function backHome(){
+  clearInterval(timer);
+  if (noteLoopTimer) clearInterval(noteLoopTimer);
+  iframeChallenge.src = "";
+
+  if (selectedIndex === 0 || selectedIndex === 1) {
+    if (wasMusicPlayingBeforeChallenge) {
+      try {
+        iframeMain.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      } catch(e) {}
+    }
+  }
+
+  document.getElementById("challengeContent").innerHTML = "";
+  document.getElementById("challenge").classList.remove("active");
+  document.getElementById("home").classList.add("active");
+}
+</script>
+</body>
 </html>
