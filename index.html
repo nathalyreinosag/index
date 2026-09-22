@@ -137,12 +137,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR PRINCIPAL DEL MIX (Permanece intacto sin recargarse nunca) -->
+<!-- REPRODUCTOR PRINCIPAL DEL MIX -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
 
-<!-- REPRODUCTOR ESPECÍFICO PARA LAS DINÁMICAS MUSICALES -->
+<!-- REPRODUCTOR PARA LAS DINÁMICAS CON MÚSICA PROPIA -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="challenge-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
@@ -185,6 +185,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
 
 let isMusicActive = false;
+let wasMusicPlayingBeforeChallenge = false;
 const iframeMain = document.getElementById("youtube-audio-frame");
 const iframeChallenge = document.getElementById("challenge-audio-frame");
 
@@ -208,9 +209,9 @@ function toggleMainMusic() {
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.", color:"#ff5c8a" },
-  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
+  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
-  { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
+  { name:["Adivina la canción", "con emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
 const noteSongs = [
@@ -258,7 +259,7 @@ function drawWheel(){
     ctx.shadowColor = "rgba(0,0,0,0.6)";
     ctx.shadowBlur = 6;
 
-    ctx.font = "bold 34px Arial";
+    ctx.font = "bold 30px Arial";
     ctx.fillText(c.name[0], 340, -15);
     ctx.fillText(c.name[1], 340, 25);
 
@@ -332,13 +333,20 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
+  wasMusicPlayingBeforeChallenge = isMusicActive;
+
+  // 0: Caiga en la nota (Tiene música propia)
   if (selectedIndex === 0) {
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
-  } else if (selectedIndex === 1) {
+  } 
+  // 1: Adivina el nombre de la canción (Tiene música propia para tararear/adivinar, pausamos el mix de fondo)
+  else if (selectedIndex === 1) {
     iframeChallenge.src = "";
-  } else {
-    // Para Ruleta de palabras (2) y Emojis (3), el mix principal sigue intacto sin alteración alguna.
+  } 
+  // 2 y 3: Ruleta de palabras y Adivina la canción con emojis (NO tienen música propia, el mix principal sigue sonando fluido)
+  else {
+    // No hacemos nada con la música para que continúe sonando sin interrupciones
   }
 
   renderChallenge(selectedIndex);
