@@ -140,13 +140,15 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
+    <!-- Botón de Música Ambiental vinculado a tu enlace de YouTube -->
     <div style="margin:20px auto;text-align:center;">
       <button type="button" id="ambientBtn" onclick="toggleAmbientMusic()" style="font-size:18px;padding:14px 32px;background:#ffd54a;color:#24102f;cursor:pointer;font-weight:bold;">
         🎵 ACTIVAR MÚSICA AMBIENTAL
       </button>
-      <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-      </audio>
+      <!-- Contenedor oculto para la API de YouTube con tu ID de video exacto (P-auj2ElqzI) -->
+      <div style="position:absolute; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none;">
+        <div id="youtube-player"></div>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -174,23 +176,41 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
+<!-- Script de la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let isPlayingAmbient = false;
+let player;
+let isPlaying = false;
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtube-player', {
+    height: '0',
+    width: '0',
+    videoId: 'P-auj2ElqzI',
+    playerVars: {
+      'autoplay': 0,
+      'controls': 0,
+      'loop': 1,
+      'playlist': 'P-auj2ElqzI'
+    }
+  });
+}
 
 function toggleAmbientMusic() {
-  const audio = document.getElementById("bgMusic");
   const btn = document.getElementById("ambientBtn");
+  
+  if (!player || typeof player.playVideo !== 'function') {
+    alert("El reproductor de YouTube aún se está cargando. Inténtalo en un segundo.");
+    return;
+  }
 
-  if (!isPlayingAmbient) {
-    audio.play().then(() => {
-      isPlayingAmbient = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
-    }).catch(err => {
-      alert("Haz clic nuevamente para permitir la reproducción.");
-    });
+  if (!isPlaying) {
+    player.playVideo();
+    isPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
   } else {
-    audio.pause();
-    isPlayingAmbient = false;
+    player.pauseVideo();
+    isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA AMBIENTAL";
   }
 }
