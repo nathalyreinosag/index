@@ -157,7 +157,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:15px auto 15px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;" disabled>⏳ CARGANDO MÚSICA...</button>
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
     </div>
 
     <div class="wheel-wrap">
@@ -195,36 +195,37 @@ const ambientList = "RDKafxrlgKvJo";
 let challengePlayer = null;
 let volumeTimeouts = [];
 
-function onYouTubeIframeAPIReady() {
-  ambientPlayer = new YT.Player('ambientPlayerElement', {
-    height: '1',
-    width: '1',
-    videoId: ambientId,
-    playerVars: {
-      'autoplay': 0,
-      'listType': 'playlist',
-      'list': ambientList,
-      'loop': 1,
-      'playsinline': 1,
-      'enablejsapi': 1
-    },
-    events: {
-      'onReady': (event) => {
-        event.target.setVolume(100);
-        // Habilitamos el botón una vez el reproductor está listo
-        const btn = document.getElementById("musicBtn");
-        btn.disabled = false;
-        btn.textContent = "▶️ ACTIVAR MÚSICA";
-      }
-    }
-  });
-}
+// Función requerida por la API de YouTube, se deja vacía para evitar bloqueos previos
+function onYouTubeIframeAPIReady() {}
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
 
-  if(!ambientPlayer || typeof ambientPlayer.playVideo !== 'function'){
-    alert("El reproductor aún se está conectando, espera un segundo.");
+  // Si el reproductor aún no existe, lo creamos justo al hacer clic (Gestión autorizada por el usuario)
+  if(!ambientPlayer) {
+    ambientPlayer = new YT.Player('ambientPlayerElement', {
+      height: '1',
+      width: '1',
+      videoId: ambientId,
+      playerVars: {
+        'autoplay': 1,
+        'listType': 'playlist',
+        'list': ambientList,
+        'loop': 1,
+        'playsinline': 1,
+        'enablejsapi': 1
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.unMute();
+          event.target.setVolume(100);
+          event.target.playVideo();
+        }
+      }
+    });
+    ambientPlaying = true;
+    userActivatedMusic = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
     return;
   }
 
