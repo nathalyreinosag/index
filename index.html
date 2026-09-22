@@ -266,7 +266,6 @@ function initYTPlayer(videoId, startTime = 0, isNoteChallenge = false) {
                   const t = challengePlayer.getCurrentTime();
                   let currentSecFloor = Math.floor(t);
                   
-                  // Patrón repetitivo consecutivo: Activar a los 15s (25, 35...) y silenciar a los 20s (30, 40...)
                   if (currentSecFloor % 10 === 5) {
                     challengePlayer.setVolume(100);
                   } else if (currentSecFloor % 10 === 0) {
@@ -382,14 +381,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  if (selectedIndex === 2) {
-    musicWasPlayingBeforeChallenge = false;
-  } else {
-    musicWasPlayingBeforeChallenge = isPlaying;
-    if (isPlaying) {
-      const iframe = document.getElementById('ambientIframe');
-      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-    }
+  musicWasPlayingBeforeChallenge = isPlaying;
+  if (isPlaying) {
+    const iframe = document.getElementById('ambientIframe');
+    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
   }
 
   const c = challenges[selectedIndex];
@@ -503,7 +498,7 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if (selectedIndex !== 2 && musicWasPlayingBeforeChallenge && isPlaying) {
+  if (musicWasPlayingBeforeChallenge && isPlaying) {
     const iframe = document.getElementById('ambientIframe');
     iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
   }
