@@ -178,14 +178,14 @@ function toggleMusic() {
   const player = document.getElementById("youtube-player");
 
   if (!isPlaying) {
-    // Asigna el enlace con autoplay solo al hacer clic para cumplir con los permisos del navegador
+    // Asigna tu enlace con autoplay al hacer clic para cumplir con los permisos del navegador
     player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    // Limpia la fuente del iframe para detener la reproducción de inmediato
+    // Limpia la fuente del iframe para detener la reproducción por completo
     player.src = "";
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
