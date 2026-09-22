@@ -135,11 +135,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón visible de Activar Música de fondo -->
+    <!-- Botón visible de Activar Música -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor de YouTube principal -->
+      <!-- Contenedor del reproductor de YouTube -->
       <div style="width:0; height:0; overflow:hidden; display:inline-block;">
         <div id="youtube-player"></div>
       </div>
@@ -177,7 +177,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let player;
 let isPlaying = false;
 let wasPlayingBeforeChallenge = false;
-let isChallengeMusic = false;
+let isChallengeMode = false;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
@@ -200,7 +200,7 @@ function toggleMusic() {
   if (!isPlaying) {
     player.playVideo();
     isPlaying = true;
-    isChallengeMusic = false;
+    isChallengeMode = false;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
@@ -220,7 +220,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista de canciones agregada para "Caiga en la nota" (índice 0)
+// Lista de canciones para "Caiga en la nota" (índice 0)
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -349,7 +349,7 @@ function startChallenge(){
   
   wasPlayingBeforeChallenge = isPlaying;
 
-  // Lógica exacta de Caiga en la Nota (índice 0): Carga y reproduce canción aleatoria de la lista
+  // Si cae en "Caiga en la nota", cargamos y reproducimos la canción aleatoria con sus segundos de inicio
   if (selectedIndex === 0) {
     if (player && typeof player.loadVideoById === 'function') {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
@@ -357,16 +357,24 @@ function startChallenge(){
         'videoId': randomSong.id,
         'startSeconds': randomSong.start
       });
-      isChallengeMusic = true;
+      isPlaying = true;
+      isChallengeMode = true;
+      const btn = document.getElementById("musicBtn");
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+      btn.style.background = "#ff5c8a";
+      btn.style.color = "#fff";
     }
   } else {
-    if (player && typeof player.pauseVideo === 'function' && isPlaying && !isChallengeMusic) {
-      player.pauseVideo();
-      isPlaying = false;
-      const btn = document.getElementById("musicBtn");
-      btn.textContent = "🎵 ACTIVAR MÚSICA";
-      btn.style.background = "#ffd54a";
-      btn.style.color = "#24102f";
+    // Pausar música en los demás desafíos si estaba sonando
+    if (selectedIndex !== 2 && player && typeof player.pauseVideo === 'function') {
+      if (isPlaying && !isChallengeMode) {
+        player.pauseVideo();
+        isPlaying = false;
+        const btn = document.getElementById("musicBtn");
+        btn.textContent = "🎵 ACTIVAR MÚSICA";
+        btn.style.background = "#ffd54a";
+        btn.style.color = "#24102f";
+      }
     }
   }
 
@@ -441,11 +449,17 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if (isChallengeMusic) {
+  // Si estábamos en modo de canción aleatoria, al volver pausamos o regresamos al estado anterior
+  if (isChallengeMode) {
     if (player && typeof player.pauseVideo === 'function') {
       player.pauseVideo();
     }
-    isChallengeMusic = false;
+    isPlaying = false;
+    isChallengeMode = false;
+    const btn = document.getElementById("musicBtn");
+    btn.textContent = "🎵 ACTIVAR MÚSICA";
+    btn.style.background = "#ffd54a";
+    btn.style.color = "#24102f";
   } else if (wasPlayingBeforeChallenge && !isPlaying && player && typeof player.playVideo === 'function') {
     player.playVideo();
     isPlaying = true;
