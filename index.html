@@ -188,8 +188,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let challengePlayer = null;
 let isPlaying = false;
+let musicWasPlayingBeforeChallenge = false;
 
-// IDs de tu mix de música ambiental (puedes agregar los IDs de YouTube separados por comas)
+// ID de tu mix de música ambiental (puedes cambiarlo si deseas otro)
 const ambientPlaylist = "P-auj2ElqzI"; 
 
 function toggleMusic() {
@@ -197,13 +198,11 @@ function toggleMusic() {
   const container = document.getElementById('ambientContainer');
 
   if (!isPlaying) {
-    // Inyectamos dinámicamente el iframe de HTML5 con el mix configurado y autoplay
     container.style.display = "block";
     container.innerHTML = `<iframe width="100" height="100" src="https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}" frameborder="0" allow="autoplay"></iframe>`;
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    // Destruimos el iframe vaciando el contenedor para cortar la música de raíz
     container.innerHTML = "";
     container.style.display = "none";
     isPlaying = false;
@@ -372,6 +371,13 @@ function showResult(){
 }
 
 function startChallenge(){
+  // 1. Guardar el estado de la música ambiental y pausarla temporalmente al entrar al reto
+  musicWasPlayingBeforeChallenge = isPlaying;
+  if (isPlaying) {
+    const container = document.getElementById('ambientContainer');
+    container.innerHTML = ""; // Pausa la música de fondo limpiando el iframe
+  }
+
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -469,6 +475,12 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
+
+  // 2. Reanudar la música ambiental al volver si estaba activa antes del reto
+  if (musicWasPlayingBeforeChallenge) {
+    const container = document.getElementById('ambientContainer');
+    container.innerHTML = `<iframe width="100" height="100" src="https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}" frameborder="0" allow="autoplay"></iframe>`;
+  }
 }
 </script>
 </body>
