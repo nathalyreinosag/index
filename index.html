@@ -140,11 +140,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Reproductor de YouTube visible y funcional con tu enlace exacto -->
-    <div style="margin:20px auto;text-align:center;">
-      <div style="max-width:400px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.2);">
-        <iframe width="100%" height="180" src="https://www.youtube.com/embed/P-auj2ElqzI?enablejsapi=1" title="YouTube player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
+    <!-- Reproductor de YouTube original con tu enlace P-auj2ElqzI -->
+    <div style="max-width:420px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.2);">
+      <iframe width="100%" height="200" src="https://www.youtube.com/embed/P-auj2ElqzI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
 
     <div class="wheel-wrap">
@@ -306,78 +304,6 @@ function renderChallenge(i){
   } else if(i === 1){
     box.innerHTML = `
       <p style="font-size:22px;">🎧 Tararea o describe una canción para que los demás adivinen.</p>
-      <div class="timer" id="timer">10</div>
-      <div class="progress"><div class="bar" id="bar"></div></div>
-      <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
-    `;
-  } else if(i === 2){
-    const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
-    const word = words[Math.floor(Math.random() * words.length)];
-    box.innerHTML = `
-      <p style="font-size:20px;">La palabra secreta es:</p>
-      <div class="word">${word}</div>
-      <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
-    `;
-  } else {
-    const idx = Math.floor(Math.random() * emojiList.length);
-    currentAnswer = songTitles[idx];
-    box.innerHTML = `
-      <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
-      <div class="emoji-song">${emojiList[idx]}</div>
-      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
-      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
-    `;
-  }
-}
-
-function revealEmojiSong(){
-  const a = document.getElementById("emojiAnswer");
-  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
-}
-
-function startTimer(){
-  clearInterval(timer);
-  let seconds = 10;
-  const t = document.getElementById("timer");
-  const bar = document.getElementById("bar");
-  t.textContent = seconds;
-  bar.style.width = "100%";
-  timer = setInterval(()=>{
-    seconds--;
-    t.textContent = seconds;
-    bar.style.width = (seconds * 10) + "%";
-    if(seconds <= 0){
-      clearInterval(timer);
-    }
-  }, 1000);
-}
-
-function backHome(){
-  clearInterval(timer);
-  document.getElementById("challengeContent").innerHTML = "";
-  document.getElementById("challenge").classList.remove("active");
-  document.getElementById("home").classList.add("active");
-}
-</script>
-</body>
-</html>  renderChallenge(selectedIndex);
-}
-
-const emojiList = ["🌺🔥🎵", "🌺🌊☀️", "💎💋🔥", "🕶️🟢🔥", "🌙🐺💚"];
-const songTitles = ["AMARGURA - Karol G", "PROVENZA - Karol G", "QLONA - Karol G & Peso Pluma", "CLASSY 101 - Feid", "LUNA - Feid"];
-let currentAnswer = "";
-
-function renderChallenge(i){
-  const box = document.getElementById("challengeContent");
-  clearInterval(timer);
-
-  if(i === 0){
-    box.innerHTML = `
-      <p style="font-size:22px;">🎵 ¡Canta una estrofa de tu canción favorita sin parar!</p>
-    `;
-  } else if(i === 1){
-    box.innerHTML = `
-      <p style="font-size:22px;">🎧 Tararea o describe una canción para que tus compañeros adivinen.</p>
       <div class="timer" id="timer">10</div>
       <div class="progress"><div class="bar" id="bar"></div></div>
       <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
