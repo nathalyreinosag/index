@@ -143,7 +143,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
 
-<!-- REPRODUCTOR OFICIAL DE YOUTUBE PARA EL DESAFÍO -->
+<!-- REPRODUCTOR OFICIAL DE YOUTUBE PARA LOS DESAFÍOS -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <div id="youtube-challenge-player"></div>
 </div>
@@ -214,11 +214,12 @@ function toggleMainMusic() {
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.", color:"#ff5c8a" },
-  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
+  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Escucha la canción aleatoria y adivina el título exacto.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
   { name:["Adivina la canción", "con emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
+// Canciones para "Caiga en la nota" (Índice 0) -> SÍ baja y sube volumen
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -228,6 +229,20 @@ const noteSongs = [
   { title: "Bacilos - Caraluna", id: "-zgDXIi1uYw", start: 0 },
   { title: "Los de Adentro - Una Canción", id: "Q9W5uIMAbb8", start: 25 },
   { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 }
+];
+
+// Canciones exclusivas para "Adivina el nombre de la canción" (Índice 1) -> Suenan normales sin alteraciones de volumen
+const guessSongs = [
+  { title: "Canción 1", id: "yRUqUJta_rw", start: 0 },
+  { title: "Canción 2", id: "fYGSv0e6zWA", start: 0 },
+  { title: "Canción 3", id: "cQWD8JZQPXE", start: 0 },
+  { title: "Canción 4", id: "1EuBPfJ713c", start: 0 },
+  { title: "Canción 5", id: "VMpaaThux2c", start: 0 },
+  { title: "Canción 6", id: "RHCj8v8S6M0", start: 0 },
+  { title: "Canción 7", id: "0aJstiPMOKs", start: 0 },
+  { title: "Canción 8", id: "xzANkdcvjoc", start: 0 },
+  { title: "Canción 9", id: "sf2yKFWCucA", start: 0 },
+  { title: "Canción 10", id: "T0nUk7dbPwQ", start: 0 }
 ];
 
 let selectedIndex = 0;
@@ -348,9 +363,9 @@ function startChallenge(){
     }
     
     if (selectedIndex === 0) {
-      startCaigaEnLaNotaLoop();
-    } else {
-      stopChallengePlayer();
+      startDynamicLoop(noteSongs, 120000, 15000, true);  // Con control de volumen (baja a 0 y sube a 100)
+    } else if (selectedIndex === 1) {
+      startDynamicLoop(guessSongs, 120000, 15000, false); // Sin control de volumen (suena normal continuo)
     }
   } else {
     stopChallengePlayer();
@@ -366,7 +381,7 @@ function stopVolumeTracker() {
   }
 }
 
-// Monitoreo constante: baja a 0 en el segundo 70 y sube a 100 en el segundo 90
+// Monitoreo de volumen exclusivo para "Caiga en la nota"
 function startVolumeTracker() {
   stopVolumeTracker();
   let volumeLowered = false;
@@ -391,8 +406,8 @@ function startVolumeTracker() {
   }, 500);
 }
 
-function playRandomNoteSong() {
-  currentSongData = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+function playSpecificSong(songsList, enableVolumeChanges) {
+  currentSongData = songsList[Math.floor(Math.random() * songsList.length)];
   
   if (!challengePlayer) {
     challengePlayer = new YT.Player('youtube-challenge-player', {
@@ -408,7 +423,11 @@ function playRandomNoteSong() {
         'onReady': (event) => {
           event.target.setVolume(100);
           event.target.playVideo();
-          startVolumeTracker();
+          if (enableVolumeChanges) {
+            startVolumeTracker();
+          } else {
+            stopVolumeTracker();
+          }
         }
       }
     });
@@ -419,7 +438,11 @@ function playRandomNoteSong() {
         startSeconds: currentSongData.start
       });
       challengePlayer.setVolume(100);
-      startVolumeTracker();
+      if (enableVolumeChanges) {
+        startVolumeTracker();
+      } else {
+        stopVolumeTracker();
+      }
     }
   }
 }
@@ -431,24 +454,20 @@ function stopChallengePlayer() {
   }
 }
 
-function startCaigaEnLaNotaLoop() {
+function startDynamicLoop(songsList, playDuration, pauseDuration, enableVolumeChanges) {
   if (noteLoopTimer) clearInterval(noteLoopTimer);
   
-  playRandomNoteSong();
+  playSpecificSong(songsList, enableVolumeChanges);
   
-  const playDuration = 120000; // 2 minutos
-  const pauseDuration = 15000;  // 15 segundos de pausa antes de cambiar de canción
   const totalCycle = playDuration + pauseDuration;
 
   noteLoopTimer = setInterval(() => {
-    // Pausar tras 2 minutos
     setTimeout(() => {
       stopChallengePlayer();
     }, playDuration);
     
-    // Reproducir siguiente canción tras la pausa
     setTimeout(() => {
-      playRandomNoteSong();
+      playSpecificSong(songsList, enableVolumeChanges);
     }, totalCycle);
   }, totalCycle);
 }
@@ -502,13 +521,12 @@ function renderChallenge(i){
   if(i === 0){
     box.innerHTML = `
       <div style="font-size:75px; margin:20px 0;">🎵🎤🔥</div>
+      <p style="font-size:20px;">¡Escucha la canción y continúa su letra!</p>
     `;
   } else if(i === 1){
     box.innerHTML = `
-      <p style="font-size:22px;">🎧 Tararea o describe una canción para que los demás adivinen el título.</p>
-      <div class="timer" id="timer">10</div>
-      <div class="progress"><div class="bar" id="bar"></div></div>
-      <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
+      <div style="font-size:75px; margin:10px 0;">🎧🎶🔥</div>
+      <p style="font-size:22px;">Escucha la pista musical aleatoria y adivina el nombre de la canción.</p>
     `;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
@@ -533,23 +551,6 @@ function renderChallenge(i){
 function revealEmojiSong(){
   const a = document.getElementById("emojiAnswer");
   if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
-}
-
-function startTimer(){
-  clearInterval(timer);
-  let seconds = 10;
-  const t = document.getElementById("timer");
-  const bar = document.getElementById("bar");
-  t.textContent = seconds;
-  bar.style.width = "100%";
-  timer = setInterval(()=>{
-    seconds--;
-    t.textContent = seconds;
-    bar.style.width = (seconds * 10) + "%";
-    if(seconds <= 0){
-      clearInterval(timer);
-    }
-  }, 1000);
 }
 
 function backHome(){
