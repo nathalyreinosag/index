@@ -151,13 +151,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:20px auto;text-align:center;">
-      <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
+      <!-- Botón de música ambiental totalmente independiente -->
+      <button type="button" onclick="toggleAmbientMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto fuera de pantalla para que el navegador permita reproducir audio sin mostrar el video -->
-      <div id="ambientContainer" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;">
-        <iframe id="ambientIframe" width="100" height="100" src="" frameborder="0" allow="autoplay"></iframe>
-      </div>
+      <!-- Elemento oculto limpio para la API de YouTube ambiental -->
+      <div id="ambientPlayerDiv" style="display:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -188,22 +187,49 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
-let isPlaying = false;
+let ambientPlayer = null;
+let isAmbientPlaying = false;
 let noteInterval = null;
 
-const ambientPlaylist = "P-auj2ElqzI"; 
+const ambientPlaylistId = "P-auj2ElqzI"; 
 
-function toggleMusic() {
+// Callback global de la API de YouTube
+function onYouTubeIframeAPIReady() {
+  ambientPlayer = new YT.Player('ambientPlayerDiv', {
+    height: '1',
+    width: '1',
+    videoId: ambientPlaylistId,
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': ambientPlaylistId,
+      'controls': 0
+    },
+    events: {
+      'onReady': (event) => {
+        event.target.setVolume(100);
+      }
+    }
+  });
+}
+
+// Control exclusivo del botón de música ambiental
+function toggleAmbientMusic() {
   const btn = document.getElementById('musicBtn');
-  const iframe = document.getElementById('ambientIframe');
+  
+  if (!ambientPlayer) {
+    alert("El reproductor ambiental aún se está cargando, intenta de nuevo en un segundo.");
+    return;
+  }
 
-  if (!isPlaying) {
-    iframe.src = `https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}`;
-    isPlaying = true;
+  if (!isAmbientPlaying) {
+    ambientPlayer.unMute();
+    ambientPlayer.playVideo();
+    isAmbientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    iframe.src = "";
-    isPlaying = false;
+    ambientPlayer.pauseVideo();
+    isAmbientPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
 }
@@ -231,6 +257,7 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
+// Gestor exclusivo para los retos de la ruleta (totalmente separado del botón ambiental)
 function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
   let startSeconds = 0;
   if(typeof startTime === "string" && startTime.includes(":")) {
