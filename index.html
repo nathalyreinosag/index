@@ -135,11 +135,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música general -->
+    <!-- Botón de música independiente con tu mix principal -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor de YouTube (oculto de forma segura) -->
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
         <div id="youtube-player"></div>
       </div>
@@ -181,11 +180,11 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
     height: '200',
     width: '200',
-    videoId: 'AMTAQ-AJS4Y', // Mix principal asignado al botón de activar música
+    videoId: 'P-auj2ElqzI', // Mix principal asignado al botón de activar música
     playerVars: {
       'autoplay': 0,
       'loop': 1,
-      'playlist': 'AMTAQ-AJS4Y',
+      'playlist': 'P-auj2ElqzI',
       'enablejsapi': 1
     }
   });
@@ -218,7 +217,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista completa de canciones individuales configuradas exclusivamente para "Caiga en la nota"
+// Lista exclusiva para la dinámica "Caiga en la nota" con los enlaces y segundos exactos que enviaste
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -344,7 +343,7 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce aleatoriamente una de las canciones individuales con su respectivo segundo de inicio
+  // Si cae en "Caiga en la nota", reproduce aleatoriamente una de las canciones individuales con su segundo exacto
   if (selectedIndex === 0) {
     if (player && typeof player.loadVideoById === 'function') {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
