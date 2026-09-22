@@ -54,7 +54,6 @@ body::before {
 }
 h1{font-size:clamp(40px, 5vw, 62px);margin:0 0 10px;font-weight:900;}
 p{font-size:20px;opacity:.9;}
-.subtitle{margin-bottom:20px;font-size:22px;}
 .wheel-wrap{
   position:relative;
   width:min(520px, 75vw);
@@ -148,7 +147,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- Contenedor oculto para la lista de reproducción de fondo -->
 <div style="display:none;">
   <div id="ambientPlayerElement"></div>
 </div>
@@ -157,7 +155,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
-    <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
@@ -198,7 +195,6 @@ const ambientList = "RDKafxrlgKvJo";
 let challengePlayer = null;
 let volumeTimeouts = [];
 
-// Inicializar API de YouTube cuando cargue el script
 function onYouTubeIframeAPIReady() {
   ambientPlayer = new YT.Player('ambientPlayerElement', {
     height: '1',
