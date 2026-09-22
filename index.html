@@ -139,11 +139,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Elemento de audio HTML5 nativo (100% invisible, sin errores de iframe) -->
-      <audio id="bgAudio" loop>
-        <source src="https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3" type="audio/mp3">
-        Tu navegador no soporta audio.
-      </audio>
+      <!-- Video oculto con dimensiones en 0 para que no interfiera ni se vea visualmente -->
+      <div style="width:0; height:0; overflow:hidden; display:inline-block;">
+        <iframe id="youtube-player" width="0" height="0" src="" frameborder="0" allow="autoplay"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -175,21 +174,19 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let isPlaying = false;
 
 function toggleMusic() {
-  const audio = document.getElementById("bgAudio");
   const btn = document.getElementById("musicBtn");
+  const player = document.getElementById("youtube-player");
 
   if (!isPlaying) {
-    audio.play().then(() => {
-      isPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
-      btn.style.background = "#ff5c8a";
-      btn.style.color = "#fff";
-    }).catch(error => {
-      console.log("Error al reproducir:", error);
-      alert("Haz clic de nuevo en el botón para autorizar el audio.");
-    });
+    // Asigna el enlace con autoplay solo al hacer clic para cumplir con los permisos del navegador
+    player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+    isPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    btn.style.background = "#ff5c8a";
+    btn.style.color = "#fff";
   } else {
-    audio.pause();
+    // Limpia la fuente del iframe para detener la reproducción de inmediato
+    player.src = "";
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
