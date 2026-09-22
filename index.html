@@ -150,13 +150,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <div style="margin:20px auto;text-align:center;position:relative;">
+    <div style="margin:20px auto;text-align:center;">
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto para la música de fondo -->
-      <div style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none;">
-        <div id="ambientPlayer"></div>
+      <!-- Contenedor iframe directo sin depender de la API de YouTube -->
+      <div id="ambientContainer" style="display:none; margin-top:15px;">
+        <iframe id="bgIframe" width="100" height="100" src="" frameborder="0" allow="autoplay"></iframe>
       </div>
     </div>
 
@@ -185,66 +185,32 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- API de YouTube -->
+<!-- API de YouTube (solo para los retos de canciones) -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
-let bgPlayer = null;
 let isPlaying = false;
-let apiLoaded = false;
-
-function onYouTubeIframeAPIReady() {
-  apiLoaded = true;
-}
 
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
+  const container = document.getElementById('ambientContainer');
+  const iframe = document.getElementById('bgIframe');
 
-  if (!apiLoaded) {
-    alert("La librería de YouTube se está conectando, por favor intenta de nuevo en un segundo.");
-    return;
-  }
-
-  // Si el reproductor aún no existe, lo creamos justo al hacer clic por primera vez
-  if (!bgPlayer) {
-    bgPlayer = new YT.Player('ambientPlayer', {
-      height: '1',
-      width: '1',
-      videoId: 'P-auj2ElqzI',
-      playerVars: {
-        'autoplay': 1,
-        'controls': 0,
-        'loop': 1,
-        'playlist': 'P-auj2ElqzI'
-      },
-      events: {
-        'onReady': (event) => {
-          event.target.unMute();
-          event.target.setVolume(100);
-          event.target.playVideo();
-          isPlaying = true;
-          btn.textContent = "⏸️ PAUSAR MÚSICA";
-        }
-      }
-    });
-    return;
-  }
-
-  // Control normal si ya fue creado
-  try {
-    if (!isPlaying) {
-      bgPlayer.unMute();
-      bgPlayer.setVolume(100);
-      bgPlayer.playVideo();
-      isPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
+  if (!isPlaying) {
+    // Inyectamos el iframe con autoplay directo al hacer clic por primera vez
+    if (!iframe.src) {
+      iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
     } else {
-      bgPlayer.pauseVideo();
-      isPlaying = false;
-      btn.textContent = "🎵 ACTIVAR MÚSICA";
+      // Si ya tenía src, forzamos recarga con autoplay
+      iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
     }
-  } catch (e) {
-    console.error("Error al controlar la música:", e);
+    isPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    // Para pausar de raíz sin complicaciones, limpiamos el src del iframe deteniendo el audio por completo
+    iframe.src = "";
+    isPlaying = false;
+    btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
 }
 
