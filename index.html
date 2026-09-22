@@ -324,21 +324,18 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Guardamos si el mix principal estaba sonando antes de entrar
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
   if (selectedIndex === 0) {
-    // 1. Caiga en la nota: guarda estado y suena la canción propia
+    // 1. Caiga en la nota: suena la canción propia del desafío
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else if (selectedIndex === 1) {
-    // 2. Adivina la canción: guarda estado y pausa el mix principal
+    // 2. Adivina la canción: pausa el mix principal
     iframe.src = "";
   } else {
-    // 3 y 4 (Ruleta de palabras / Emojis): No tienen música propia, el mix principal sigue sonando normal
-    if (wasMusicPlayingBeforeChallenge) {
-      iframe.src = MIX_EMBED_URL;
-    }
+    // 3 y 4 (Ruleta de palabras y Emojis): No tienen música propia, el mix continúa sonando sin reiniciarse
+    // No tocamos iframe.src para que siga su curso natural
   }
 
   renderChallenge(selectedIndex);
@@ -409,7 +406,8 @@ function startTimer(){
 function backHome(){
   clearInterval(timer);
   
-  // Solo si estábamos en una dinámica con música propia (0 o 1), restauramos el estado anterior del mix principal
+  // Al salir, solo restauramos el mix si estábamos en las dinámicas 0 o 1 que pausaban la música principal.
+  // Para las dinámicas 2 y 3, como el mix nunca se alteró, al volver todo sigue sonando idéntico por donde iba.
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
       iframe.src = MIX_EMBED_URL;
@@ -425,7 +423,6 @@ function backHome(){
       document.getElementById("musicBtn").style.color = "#24102f";
     }
   }
-  // Si estabas en la 2 o 3, el mix nunca se alteró al salir, por lo que sigue su curso sin tocar nada.
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
