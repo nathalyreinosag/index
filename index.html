@@ -199,15 +199,16 @@ function toggleMusic() {
 
   if (!isPlaying) {
     container.style.display = "block";
-    if (!iframe.src.includes(ambientPlaylist)) {
-      iframe.src = `https://www.youtube.com/embed/${ambientPlaylist}?enablejsapi=1&autoplay=1&loop=1&playlist=${ambientPlaylist}`;
-    } else {
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
+    // Ajuste real y limpio para cumplir con las políticas de autoplay del navegador
+    iframe.src = `https://www.youtube.com/embed/${ambientPlaylist}?enablejsapi=1&autoplay=1&loop=1&playlist=${ambientPlaylist}`;
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    try {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    } catch(e) {
+      iframe.src = "";
+    }
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
