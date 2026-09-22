@@ -190,7 +190,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let ambientPlaying = false;
 let userActivatedMusic = false;
-const ambientId = "LypslWGSvSI";
+// Nuevos parámetros de tu lista de reproducción de YouTube
+const ambientId = "P-auj2ElqzI";
+const ambientList = "RDKafxrlgKvJo";
+
 let challengePlayer = null;
 let volumeTimeouts = [];
 
@@ -201,7 +204,7 @@ function toggleAmbientMusic(){
   if(!ambientPlaying){
     userActivatedMusic = true;
     if(!iframe.src || iframe.src === "" || iframe.src === window.location.href){
-      iframe.src = `https://www.youtube.com/embed/${ambientId}?autoplay=1&loop=1&playlist=${ambientId}&enablejsapi=1`;
+      iframe.src = `https://www.youtube.com/embed/${ambientId}?list=${ambientList}&autoplay=1&loop=1&enablejsapi=1`;
     } else {
       iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     }
@@ -421,7 +424,6 @@ function renderChallenge(i){
     `;
 
     initYTPlayer(currentSong.url, currentSong.time, (player) => {
-      // A los 20 segundos bajamos volumen a 0% y nos aseguramos de desmutear
       let t1 = setTimeout(() => {
         if(player && typeof player.setVolume === 'function') {
           player.unMute();
@@ -429,7 +431,6 @@ function renderChallenge(i){
         }
       }, 20000);
 
-      // A los 30 segundos (20s + 10s de canto) subimos volumen a 100%
       let t2 = setTimeout(() => {
         if(player && typeof player.setVolume === 'function') {
           player.unMute();
