@@ -219,7 +219,10 @@ function onYouTubeIframeAPIReady() {
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
 
-  if(!ambientPlayer) return;
+  if(!ambientPlayer || typeof ambientPlayer.playVideo !== 'function'){
+    alert("El reproductor de fondo aún se está cargando, por favor intenta en un segundo.");
+    return;
+  }
 
   if(!ambientPlaying){
     userActivatedMusic = true;
