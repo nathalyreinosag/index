@@ -147,15 +147,17 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- CONTENEDOR OCULTO PARA EL MIX DE AMBIENTE DE YOUTUBE -->
-<div id="ambientYouTubePlayer" style="display:none;"></div>
+<!-- AUDIO DE AMBIENTE ESTABLE NATIVO -->
+<audio id="ambientAudio" loop preload="auto">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
 
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- BOTÓN DE ACTIVAR MÚSICA -->
+    <!-- BOTÓN DE ACTIVAR MÚSICA FUNCIONAL -->
     <div style="margin:15px auto;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
     </div>
@@ -186,7 +188,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let ambientYTPlayer = null;
 let ambientPlaying = false;
 let userActivatedMusic = false;
 let challengePlayer = null;
@@ -197,44 +198,20 @@ function onYouTubeIframeAPIReady() {
 }
 
 function toggleAmbientMusic(){
+  const audio = document.getElementById("ambientAudio");
   const btn = document.getElementById("musicBtn");
 
   if(!ambientPlaying){
-    if(!ambientYTPlayer){
-      ambientYTPlayer = new YT.Player('ambientYouTubePlayer', {
-        height: '0',
-        width: '0',
-        videoId: 'P-auj2ElqzI',
-        playerVars: {
-          'autoplay': 1,
-          'loop': 1,
-          'playlist': 'P-auj2ElqzI',
-          'playsinline': 1,
-          'mute': 0
-        },
-        events: {
-          'onReady': (event) => {
-            event.target.unMute();
-            event.target.setVolume(100);
-            event.target.playVideo();
-            ambientPlaying = true;
-            userActivatedMusic = true;
-            btn.textContent = "⏸️ PAUSAR MÚSICA";
-          }
-        }
-      });
-    } else {
-      ambientYTPlayer.unMute();
-      ambientYTPlayer.setVolume(100);
-      ambientYTPlayer.playVideo();
+    audio.play().then(() => {
       ambientPlaying = true;
       userActivatedMusic = true;
       btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }
+    }).catch(error => {
+      console.log("Error de reproducción:", error);
+      alert("Haz clic nuevamente en el botón para autorizar el audio.");
+    });
   } else {
-    if(ambientYTPlayer && typeof ambientYTPlayer.pauseVideo === 'function'){
-      ambientYTPlayer.pauseVideo();
-    }
+    audio.pause();
     ambientPlaying = false;
     userActivatedMusic = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
@@ -424,8 +401,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying && ambientYTPlayer && typeof ambientYTPlayer.pauseVideo === 'function'){
-    ambientYTPlayer.pauseVideo();
+  if(ambientPlaying){
+    document.getElementById("ambientAudio").pause();
   }
 
   const c = challenges[selectedIndex];
@@ -548,9 +525,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if(userActivatedMusic && ambientYTPlayer && typeof ambientYTPlayer.playVideo === 'function'){
-    ambientYTPlayer.playVideo();
+  if(userActivatedMusic){
     ambientPlaying = true;
+    document.getElementById("ambientAudio").play();
   }
 }
 </script>
