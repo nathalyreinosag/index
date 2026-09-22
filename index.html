@@ -154,7 +154,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor iframe fijo para control por postMessage (evita que se reinicie al pausar/reanudar) -->
       <div id="ambientContainer" style="display:none; margin-top:15px; width:1px; height:1px; opacity:0; overflow:hidden;">
         <iframe id="ambientIframe" width="100" height="100" src="" frameborder="0" allow="autoplay"></iframe>
       </div>
@@ -185,14 +184,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- API de YouTube oficial para los retos -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
 let isPlaying = false;
 let musicWasPlayingBeforeChallenge = false;
+let noteInterval = null;
 
-// ID de tu mix de música ambiental
 const ambientPlaylist = "P-auj2ElqzI"; 
 
 function toggleMusic() {
@@ -239,7 +237,7 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function initYTPlayer(videoId, startTime = "0") {
+function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
   let startSeconds = 0;
   if(startTime.includes(":")) {
     const parts = startTime.split(":");
@@ -251,6 +249,7 @@ function initYTPlayer(videoId, startTime = "0") {
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
     try { challengePlayer.destroy(); } catch(err){}
   }
+  clearInterval(noteInterval);
 
   setTimeout(() => {
     const element = document.getElementById('youtubePlayerElement');
@@ -270,6 +269,30 @@ function initYTPlayer(videoId, startTime = "0") {
             event.target.unMute();
             event.target.setVolume(100);
             event.target.playVideo();
+
+            // Lógica específica para "Caiga en la nota" (índice 0):
+            // 15s -> silencia (0%), 20s -> volumen normal (100%), repetido dos veces.
+            if (isNoteChallenge) {
+              noteInterval = setInterval(() => {
+                if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function') {
+                  const t = challengePlayer.getCurrentTime();
+                  
+                  // Primer ciclo
+                  if (t >= 15 && t < 16) {
+                    challengePlayer.setVolume(0);
+                  } else if (t >= 20 && t < 21) {
+                    challengePlayer.setVolume(100);
+                  }
+                  
+                  // Segundo ciclo
+                  if (t >= 35 && t < 36) {
+                    challengePlayer.setVolume(0);
+                  } else if (t >= 40 && t < 41) {
+                    challengePlayer.setVolume(100);
+                  }
+                }
+              }, 500);
+            }
           }
         }
       });
@@ -377,11 +400,10 @@ function showResult(){
 }
 
 function startChallenge(){
-  // EXCEPCIÓN: Si es la dinámica "Adivina la canción" (índice 1), NO pausamos la música ambiental
+  // Excepción: "Adivina la canción" (índice 1) no pausa la música ambiental
   if (selectedIndex === 1) {
     musicWasPlayingBeforeChallenge = false;
   } else {
-    // Para las demás dinámicas, pausamos la música ambiental sin perder el segundo actual
     musicWasPlayingBeforeChallenge = isPlaying;
     if (isPlaying) {
       const iframe = document.getElementById('ambientIframe');
@@ -400,6 +422,7 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
+  clearInterval(noteInterval);
 
   if(i === 0){
     currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
@@ -409,7 +432,7 @@ function renderChallenge(i){
         <div id="youtubePlayerElement"></div>
       </div>
     `;
-    initYTPlayer(currentSong.url, currentSong.time);
+    initYTPlayer(currentSong.url, currentSong.time, true);
 
   } else if(i === 1){
     currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
@@ -422,7 +445,7 @@ function renderChallenge(i){
       <button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button>
       <div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>
     `;
-    initYTPlayer(currentSong.url, "0");
+    initYTPlayer(currentSong.url, "0", false);
 
   } else if(i === 2){
     if (challengePlayer && typeof challengePlayer.destroy === 'function') {
@@ -445,7 +468,7 @@ function renderChallenge(i){
       <div id="emojiMusic" style="margin-top:15px;"><div id="youtubePlayerElement"></div></div>
       <button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>
     `;
-    initYTPlayer(currentSong.url, "0");
+    initYTPlayer(currentSong.url, "0", false);
   }
 }
 
@@ -478,6 +501,7 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
+  clearInterval(noteInterval);
 
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
     try { challengePlayer.destroy(); } catch(err){}
@@ -487,7 +511,6 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar la música ambiental exactamente donde iba al volver a la ruleta (si estaba activa antes)
   if (musicWasPlayingBeforeChallenge) {
     const iframe = document.getElementById('ambientIframe');
     iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
