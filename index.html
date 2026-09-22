@@ -270,21 +270,17 @@ function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
             event.target.setVolume(100);
             event.target.playVideo();
 
-            // Lógica específica para "Caiga en la nota" (índice 0):
-            // 15s -> silencia (0%), 20s -> volumen normal (100%), repetido dos veces.
             if (isNoteChallenge) {
               noteInterval = setInterval(() => {
                 if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function') {
                   const t = challengePlayer.getCurrentTime();
                   
-                  // Primer ciclo
                   if (t >= 15 && t < 16) {
                     challengePlayer.setVolume(0);
                   } else if (t >= 20 && t < 21) {
                     challengePlayer.setVolume(100);
                   }
                   
-                  // Segundo ciclo
                   if (t >= 35 && t < 36) {
                     challengePlayer.setVolume(0);
                   } else if (t >= 40 && t < 41) {
@@ -400,8 +396,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Excepción: "Adivina la canción" (índice 1) y "Ruleta de palabras" (índice 2) no pausan la música ambiental
-  if (selectedIndex === 1 || selectedIndex === 2) {
+  // Excepción exclusiva para el índice 2 (Ruleta de palabras)
+  if (selectedIndex === 2) {
     musicWasPlayingBeforeChallenge = false;
   } else {
     musicWasPlayingBeforeChallenge = isPlaying;
@@ -511,7 +507,8 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if (musicWasPlayingBeforeChallenge) {
+  // Reanudar música solo si no proviene de la Ruleta de palabras (índice 2)
+  if (selectedIndex !== 2 && musicWasPlayingBeforeChallenge && isPlaying) {
     const iframe = document.getElementById('ambientIframe');
     iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
   }
