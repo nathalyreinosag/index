@@ -366,7 +366,7 @@ function stopVolumeTracker() {
   }
 }
 
-// Monitoreo constante del tiempo de reproducción para garantizar el cambio de volumen exacto
+// Monitoreo constante: baja a 0 en el segundo 70 y sube a 100 en el segundo 90
 function startVolumeTracker() {
   stopVolumeTracker();
   let volumeLowered = false;
@@ -376,13 +376,13 @@ function startVolumeTracker() {
     if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function' && challengePlayer.getPlayerState() === 1) {
       const currentTime = challengePlayer.getCurrentTime();
 
-      // Minuto 1:10 (70 segundos): Baja el volumen a 15%
+      // Minuto 1:10 (70 segundos): Baja el volumen a 0%
       if (currentTime >= 70 && currentTime < 90 && !volumeLowered) {
-        challengePlayer.setVolume(15);
+        challengePlayer.setVolume(0);
         volumeLowered = true;
       }
 
-      // Minuto 1:30 (90 segundos - 20 segundos después): Restaura el volumen al 100%
+      // Minuto 1:30 (90 segundos): Restaura el volumen al 100%
       if (currentTime >= 90 && !volumeRestored) {
         challengePlayer.setVolume(100);
         volumeRestored = true;
