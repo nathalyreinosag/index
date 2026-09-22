@@ -147,9 +147,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<div style="display:none;">
-  <div id="ambientPlayerElement"></div>
-</div>
+<!-- Audio de ambiente nativo HTML5 (¡Infalible al primer clic!) -->
+<audio id="ambientAudio" loop preload="auto">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
 
 <section id="home" class="screen active">
   <div class="card">
@@ -188,58 +189,30 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let ambientPlaying = false;
 let userActivatedMusic = false;
-let ambientPlayer = null;
-const ambientId = "P-auj2ElqzI";
-const ambientList = "RDKafxrlgKvJo";
-
 let challengePlayer = null;
 let volumeTimeouts = [];
 
-// Función requerida por la API de YouTube, se deja vacía para evitar bloqueos previos
-function onYouTubeIframeAPIReady() {}
+function onYouTubeIframeAPIReady() {
+  // Vacío intencionalmente para los retos que usan YouTube de forma individual
+}
 
 function toggleAmbientMusic(){
+  const audio = document.getElementById("ambientAudio");
   const btn = document.getElementById("musicBtn");
 
-  // Si el reproductor aún no existe, lo creamos justo al hacer clic (Gestión autorizada por el usuario)
-  if(!ambientPlayer) {
-    ambientPlayer = new YT.Player('ambientPlayerElement', {
-      height: '1',
-      width: '1',
-      videoId: ambientId,
-      playerVars: {
-        'autoplay': 1,
-        'listType': 'playlist',
-        'list': ambientList,
-        'loop': 1,
-        'playsinline': 1,
-        'enablejsapi': 1
-      },
-      events: {
-        'onReady': (event) => {
-          event.target.unMute();
-          event.target.setVolume(100);
-          event.target.playVideo();
-        }
-      }
-    });
-    ambientPlaying = true;
-    userActivatedMusic = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-    return;
-  }
-
   if(!ambientPlaying){
-    userActivatedMusic = true;
-    ambientPlayer.unMute();
-    ambientPlayer.setVolume(100);
-    ambientPlayer.playVideo();
-    ambientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    audio.play().then(() => {
+      ambientPlaying = true;
+      userActivatedMusic = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    }).catch(error => {
+      console.log("Error al reproducir audio:", error);
+      alert("Haz clic de nuevo para autorizar el audio.");
+    });
   } else {
-    userActivatedMusic = false;
-    ambientPlayer.pauseVideo();
+    audio.pause();
     ambientPlaying = false;
+    userActivatedMusic = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
 }
@@ -427,8 +400,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying && ambientPlayer){
-    ambientPlayer.pauseVideo();
+  if(ambientPlaying){
+    document.getElementById("ambientAudio").pause();
   }
 
   const c = challenges[selectedIndex];
@@ -551,9 +524,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if(userActivatedMusic && ambientPlayer){
+  if(userActivatedMusic){
     ambientPlaying = true;
-    ambientPlayer.playVideo();
+    document.getElementById("ambientAudio").play();
   }
 }
 </script>
