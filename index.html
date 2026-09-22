@@ -191,7 +191,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 let challengePlayer = null;
-let volumeTimeouts = [];
 
 function onYouTubeIframeAPIReady() {
   // YouTube API lista
@@ -218,30 +217,7 @@ function toggleAmbientMusic(){
   }
 }
 
-const noteSongs = [
-  { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51" },
-  { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03" },
-  { title:"Devuélveme a mi Chica", artist:"Hombres G", url:"LgQYPqr9Rho", time:"0:00" },
-  { title:"Mil Horas", artist:"Los Abuelos de la Nada", url:"1To_Wz5RWi0", time:"0:00" },
-  { title:"Cuando El AMOR Se Daña", artist:"Rikarena", url:"MB4o_V8AZa4", time:"0:23" },
-  { title:"Pégame Tu VICIO", artist:"Eddy Herrera", url:"yWSQxGppcFA", time:"0:15" },
-  { title:"Caraluna", artist:"Bacilos", url:"-zgDXIi1uYw", time:"0:00" },
-  { title:"Una Cancion", artist:"Los de Adentro", url:"Q9W5uIMAbb8", time:"0:25" },
-  { title:"Colgando en tus manos", artist:"Carlos Baute", url:"qExd-3oCTl4", time:"0:10" },
-  { title:"Nuqui (Te Quiero Para Mi)", artist:"ChocQuibTown", url:"EzbzWerC9AM", time:"0:10" },
-  { title:"Morenamia", artist:"Miguel Bosé", url:"ljO63sL2CWc", time:"0:10" },
-  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" },
-  { title:"Tema 1 (Caiga en la nota)", artist:"Selección Especial", url:"aPQN_xOCfvg", time:"0:00" },
-  { title:"Tema 2 (Caiga en la nota)", artist:"Selección Especial", url:"fVWQ3tq8VU0", time:"0:00" },
-  { title:"Tema 3 (Caiga en la nota)", artist:"Selección Especial", url:"PIoPVz0499c", time:"0:00" },
-  { title:"Querida", artist:"Juan Gabriel", url:"o3J3nrdS2_c", time:"0:00" },
-  { title:"A Esa", artist:"Pimpinela", url:"vdFCr0XOu7o", time:"0:00" },
-  { title:"Tarde Lo Conocí", artist:"Patricia Teherán", url:"iN_5sKv_l74", time:"0:00" },
-  { title:"Olvídala", artist:"Binomio De Oro De América", url:"yry3rgGlRUw", time:"0:24" },
-  { title:"Adiós Amor", artist:"Christian Nodal", url:"ETLoTxVVvjM", time:"0:00" },
-  { title:"Qué Agonía", artist:"Yuridia, Ángela Aguilar", url:"hjFV7gh_lI8", time:"0:00" },
-  { title:"Rata De Dos Patas", artist:"Paquita la del Barrio", url:"VuyvT9inAf8", time:"0:00" }
-];
+const noteSong = { title:"Todo Lo Fue", artist:"Selección Caiga en la Nota", url:"kwwdY1bp-Ck", time:"0:00" };
 
 const generalSongs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
@@ -252,7 +228,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce la canción y el participante debe cantar la letra correspondiente.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -262,12 +238,7 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function clearAllTimeouts() {
-  volumeTimeouts.forEach(t => clearTimeout(t));
-  volumeTimeouts = [];
-}
-
-function initYTPlayer(videoId, startTime = "0", onReadyCallback) {
+function initYTPlayer(videoId, startTime = "0") {
   let startSeconds = 0;
   if(startTime.includes(":")) {
     const parts = startTime.split(":");
@@ -295,7 +266,6 @@ function initYTPlayer(videoId, startTime = "0", onReadyCallback) {
         event.target.unMute();
         event.target.setVolume(100);
         event.target.playVideo();
-        if(onReadyCallback) onReadyCallback(event.target);
       }
     }
   });
@@ -416,37 +386,17 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
-  clearAllTimeouts();
 
   if(i === 0){
-    currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    currentSong = noteSong;
     box.innerHTML = `
-      <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>
+      <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b></p>
       <div class="player-container">
         <div id="youtubePlayerElement"></div>
       </div>
-      <div class="lyrics" style="margin-top:15px">
-        <strong>⚡ DINÁMICA ACTIVA:</strong><br>A los 20 segundos el volumen bajará al 0% para que cantes, y a los 10 segundos volverá al 100% para verificar si caíste en la nota exacta.
-      </div>
+      <button class="secondary" style="margin-top:15px;font-size:18px;padding:12px 25px;" onclick="renderChallenge(0)">🔄 Otra vez / Recargar canción</button>
     `;
-
-    initYTPlayer(currentSong.url, currentSong.time, (player) => {
-      let t1 = setTimeout(() => {
-        if(player && typeof player.setVolume === 'function') {
-          player.unMute();
-          player.setVolume(0);
-        }
-      }, 20000);
-
-      let t2 = setTimeout(() => {
-        if(player && typeof player.setVolume === 'function') {
-          player.unMute();
-          player.setVolume(100);
-        }
-      }, 30000);
-
-      volumeTimeouts.push(t1, t2);
-    });
+    initYTPlayer(currentSong.url, currentSong.time);
 
   } else if(i === 1){
     currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
@@ -515,7 +465,6 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  clearAllTimeouts();
 
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
     challengePlayer.destroy();
