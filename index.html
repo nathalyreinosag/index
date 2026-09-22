@@ -323,10 +323,14 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota" (índice 0), reproduce una canción de la lista con su segundo exacto
   if (selectedIndex === 0) {
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
+  } else if (selectedIndex === 2 || selectedIndex === 3) {
+    // Si entra a Ruleta de palabras (2) o Adivina con emojis (3), pausa la música de ambiente si estaba activa
+    if (isMusicActive) {
+      iframe.src = "";
+    }
   } else {
     iframe.src = "";
   }
@@ -398,12 +402,13 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  iframe.src = "";
-  isMusicActive = false;
-  const btn = document.getElementById("musicBtn");
-  btn.textContent = "🎵 ACTIVAR MÚSICA";
-  btn.style.background = "#ffd54a";
-  btn.style.color = "#24102f";
+  
+  // Si la música de ambiente estaba activa previamente, la retoma al volver a la ruleta
+  if (isMusicActive) {
+    iframe.src = MIX_EMBED_URL;
+  } else {
+    iframe.src = "";
+  }
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
