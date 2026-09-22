@@ -154,7 +154,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto correctamente para YouTube (sin usar display:none) -->
+      <!-- Contenedor oculto para la música de fondo -->
       <div style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none;">
         <div id="ambientPlayer"></div>
       </div>
@@ -191,35 +191,46 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let challengePlayer = null;
 let bgPlayer = null;
 let isPlaying = false;
-let ytReady = false;
+let apiLoaded = false;
 
 function onYouTubeIframeAPIReady() {
-  bgPlayer = new YT.Player('ambientPlayer', {
-    height: '1',
-    width: '1',
-    videoId: 'P-auj2ElqzI',
-    playerVars: {
-      'autoplay': 0,
-      'controls': 0,
-      'loop': 1,
-      'playlist': 'P-auj2ElqzI'
-    },
-    events: {
-      'onReady': () => {
-        ytReady = true;
-      }
-    }
-  });
+  apiLoaded = true;
 }
 
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
-  
-  if (!ytReady || !bgPlayer || typeof bgPlayer.playVideo !== 'function') {
-    alert("El reproductor ambiental está cargando. Por favor, espera un segundo y vuelve a hacer clic.");
+
+  if (!apiLoaded) {
+    alert("La librería de YouTube se está conectando, por favor intenta de nuevo en un segundo.");
     return;
   }
 
+  // Si el reproductor aún no existe, lo creamos justo al hacer clic por primera vez
+  if (!bgPlayer) {
+    bgPlayer = new YT.Player('ambientPlayer', {
+      height: '1',
+      width: '1',
+      videoId: 'P-auj2ElqzI',
+      playerVars: {
+        'autoplay': 1,
+        'controls': 0,
+        'loop': 1,
+        'playlist': 'P-auj2ElqzI'
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.unMute();
+          event.target.setVolume(100);
+          event.target.playVideo();
+          isPlaying = true;
+          btn.textContent = "⏸️ PAUSAR MÚSICA";
+        }
+      }
+    });
+    return;
+  }
+
+  // Control normal si ya fue creado
   try {
     if (!isPlaying) {
       bgPlayer.unMute();
