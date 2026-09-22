@@ -152,9 +152,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:20px auto;text-align:center;">
-      <button type="button" onclick="alert('Música activada')" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
+      <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
+      <div id="ambientPlayerContainer" style="display:none; width:0; height:0; overflow:hidden;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -184,8 +185,34 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
 <script>
 let challengePlayer = null;
+let ambientPlayer = null;
+let isPlaying = false;
 
 function onYouTubeIframeAPIReady() {
+  ambientPlayer = new YT.Player('ambientPlayerContainer', {
+    height: '1',
+    width: '1',
+    videoId: 'P-auj2ElqzI',
+    playerVars: {
+      'autoplay': 0,
+      'controls': 0
+    }
+  });
+}
+
+function toggleMusic() {
+  const btn = document.getElementById('musicBtn');
+  if (!ambientPlayer) return;
+
+  if (!isPlaying) {
+    ambientPlayer.playVideo();
+    isPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  } else {
+    ambientPlayer.pauseVideo();
+    isPlaying = false;
+    btn.textContent = "🎵 ACTIVAR MÚSICA";
+  }
 }
 
 const noteSongs = [
