@@ -135,13 +135,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música integrado con iframe nativo para evitar bloqueos del navegador -->
+    <!-- Botón de música original -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor de YouTube mediante iframe HTML5 -->
-      <div id="player-container" style="display:none; width:0; height:0; overflow:hidden;">
-        <iframe id="youtube-iframe" width="0" height="0" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <!-- Contenedor del reproductor con opacidad y visibilidad real para evitar bloqueos del navegador -->
+      <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
+        <div id="youtube-player"></div>
       </div>
     </div>
 
@@ -170,25 +170,40 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
+<!-- Script oficial de la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
+let player;
 let isPlaying = false;
 
-// Función de activación de música usando iframe nativo (sin restricciones de navegador)
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtube-player', {
+    height: '200',
+    width: '200',
+    videoId: 'P-auj2ElqzI',
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': 'P-auj2ElqzI',
+      'enablejsapi': 1
+    }
+  });
+}
+
+// Función de activación de música del botón principal (reproduce tu Mix)
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
-  const container = document.getElementById("player-container");
-  const iframe = document.getElementById("youtube-iframe");
+  if (!player || typeof player.playVideo !== 'function') return;
 
   if (!isPlaying) {
-    container.style.display = "block";
-    iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+    player.playVideo();
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    iframe.src = "";
-    container.style.display = "none";
+    player.pauseVideo();
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
@@ -203,7 +218,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista de canciones individuales exclusivamente para la dinámica "Caiga en la nota"
+// Lista de canciones individuales para la dinámica "Caiga en la nota"
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -330,13 +345,15 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce aleatoriamente de la lista de canciones individuales mediante iframe
+  // Si cae en "Caiga en la nota", reproduce una canción aleatoria de la lista con su segundo exacto
   if (selectedIndex === 0) {
-    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-    const container = document.getElementById("player-container");
-    const iframe = document.getElementById("youtube-iframe");
-    container.style.display = "block";
-    iframe.src = `https://www.youtube.com/embed/${randomSong.id}?autoplay=1&start=${randomSong.start}`;
+    if (player && typeof player.loadVideoById === 'function') {
+      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+      player.loadVideoById({
+        'videoId': randomSong.id,
+        'startSeconds': randomSong.start
+      });
+    }
   }
 
   renderChallenge(selectedIndex);
