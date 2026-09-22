@@ -135,10 +135,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de Activar Música y contenedor invisible de YouTube -->
-    <div style="margin:20px auto;">
-      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:18px;padding:14px 34px;">🎵 ACTIVAR MÚSICA</button>
-      <div id="youtube-player" style="display:none;"></div>
+    <!-- Botón visible de Activar Música -->
+    <div style="margin:25px auto; text-align:center;">
+      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
+      
+      <!-- Contenedor oculto fuera de pantalla para que la API funcione sin mostrar el video -->
+      <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;">
+        <div id="youtube-player"></div>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -174,8 +178,8 @@ let isPlaying = false;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
-    height: '0',
-    width: '0',
+    height: '1',
+    width: '1',
     videoId: 'P-auj2ElqzI',
     playerVars: {
       'autoplay': 0,
