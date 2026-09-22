@@ -126,16 +126,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .emoji-song{font-size:70px;letter-spacing:15px;margin:20px 0;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
 .spark{font-size:28px;margin-bottom:5px;}
-.player-container{
-  width:100%;
-  max-width:720px;
-  margin:15px auto;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 12px 30px rgba(0,0,0,.6);
-  background:#000;
-}
-#youtubePlayerElement{width:100%;height:320px;}
 
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
@@ -149,16 +139,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
-
-    <!-- Panel de control de música ambiental garantizado -->
-    <div style="margin:20px auto;text-align:center;">
-      <button type="button" onclick="toggleAmbientMusic()" id="ambientBtn" style="font-size:18px;padding:14px 32px;background:#ffd54a;color:#24102f;cursor:pointer;font-weight:bold;">
-        🎵 ACTIVAR MÚSICA AMBIENTAL
-      </button>
-      <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-      </audio>
-    </div>
+    <p>¡Gira la ruleta y acepta el desafío musical!</p>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -185,106 +166,16 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let challengePlayer = null;
-let noteInterval = null;
-let isPlayingAmbient = false;
-
-function toggleAmbientMusic() {
-  const audio = document.getElementById("bgMusic");
-  const btn = document.getElementById("ambientBtn");
-
-  if (!isPlayingAmbient) {
-    audio.play().then(() => {
-      isPlayingAmbient = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
-    }).catch(err => {
-      alert("Haz clic nuevamente para permitir la reproducción.");
-    });
-  } else {
-    audio.pause();
-    isPlayingAmbient = false;
-    btn.textContent = "🎵 ACTIVAR MÚSICA AMBIENTAL";
-  }
-}
-
-const noteSongs = [
-  { title: "Todo Lo Fue", url: "kwwdY1bp-Ck", time: "0:00" }
-];
-
-const generalSongs = [
-  { title: "AMARGURA", artist: "Karol G", url: "fEWhm_TVvUw", emojis: "🌺🔥🎵" },
-  { title: "PROVENZA", artist: "Karol G", url: "ca48oMV59LU", emojis: "🌺🌊☀️" },
-  { title: "QLONA", artist: "Karol G & Peso Pluma", url: "BeUOBoSPWvA", emojis: "💎💋🔥" },
-  { title: "CLASSY 101", artist: "Feid & Young Miko", url: "cD5T1Y4b7wA", emojis: "🕶️🟢🔥" },
-  { title: "LUNA", artist: "Feid & ATL Jacob", url: "ZA7ZKB8Mo9k", emojis: "🌙🐺💚" }
-];
-
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce la canción y el participante debe cantar la letra correspondiente.", color:"#ff5c8a" },
-  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
-  { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
-  { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"El participante debe cantar una canción conocida sin equivocarse en la letra.", color:"#ff5c8a" },
+  { name:["Adivina", "la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
+  { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
+  { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
-
-function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
-  let startSeconds = 0;
-  if(typeof startTime === "string" && startTime.includes(":")) {
-    const parts = startTime.split(":");
-    startSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-  } else {
-    startSeconds = parseInt(startTime) || 0;
-  }
-
-  if (challengePlayer && typeof challengePlayer.destroy === 'function') {
-    try { challengePlayer.destroy(); } catch(err){}
-  }
-  clearInterval(noteInterval);
-
-  setTimeout(() => {
-    const element = document.getElementById('youtubePlayerElement');
-    if (element) {
-      challengePlayer = new YT.Player('youtubePlayerElement', {
-        height: '320',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-          'autoplay': 1,
-          'start': startSeconds,
-          'playsinline': 1,
-          'mute': 0
-        },
-        events: {
-          'onReady': (event) => {
-            event.target.unMute();
-            event.target.setVolume(100);
-            event.target.playVideo();
-
-            if (isNoteChallenge) {
-              noteInterval = setInterval(() => {
-                if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function') {
-                  const t = challengePlayer.getCurrentTime();
-                  let currentSecFloor = Math.floor(t);
-                  
-                  if (currentSecFloor % 10 === 5) {
-                    challengePlayer.setVolume(100);
-                  } else if (currentSecFloor % 10 === 0) {
-                    challengePlayer.setVolume(0);
-                  }
-                }
-              }, 200);
-            }
-          }
-        }
-      });
-    }
-  }, 150);
-}
 
 const wheel = document.getElementById("wheel");
 const ctx = wheel.getContext("2d");
@@ -394,38 +285,26 @@ function startChallenge(){
   renderChallenge(selectedIndex);
 }
 
+const emojiList = ["🌺🔥🎵", "🌺🌊☀️", "💎💋🔥", "🕶️🟢🔥", "🌙🐺💚"];
+const songTitles = ["AMARGURA - Karol G", "PROVENZA - Karol G", "QLONA - Karol G & Peso Pluma", "CLASSY 101 - Feid", "LUNA - Feid"];
+let currentAnswer = "";
+
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
-  clearInterval(noteInterval);
 
   if(i === 0){
-    currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     box.innerHTML = `
-      <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b></p>
-      <div class="player-container">
-        <div id="youtubePlayerElement"></div>
-      </div>
+      <p style="font-size:22px;">🎵 ¡Canta una estrofa de tu canción favorita sin parar!</p>
     `;
-    initYTPlayer(currentSong.url, currentSong.time, true);
-
   } else if(i === 1){
-    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
     box.innerHTML = `
-      <p style="font-size:20px;">🎧 Escucha un fragmento y adivina el título.</p>
-      <div class="player-container"><div id="youtubePlayerElement"></div></div>
+      <p style="font-size:22px;">🎧 Tararea o describe una canción para que tus compañeros adivinen.</p>
       <div class="timer" id="timer">10</div>
       <div class="progress"><div class="bar" id="bar"></div></div>
       <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
-      <button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button>
-      <div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>
     `;
-    initYTPlayer(currentSong.url, "0", false);
-
   } else if(i === 2){
-    if (challengePlayer && typeof challengePlayer.destroy === 'function') {
-      try { challengePlayer.destroy(); } catch(err){}
-    }
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
@@ -434,27 +313,20 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
+    const idx = Math.floor(Math.random() * emojiList.length);
+    currentAnswer = songTitles[idx];
     box.innerHTML = `
       <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
-      <div class="emoji-song">${currentSong.emojis}</div>
+      <div class="emoji-song">${emojiList[idx]}</div>
       <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
-      <div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
-      <div id="emojiMusic" style="margin-top:15px;"><div id="youtubePlayerElement"></div></div>
-      <button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>
+      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
     `;
-    initYTPlayer(currentSong.url, "0", false);
   }
-}
-
-function revealSong(){
-  const a = document.getElementById("answer");
-  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
 }
 
 function revealEmojiSong(){
   const a = document.getElementById("emojiAnswer");
-  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
+  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
 }
 
 function startTimer(){
@@ -476,12 +348,6 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  clearInterval(noteInterval);
-
-  if (challengePlayer && typeof challengePlayer.destroy === 'function') {
-    try { challengePlayer.destroy(); } catch(err){}
-  }
-
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
