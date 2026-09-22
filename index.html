@@ -17,7 +17,6 @@ body{
   justify-content:center;
   position:relative;
 }
-
 body::before {
   content: "";
   position: absolute;
@@ -27,12 +26,10 @@ body::before {
   z-index: -1;
   animation: changeBackground 12s infinite alternate;
 }
-
 @keyframes changeBackground {
   0% { filter: hue-rotate(0deg) brightness(1); }
   100% { filter: hue-rotate(30deg) brightness(1.15); }
 }
-
 .screen{
   position: absolute;
   top: 0; left: 0; width: 100%; min-height: 100vh;
@@ -73,16 +70,14 @@ p{font-size:20px;opacity:.9;}
   top:-12px;
   left:50%;
   transform:translateX(-50%);
-  width:0;
-  height:0;
+  width:0; height:0;
   border-left:24px solid transparent;
   border-right:24px solid transparent;
   border-top:44px solid #ffd54a;
   filter:drop-shadow(0 4px 6px #000);
 }
 canvas{
-  width:100%;
-  height:100%;
+  width:100%; height:100%;
   border-radius:50%;
   box-shadow:0 15px 40px rgba(0,0,0,.5);
 }
@@ -128,7 +123,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .emoji-song{font-size:55px;letter-spacing:10px;margin:20px 0;word-break:break-all;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
 .spark{font-size:28px;margin-bottom:5px;}
-
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -138,12 +132,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR PRINCIPAL DEL MIX -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
 
-<!-- REPRODUCTOR OFICIAL DE YOUTUBE PARA LOS DESAFÍOS -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <div id="youtube-challenge-player"></div>
 </div>
@@ -152,18 +144,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
-
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
     </div>
-
     <div class="wheel-wrap">
       <div class="pointer"></div>
       <canvas id="wheel" width="1000" height="1000"></canvas>
     </div>
-
     <button id="spinBtn" onclick="spin()" style="font-size:22px;padding:18px 40px;">🎡 GIRAR RULETA</button>
-
     <div id="result" class="result">
       <div id="resultEmoji" style="font-size:55px;"></div>
       <h2 id="resultTitle" style="font-size:34px;margin:8px 0;"></h2>
@@ -199,7 +187,6 @@ const iframeMain = document.getElementById("youtube-audio-frame");
 
 function toggleMainMusic() {
   const btn = document.getElementById("musicBtn");
-  
   if (!isMusicActive) {
     iframeMain.src = MIX_EMBED_URL;
     isMusicActive = true;
@@ -273,19 +260,15 @@ function drawWheel(){
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(a + slice / 2);
-    
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
     ctx.shadowColor = "rgba(0,0,0,0.6)";
     ctx.shadowBlur = 6;
-
     ctx.font = "bold 30px Arial";
     ctx.fillText(c.name[0], 340, -15);
     ctx.fillText(c.name[1], 340, 25);
-
     ctx.font = "bold 44px Arial";
     ctx.fillText(c.emoji, 340, 75);
-    
     ctx.restore();
   });
 
@@ -361,7 +344,6 @@ function startChallenge(){
         iframeMain.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
       } catch(e) {}
     }
-    
     if (selectedIndex === 0) {
       startDynamicLoop(noteSongs, 120000, 15000, true);  
     } else if (selectedIndex === 1) {
@@ -370,7 +352,6 @@ function startChallenge(){
   } else {
     stopChallengePlayer();
   }
-
   renderChallenge(selectedIndex);
 }
 
@@ -389,12 +370,10 @@ function startVolumeTracker() {
   volumeCheckInterval = setInterval(() => {
     if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function' && challengePlayer.getPlayerState() === 1) {
       const currentTime = challengePlayer.getCurrentTime();
-
       if (currentTime >= 70 && currentTime < 90 && !volumeLowered) {
         challengePlayer.setVolume(0);
         volumeLowered = true;
       }
-
       if (currentTime >= 90 && !volumeRestored) {
         challengePlayer.setVolume(100);
         volumeRestored = true;
@@ -409,8 +388,7 @@ function playSpecificSong(songsList, enableVolumeChanges) {
   
   if (!challengePlayer) {
     challengePlayer = new YT.Player('youtube-challenge-player', {
-      height: '200',
-      width: '200',
+      height: '200', width: '200',
       videoId: currentSongData.id,
       playerVars: {
         'autoplay': 1,
@@ -422,9 +400,7 @@ function playSpecificSong(songsList, enableVolumeChanges) {
         'onReady': (event) => {
           event.target.setVolume(100);
           event.target.playVideo();
-          if (enableVolumeChanges) {
-            startVolumeTracker();
-          }
+          if (enableVolumeChanges) { startVolumeTracker(); }
         }
       }
     });
@@ -435,9 +411,7 @@ function playSpecificSong(songsList, enableVolumeChanges) {
         startSeconds: currentSongData.start
       });
       challengePlayer.setVolume(100);
-      if (enableVolumeChanges) {
-        startVolumeTracker();
-      }
+      if (enableVolumeChanges) { startVolumeTracker(); }
     }
   }
 }
@@ -487,19 +461,12 @@ function stopChallengePlayer() {
 
 function startDynamicLoop(songsList, playDuration, pauseDuration, enableVolumeChanges) {
   if (noteLoopTimer) clearInterval(noteLoopTimer);
-  
   playSpecificSong(songsList, enableVolumeChanges);
-  
   const totalCycle = playDuration + pauseDuration;
 
   noteLoopTimer = setInterval(() => {
-    setTimeout(() => {
-      stopChallengePlayer();
-    }, playDuration);
-    
-    setTimeout(() => {
-      playSpecificSong(songsList, enableVolumeChanges);
-    }, totalCycle);
+    setTimeout(() => { stopChallengePlayer(); }, playDuration);
+    setTimeout(() => { playSpecificSong(songsList, enableVolumeChanges); }, totalCycle);
   }, totalCycle);
 }
 
