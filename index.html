@@ -188,7 +188,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let challengePlayer = null;
 let isPlaying = false;
-let musicWasPlayingBeforeChallenge = false;
 let noteInterval = null;
 
 const ambientPlaylist = "P-auj2ElqzI"; 
@@ -214,12 +213,10 @@ function toggleMusic() {
   }
 }
 
-// Canciones originales para "Caiga en la nota"
 const noteSongs = [
   { title: "Todo Lo Fue", url: "kwwdY1bp-Ck", time: "0:00" }
 ];
 
-// Canciones originales para adivinar y emojis
 const generalSongs = [
   { title: "AMARGURA", artist: "Karol G", url: "fEWhm_TVvUw", emojis: "🌺🔥🎵" },
   { title: "PROVENZA", artist: "Karol G", url: "ca48oMV59LU", emojis: "🌺🌊☀️" },
@@ -393,12 +390,6 @@ function showResult(){
 }
 
 function startChallenge(){
-  musicWasPlayingBeforeChallenge = isPlaying;
-  if (isPlaying) {
-    const iframe = document.getElementById('ambientIframe');
-    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-  }
-
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -498,11 +489,6 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  if (musicWasPlayingBeforeChallenge && isPlaying) {
-    const iframe = document.getElementById('ambientIframe');
-    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-  }
 }
 </script>
 </body>
