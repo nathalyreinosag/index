@@ -192,7 +192,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 const ambientId = "LypslWGSvSI";
-let stopTimeout = null;
+let volumeTimeout = null;
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -241,7 +241,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se le baja el volumen de repente; el participante debe continuar cantando y al minuto se verifica.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -387,7 +387,7 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
-  if(stopTimeout) clearTimeout(stopTimeout);
+  if(volumeTimeout) clearTimeout(volumeTimeout);
 
   if(i === 0){
     currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
@@ -395,14 +395,15 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>
       ${youtubePlayer(currentSong.url, currentSong.time, true)}
       <div class="lyrics" style="margin-top:15px">
-        <strong>⏸️ DINÁMICA:</strong><br>Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.
+        <strong>🔉 BAJADA DE VOLUMEN AUTOMÁTICA:</strong><br>Se reproduce la canción y a los 20 segundos el volumen bajará al 5% para que cantes; luego podrás verificar si caíste en la nota exacta.
       </div>
     `;
 
-    stopTimeout = setTimeout(() => {
+    // A los 20 segundos (20000 ms), bajamos el volumen del reproductor de YouTube a 5
+    volumeTimeout = setTimeout(() => {
       const activeFrame = document.getElementById("activeSongIframe");
       if(activeFrame) {
-        activeFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        activeFrame.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[5]}', '*');
       }
     }, 20000);
 
@@ -456,7 +457,16 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  if(stopTimeout) clearTimeout(stopTimeout);
+  if(volumeTimeout) clearTimeout(volumeTimeout);
+  
+  // Al salir restablecemos el volumen a 100 por si acaso
+  const activeFrame = document.getElementById("activeSongIframe");
+  if(activeFrame) {
+    try {
+      activeFrame.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+    } catch(e) {}
+  }
+
   document.getElementById("challengeContent").innerHTML = "";
   const emojiMusic = document.getElementById("emojiMusic");
   if(emojiMusic) emojiMusic.innerHTML = "";
