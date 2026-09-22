@@ -222,7 +222,6 @@ const challenges = [
   { name:["Adivina la canción", "con emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Canciones para "Caiga en la nota" (Índice 0)
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -234,7 +233,6 @@ const noteSongs = [
   { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 }
 ];
 
-// Canciones para "Adivina el nombre de la canción" (Índice 1) - Con cronómetro de 30 segundos
 const guessSongs = [
   { title: "Pista 1", id: "yRUqUJta_rw", start: 0 },
   { title: "Pista 2", id: "fYGSv0e6zWA", start: 0 },
@@ -444,7 +442,6 @@ function playSpecificSong(songsList, enableVolumeChanges) {
   }
 }
 
-// Lógica específica para reproducir 30 segundos con cronómetro en "Adivina el nombre de la canción"
 function startGuessSongWithTimer() {
   stopVolumeTracker();
   if (guessTimerInterval) clearInterval(guessTimerInterval);
