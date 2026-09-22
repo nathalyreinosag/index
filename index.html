@@ -209,7 +209,7 @@ function toggleMainMusic() {
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.", color:"#ff5c8a" },
-  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
+  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Escucha la canción y adivina el nombre correcto.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
   { name:["Adivina la canción", "con emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
@@ -335,19 +335,17 @@ function startChallenge(){
   
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
-  // Si estamos en Caiga en la nota (0) o Adivina el nombre de la canción (1):
-  // Pausamos el mix de fondo poniendo su src en vacío para que se detenga por completo.
+  // Si estamos en "Caiga en la nota" (0) o "Adivina el nombre de la canción" (1):
+  // Pausamos el mix principal de fondo.
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (isMusicActive) {
-      iframeMain.src = ""; // Detiene el mix principal
+      iframeMain.src = ""; 
     }
-  }
-
-  // Ahora asignamos la música propia si es la dinámica 0
-  if (selectedIndex === 0) {
+    // Reproducimos una canción aleatoria en el iframe secundario para ambas dinámicas musicales
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else {
+    // Para Ruleta de palabras (2) y Emojis (3), el mix principal sigue sonando sin tocarse
     iframeChallenge.src = "";
   }
 
@@ -369,10 +367,8 @@ function renderChallenge(i){
     `;
   } else if(i === 1){
     box.innerHTML = `
-      <p style="font-size:22px;">🎧 Tararea o describe una canción para que los demás adivinen.</p>
-      <div class="timer" id="timer">10</div>
-      <div class="progress"><div class="bar" id="bar"></div></div>
-      <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
+      <p style="font-size:22px;">🎧 Escucha la canción que está sonando y adivina el nombre.</p>
+      <div style="font-size:60px; margin:20px 0;">🔎🎶</div>
     `;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
@@ -420,61 +416,13 @@ function backHome(){
   clearInterval(timer);
   iframeChallenge.src = "";
 
-  // Si veníamos de una dinámica musical (0 o 1) y el mix estaba activo antes, lo retomamos
+  // Si veníamos de Caiga en la nota (0) o Adivina el nombre de la canción (1) y el mix estaba activo, lo retomamos
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
       iframeMain.src = MIX_EMBED_URL;
       isMusicActive = true;
     }
   }
-
-  document.getElementById("challengeContent").innerHTML = "";
-  document.getElementById("challenge").classList.remove("active");
-  document.getElementById("home").classList.add("active");
-}
-</script>
-</body>
-</html>      <p style="font-size:20px;">La palabra secreta es:</p>
-      <div class="word">${word}</div>
-      <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
-    `;
-  } else {
-    const idx = Math.floor(Math.random() * emojiList.length);
-    currentAnswer = songTitles[idx];
-    box.innerHTML = `
-      <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
-      <div class="emoji-song">${emojiList[idx]}</div>
-      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
-      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
-    `;
-  }
-}
-
-function revealEmojiSong(){
-  const a = document.getElementById("emojiAnswer");
-  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
-}
-
-function startTimer(){
-  clearInterval(timer);
-  let seconds = 10;
-  const t = document.getElementById("timer");
-  const bar = document.getElementById("bar");
-  t.textContent = seconds;
-  bar.style.width = "100%";
-  timer = setInterval(()=>{
-    seconds--;
-    t.textContent = seconds;
-    bar.style.width = (seconds * 10) + "%";
-    if(seconds <= 0){
-      clearInterval(timer);
-    }
-  }, 1000);
-}
-
-function backHome(){
-  clearInterval(timer);
-  iframeChallenge.src = "";
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
