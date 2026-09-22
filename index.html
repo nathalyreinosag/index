@@ -192,6 +192,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 const ambientId = "LypslWGSvSI";
+let stopTimeout = null; // Variable para controlar el corte automático a los 20 segundos
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -214,30 +215,33 @@ function toggleAmbientMusic(){
   }
 }
 
-// Canciones actualizadas exclusivamente para la dinámica "Caiga en la nota"
+// Lista exclusiva para "Caiga en la nota" con sus tiempos de inicio exactos
 const noteSongs = [
-  { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51", emojis:"🎧🔥" },
-  { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03", emojis:"💍❤️" },
-  { title:"Devuélveme a mi Chica", artist:"Hombres G", url:"LgQYPqr9Rho", time:"0:00", emojis:"🎸🕶️" },
-  { title:"Mil Horas", artist:"Los Abuelos de la Nada", url:"1To_Wz5RWi0", time:"0:00", emojis:"🌸⏰" },
-  { title:"Cuando El AMOR Se Daña", artist:"Rikarena", url:"MB4o_V8AZa4", time:"0:23", emojis:"💔🎶" },
-  { title:"Pégame Tu VICIO", artist:"Eddy Herrera", url:"yWSQxGppcFA", time:"0:15", emojis:"🕺🔥" },
-  { title:"Caraluna", artist:"Bacilos", url:"-zgDXIi1uYw", time:"0:00", emojis:"🌕🌊" },
-  { title:"Una Cancion", artist:"Los de Adentro", url:"Q9W5uIMAbb8", time:"0:25", emojis:"🎸🎤" },
-  { title:"Colgando en tus manos", artist:"Carlos Baute", url:"qExd-3oCTl4", time:"0:10", emojis:"🤝✨" },
-  { title:"Nuqui (Te Quiero Para Mi)", artist:"ChocQuibTown", url:"EzbzWerC9AM", time:"0:10", emojis:"🌴☀️" },
-  { title:"Morenamia", artist:"Miguel Bosé", url:"ljO63sL2CWc", time:"0:10", emojis:"🌹🔥" },
-  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30", emojis:"🚗💨" }
+  { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51" },
+  { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03" },
+  { title:"Devuélveme a mi Chica", artist:"Hombres G", url:"LgQYPqr9Rho", time:"0:00" },
+  { title:"Mil Horas", artist:"Los Abuelos de la Nada", url:"1To_Wz5RWi0", time:"0:00" },
+  { title:"Cuando El AMOR Se Daña", artist:"Rikarena", url:"MB4o_V8AZa4", time:"0:23" },
+  { title:"Pégame Tu VICIO", artist:"Eddy Herrera", url:"yWSQxGppcFA", time:"0:15" },
+  { title:"Caraluna", artist:"Bacilos", url:"-zgDXIi1uYw", time:"0:00" },
+  { title:"Una Cancion", artist:"Los de Adentro", url:"Q9W5uIMAbb8", time:"0:25" },
+  { title:"Colgando en tus manos", artist:"Carlos Baute", url:"qExd-3oCTl4", time:"0:10" },
+  { title:"Nuqui (Te Quiero Para Mi)", artist:"ChocQuibTown", url:"EzbzWerC9AM", time:"0:10" },
+  { title:"Morenamia", artist:"Miguel Bosé", url:"ljO63sL2CWc", time:"0:10" },
+  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" }
 ];
 
-// O si prefieres mantener otras canciones para el resto de modalidades (puedes dejarlas o adaptarlas):
-const songs = [
+// Canciones para las demás dinámicas (ej. emojis, adivinar)
+const generalSongs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" }
+  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", emojis:"💎💋🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", emojis:"🕶️🟢🔥" },
+  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", emojis:"🌙🐺💚" }
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción se detiene y debes continuar la letra.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción suena por 20 segundos y se detiene para continuar la letra.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -247,12 +251,7 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function pickSong(list){
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-function youtubePlayer(videoId, startTime = "0"){
-  // Convertir formato tipo "0:51" a segundos si es necesario, o pasar el parámetro start de YouTube
+function youtubePlayer(videoId, startTime = "0", enableApi = false){
   let startSeconds = 0;
   if(startTime.includes(":")) {
     const parts = startTime.split(":");
@@ -260,9 +259,12 @@ function youtubePlayer(videoId, startTime = "0"){
   } else {
     startSeconds = parseInt(startTime) || 0;
   }
+  
+  let apiParam = enableApi ? "&enablejsapi=1" : "";
+  
   return `
     <div class="player-container" id="songPlayerContainer">
-      <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSeconds}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe id="activeSongIframe" src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSeconds}${apiParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
   `;
 }
@@ -385,12 +387,29 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
+  if(stopTimeout) clearTimeout(stopTimeout);
 
   if(i === 0){
-    currentSong = pickSong(noteSongs);
-    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url, currentSong.time)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>La canción inicia cerca del minuto sugerido (${currentSong.time}). Pausa en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
+    // Dinámica: Caiga en la nota (usa exclusivamente noteSongs)
+    currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    box.innerHTML = `
+      <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>
+      ${youtubePlayer(currentSong.url, currentSong.time, true)}
+      <div class="lyrics" style="margin-top:15px">
+        <strong>⏱️ AUTOMÁTICO:</strong><br>La canción sonará por <b>20 segundos</b> y se pausará sola. ¡Prepárate para continuar la letra!
+      </div>
+    `;
+
+    // Programar para que a los 20 segundos (20000 ms) se pause automáticamente
+    stopTimeout = setTimeout(() => {
+      const activeFrame = document.getElementById("activeSongIframe");
+      if(activeFrame) {
+        activeFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      }
+    }, 20000);
+
   } else if(i === 1){
-    currentSong = pickSong(songs);
+    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
     box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
@@ -401,7 +420,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    currentSong = pickSong(songs);
+    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
     box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
   }
 }
@@ -439,6 +458,7 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
+  if(stopTimeout) clearTimeout(stopTimeout);
   document.getElementById("challengeContent").innerHTML = "";
   const emojiMusic = document.getElementById("emojiMusic");
   if(emojiMusic) emojiMusic.innerHTML = "";
