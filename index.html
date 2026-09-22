@@ -125,7 +125,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .bar{height:100%;width:100%;background:#ffd54a;transition:width 1s linear;}
 .emoji-song{font-size:70px;letter-spacing:15px;margin:20px 0;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
-.lyrics{font-size:24px;line-height:1.5;margin:15px auto;max-width:720px;}
 .spark{font-size:28px;margin-bottom:5px;}
 .player-container{
   width:100%;
@@ -138,6 +137,16 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 }
 #youtubePlayerElement{width:100%;height:320px;}
 
+/* Contenedor del mix de fondo */
+#mixContainer {
+  margin: 15px auto;
+  max-width: 450px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  display: none; /* Se muestra al activar la música */
+}
+
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -147,17 +156,19 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR OCULTO PARA LA MÚSICA DE FONDO DE YOUTUBE -->
-<div id="hiddenAmbientContainer" style="display:none;"><div id="hiddenAmbientPlayer"></div></div>
-
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- BOTÓN DE ACTIVAR MÚSICA -->
+    <!-- BOTÓN DE ACTIVAR MÚSICA Y REPRODUCTOR DEL MIX -->
     <div style="margin:15px auto;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      <button id="musicBtn" onclick="toggleMixMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      
+      <!-- Reproductor visible del mix para que YouTube permita la reproducción -->
+      <div id="mixContainer">
+        <div id="ambientMixPlayer"></div>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -186,25 +197,21 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let ambientPlaying = false;
-let userActivatedMusic = false;
-let ambientYTPlayer = null;
+let mixPlaying = false;
+let userActivatedMix = false;
+let ambientMixYT = null;
 let challengePlayer = null;
-let ytApiReady = false;
 
 function onYouTubeIframeAPIReady() {
-  ytApiReady = true;
-  // Inicializamos de forma invisible el reproductor de fondo con tu link P-auj2ElqzI
-  ambientYTPlayer = new YT.Player('hiddenAmbientPlayer', {
-    height: '1',
-    width: '1',
+  // Inicializamos el reproductor del mix con tu enlace P-auj2ElqzI
+  ambientMixYT = new YT.Player('ambientMixPlayer', {
+    height: '140',
+    width: '100%',
     videoId: 'P-auj2ElqzI',
     playerVars: {
       'autoplay': 0,
-      'loop': 1,
-      'playlist': 'P-auj2ElqzI',
-      'playsinline': 1,
-      'mute': 0
+      'controls': 1,
+      'playsinline': 1
     },
     events: {
       'onReady': (event) => {
@@ -214,26 +221,26 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
-function toggleAmbientMusic(){
+function toggleMixMusic(){
   const btn = document.getElementById("musicBtn");
+  const container = document.getElementById("mixContainer");
 
-  if(!ambientPlaying){
-    if(ambientYTPlayer && typeof ambientYTPlayer.playVideo === 'function'){
-      ambientYTPlayer.unMute();
-      ambientYTPlayer.setVolume(100);
-      ambientYTPlayer.playVideo();
-      ambientPlaying = true;
-      userActivatedMusic = true;
+  if(!mixPlaying){
+    container.style.display = "block";
+    if(ambientMixYT && typeof ambientMixYT.playVideo === 'function'){
+      ambientMixYT.playVideo();
+      mixPlaying = true;
+      userActivatedMix = true;
       btn.textContent = "⏸️ PAUSAR MÚSICA";
     } else {
-      alert("El reproductor de YouTube se está cargando, intenta de nuevo en un segundo.");
+      alert("Cargando el mix, presiona de nuevo en un momento.");
     }
   } else {
-    if(ambientYTPlayer && typeof ambientYTPlayer.pauseVideo === 'function'){
-      ambientYTPlayer.pauseVideo();
+    if(ambientMixYT && typeof ambientMixYT.pauseVideo === 'function'){
+      ambientMixYT.pauseVideo();
     }
-    ambientPlaying = false;
-    userActivatedMusic = false;
+    mixPlaying = false;
+    userActivatedMix = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
 }
@@ -394,8 +401,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying && ambientYTPlayer && typeof ambientYTPlayer.pauseVideo === 'function'){
-    ambientYTPlayer.pauseVideo();
+  if(mixPlaying && ambientMixYT && typeof ambientMixYT.pauseVideo === 'function'){
+    ambientMixYT.pauseVideo();
   }
 
   const c = challenges[selectedIndex];
@@ -496,9 +503,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if(userActivatedMusic && ambientYTPlayer && typeof ambientYTPlayer.playVideo === 'function'){
-    ambientPlaying = true;
-    ambientYTPlayer.playVideo();
+  if(userActivatedMix && ambientMixYT && typeof ambientMixYT.playVideo === 'function'){
+    mixPlaying = true;
+    ambientMixYT.playVideo();
   }
 }
 </script>
