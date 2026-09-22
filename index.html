@@ -144,10 +144,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" id="ambientBtn" onclick="toggleAmbientMusic()" style="font-size:18px;padding:14px 32px;background:#ffd54a;color:#24102f;cursor:pointer;font-weight:bold;">
         🎵 ACTIVAR MÚSICA AMBIENTAL
       </button>
-      <!-- Reproductor de YouTube oculto para que no estorbe visualmente -->
-      <div style="position:absolute; top:-9999px; left:-9999px;">
-        <div id="ambientYTPlayer"></div>
-      </div>
+      <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+      </audio>
     </div>
 
     <div class="wheel-wrap">
@@ -175,42 +174,24 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let ambientYTPlayer = null;
-let isAmbientPlaying = false;
+let isPlayingAmbient = false;
 
 function toggleAmbientMusic() {
+  const audio = document.getElementById("bgMusic");
   const btn = document.getElementById("ambientBtn");
 
-  if (!ambientYTPlayer) {
-    ambientYTPlayer = new YT.Player('ambientYTPlayer', {
-      height: '1',
-      width: '1',
-      videoId: 'P-auj2ElqzI',
-      playerVars: {
-        'autoplay': 1,
-        'controls': 0,
-        'playsinline': 1
-      },
-      events: {
-        'onReady': (event) => {
-          event.target.playVideo();
-          isAmbientPlaying = true;
-          btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
-        }
-      }
+  if (!isPlayingAmbient) {
+    audio.play().then(() => {
+      isPlayingAmbient = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
+    }).catch(err => {
+      alert("Haz clic nuevamente para permitir la reproducción.");
     });
   } else {
-    if (isAmbientPlaying) {
-      ambientYTPlayer.pauseVideo();
-      isAmbientPlaying = false;
-      btn.textContent = "🎵 ACTIVAR MÚSICA AMBIENTAL";
-    } else {
-      ambientYTPlayer.playVideo();
-      isAmbientPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
-    }
+    audio.pause();
+    isPlayingAmbient = false;
+    btn.textContent = "🎵 ACTIVAR MÚSICA AMBIENTAL";
   }
 }
 
