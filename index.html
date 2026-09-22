@@ -135,13 +135,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música independiente con control de estado y reproductor funcional -->
+    <!-- Botón de música para tu mix -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;" disabled>⏳ CARGANDO MÚSICA...</button>
+      <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;" disabled>⏳ CARGANDO MIX...</button>
       
-      <!-- Contenedor del reproductor de YouTube de fondo -->
+      <!-- Contenedor oculto exclusivo para el mix principal -->
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
-        <div id="youtube-player"></div>
+        <div id="main-mix-player"></div>
+        <div id="challenge-player"></div>
       </div>
     </div>
 
@@ -174,49 +175,67 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-let player;
-let isPlaying = false;
-let isPlayerReady = false;
-const MAIN_MIX_ID = 'P-auj2ElqzI'; // ID del mix principal para el botón de activar música
+let mainPlayer;
+let challengePlayer;
+let isMainReady = false;
+let isChallengeReady = false;
+let isMainPlaying = false;
+
+// ⚠️ PEGA AQUÍ EL ENLACE O ID DE TU MIX DE YOUTUBE (Ejemplo: si tu enlace es youtube.com/watch?v=ABC123xyz, pon solo 'ABC123xyz')
+const USER_MIX_ID = 'AMTAQ-AJS4Y'; 
 
 function onYouTubeIframeAPIReady() {
-  player = new YT.Player('youtube-player', {
+  // Reproductor para el mix principal del botón
+  mainPlayer = new YT.Player('main-mix-player', {
     height: '200',
     width: '200',
-    videoId: MAIN_MIX_ID,
-    playerVars: {
-      'autoplay': 0,
-      'loop': 1,
-      'playlist': MAIN_MIX_ID,
-      'enablejsapi': 1
-    },
+    videoId: USER_MIX_ID,
+    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': USER_MIX_ID, 'enablejsapi': 1 },
     events: {
-      'onReady': onPlayerReady
+      'onReady': () => {
+        isMainReady = true;
+        checkReadyState();
+      }
+    }
+  });
+
+  // Reproductor independiente para la dinámica "Caiga en la nota"
+  challengePlayer = new YT.Player('challenge-player', {
+    height: '200',
+    width: '200',
+    videoId: 'cpN78ZjnCZY',
+    playerVars: { 'autoplay': 0, 'enablejsapi': 1 },
+    events: {
+      'onReady': () => {
+        isChallengeReady = true;
+        checkReadyState();
+      }
     }
   });
 }
 
-function onPlayerReady(event) {
-  isPlayerReady = true;
-  const btn = document.getElementById("musicBtn");
-  btn.disabled = false;
-  btn.textContent = "🎵 ACTIVAR MÚSICA";
+function checkReadyState() {
+  if (isMainReady && isChallengeReady) {
+    const btn = document.getElementById("musicBtn");
+    btn.disabled = false;
+    btn.textContent = "🎵 ACTIVAR MÚSICA";
+  }
 }
 
-// Función exclusiva para controlar el botón de activar música
-function toggleMusic() {
-  if (!isPlayerReady) return;
+// Control del botón de activar música
+function toggleMainMusic() {
+  if (!isMainReady) return;
   const btn = document.getElementById("musicBtn");
 
-  if (!isPlaying) {
-    player.playVideo();
-    isPlaying = true;
+  if (!isMainPlaying) {
+    mainPlayer.playVideo();
+    isMainPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    player.pauseVideo();
-    isPlaying = false;
+    mainPlayer.pauseVideo();
+    isMainPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
     btn.style.color = "#24102f";
@@ -230,7 +249,6 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista exclusiva para la dinámica "Caiga en la nota" con los enlaces y segundos exactos
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -239,17 +257,11 @@ const noteSongs = [
   { title: "Eddy Herrera - Pégame Tu Vicio", id: "yWSQxGppcFA", start: 15 },
   { title: "Bacilos - Caraluna", id: "-zgDXIi1uYw", start: 0 },
   { title: "Los de Adentro - Una Canción", id: "Q9W5uIMAbb8", start: 25 },
-  { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 },
-  { title: "ChocQuibTown - Nuqui (Te Quiero Para Mi)", id: "EzbzWerC9AM", start: 10 },
-  { title: "Miguel Bosé - Morenamía", id: "ljO63sL2CWc", start: 10 },
-  { title: "Vilma Palma - Auto Rojo", id: "95kf6cCasfg", start: 30 },
-  { title: "Canción Extra 1", id: "kwwdY1bp-Ck", start: 0 },
-  { title: "Canción Extra 2", id: "gS9MTt3FOgw", start: 0 }
+  { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 }
 ];
 
 let selectedIndex = 0;
 let timer = null;
-
 const wheel = document.getElementById("wheel");
 const ctx = wheel.getContext("2d");
 let rotation = 0;
@@ -356,18 +368,18 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce una canción aleatoria de la lista de notas con su segundo exacto
-  if (selectedIndex === 0 && isPlayerReady) {
-    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-    player.loadVideoById({
-      'videoId': randomSong.id,
-      'startSeconds': randomSong.start
-    });
-    isPlaying = true;
-    const btn = document.getElementById("musicBtn");
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-    btn.style.background = "#ff5c8a";
-    btn.style.color = "#fff";
+  // Si cae en "Caiga en la nota", pausamos el mix principal y reproducimos la canción del reto
+  if (selectedIndex === 0) {
+    if (isMainPlaying && isMainReady) {
+      mainPlayer.pauseVideo();
+    }
+    if (isChallengeReady) {
+      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+      challengePlayer.loadVideoById({
+        'videoId': randomSong.id,
+        'startSeconds': randomSong.start
+      });
+    }
   }
 
   renderChallenge(selectedIndex);
@@ -437,18 +449,9 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  // Al volver a casa, si el usuario desea retomar el mix principal
-  if (isPlayerReady) {
-    player.loadVideoById({
-      'videoId': MAIN_MIX_ID,
-      'startSeconds': 0
-    });
-    player.playVideo();
-    isPlaying = true;
-    const btn = document.getElementById("musicBtn");
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-    btn.style.background = "#ff5c8a";
-    btn.style.color = "#fff";
+  // Al volver, detenemos el reproductor de retos y si el usuario quiere retomar el mix
+  if (isChallengeReady) {
+    challengePlayer.stopVideo();
   }
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
