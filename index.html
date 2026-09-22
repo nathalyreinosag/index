@@ -135,11 +135,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón visible de Activar Música -->
+    <!-- Botón visible de Activar Música de fondo -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor de YouTube -->
+      <!-- Contenedor del reproductor de YouTube principal -->
       <div style="width:0; height:0; overflow:hidden; display:inline-block;">
         <div id="youtube-player"></div>
       </div>
@@ -177,8 +177,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let player;
 let isPlaying = false;
 let wasPlayingBeforeChallenge = false;
+let isChallengeMusic = false; // Bandera para saber si suena música del desafío
 
-// Esta función la llama automáticamente la API de YouTube al cargar
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
     height: '0',
@@ -200,6 +200,7 @@ function toggleMusic() {
   if (!isPlaying) {
     player.playVideo();
     isPlaying = true;
+    isChallengeMusic = false;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
@@ -213,10 +214,28 @@ function toggleMusic() {
 }
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"El participante debe cantar una canción conocida sin equivocarse en la letra.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Describe o tararea una canción para que los demás adivinen el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
+];
+
+// Lista de canciones para "Caiga en la nota" con sus IDs y segundos de inicio
+const noteSongs = [
+  { title: "Chino y Nacho - Andas En Mi Cabeza", id: "AMTAQ-AJS4Y", start: 0 },
+  { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
+  { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
+  { title: "Los Auténticos Decadentes - Mil Horas", id: "1To_Wz5RWi0", start: 0 },
+  { title: "Rikarena - Cuando El Amor Se Daña", id: "MB4o_V8AZa4", start: 23 },
+  { title: "Eddy Herrera - Pégame Tu Vicio", id: "yWSQxGppcFA", start: 15 },
+  { title: "Bacilos - Caraluna", id: "-zgDXIi1uYw", start: 0 },
+  { title: "Los de Adentro - Una Canción", id: "Q9W5uIMAbb8", start: 25 },
+  { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 },
+  { title: "ChocQuibTown - Nuqui (Te Quiero Para Mi)", id: "EzbzWerC9AM", start: 10 },
+  { title: "Miguel Bosé - Morenamía", id: "ljO63sL2CWc", start: 10 },
+  { title: "Vilma Palma e Vampiros - Auto Rojo", id: "95kf6cCasfg", start: 30 },
+  { title: "Canción Extra 1", id: "kwwdY1bp-Ck", start: 0 },
+  { title: "Canción Extra 2", id: "gS9MTt3FOgw", start: 0 }
 ];
 
 let selectedIndex = 0;
@@ -328,10 +347,26 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Pausar música si es Caiga en la nota (0), Adivina la canción (1) o Adivina con emojis (3)
-  if (selectedIndex !== 2 && player && typeof player.pauseVideo === 'function') {
-    wasPlayingBeforeChallenge = isPlaying;
-    if (isPlaying) {
+  wasPlayingBeforeChallenge = isPlaying;
+
+  // Si cae en "Caiga en la nota" (índice 0)
+  if (selectedIndex === 0) {
+    if (player && typeof player.loadVideoById === 'function') {
+      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+      player.loadVideoById({
+        'videoId': randomSong.id,
+        'startSeconds': randomSong.start
+      });
+      isPlaying = true;
+      isChallengeMusic = true;
+      const btn = document.getElementById("musicBtn");
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+      btn.style.background = "#ff5c8a";
+      btn.style.color = "#fff";
+    }
+  } else {
+    // Pausar música en los demás desafíos si estaba sonando
+    if (player && typeof player.pauseVideo === 'function' && isPlaying && !isChallengeMusic) {
       player.pauseVideo();
       isPlaying = false;
       const btn = document.getElementById("musicBtn");
@@ -354,7 +389,8 @@ function renderChallenge(i){
 
   if(i === 0){
     box.innerHTML = `
-      <p style="font-size:22px;">🎵 ¡Canta una estrofa de tu canción favorita sin parar!</p>
+      <p style="font-size:22px;">🎵 ¡Escucha la canción y demuestra que te sabes la letra!</p>
+      <div style="font-size:60px; margin:20px 0;">🎤🔥</div>
     `;
   } else if(i === 1){
     box.innerHTML = `
@@ -411,8 +447,18 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar la música exactamente en el segundo donde iba
-  if (wasPlayingBeforeChallenge && !isPlaying && player && typeof player.playVideo === 'function') {
+  // Si estaba sonando música de "Caiga en la nota", al volver podemos pausarla o restaurar la principal
+  if (isChallengeMusic) {
+    if (player && typeof player.pauseVideo === 'function') {
+      player.pauseVideo();
+    }
+    isPlaying = false;
+    isChallengeMusic = false;
+    const btn = document.getElementById("musicBtn");
+    btn.textContent = "🎵 ACTIVAR MÚSICA";
+    btn.style.background = "#ffd54a";
+    btn.style.color = "#24102f";
+  } else if (wasPlayingBeforeChallenge && !isPlaying && player && typeof player.playVideo === 'function') {
     player.playVideo();
     isPlaying = true;
     const btn = document.getElementById("musicBtn");
