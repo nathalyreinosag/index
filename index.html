@@ -34,14 +34,21 @@ body::before {
 }
 
 .screen{
-  width:100%;
-  min-height:100vh;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+  position: absolute;
+  top: 0; left: 0; width: 100%; min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
-.screen.active{display:flex;}
+.screen.active{
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
 .card{
   width:min(1150px, 98vw);
   background:rgba(0,0,0,0.55);
@@ -130,12 +137,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR PRINCIPAL DEL MIX (Siempre presente y oculto, nunca se destruye) -->
+<!-- REPRODUCTOR PRINCIPAL DEL MIX (Permanece intacto sin recargarse nunca) -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
 
-<!-- REPRODUCTOR ESPECÍFICO PARA LAS DINÁMICAS MUSICALES (Caiga en la nota / Adivina la canción) -->
+<!-- REPRODUCTOR ESPECÍFICO PARA LAS DINÁMICAS MUSICALES -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="challenge-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
@@ -145,7 +152,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música para activar tu Mix -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
     </div>
@@ -176,14 +182,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-// 🎵 TU MIX EXACTO CONFIGURADO
 const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
 
 let isMusicActive = false;
 const iframeMain = document.getElementById("youtube-audio-frame");
 const iframeChallenge = document.getElementById("challenge-audio-frame");
 
-// Control del botón principal de música
 function toggleMainMusic() {
   const btn = document.getElementById("musicBtn");
   
@@ -328,16 +332,13 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Lógica específica para las dinámicas:
   if (selectedIndex === 0) {
-    // 1. Caiga en la nota: Reproduce la canción del desafío en su iframe propio
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else if (selectedIndex === 1) {
-    // 2. Adivina la canción: Silencia el iframe del desafío y no interfiere con el principal
     iframeChallenge.src = "";
   } else {
-    // 3 y 4 (Ruleta de palabras y Emojis): El mix principal sigue sonando intacto en su propio iframe oculto sin reiniciarse
+    // Para Ruleta de palabras (2) y Emojis (3), el mix principal sigue intacto sin alteración alguna.
   }
 
   renderChallenge(selectedIndex);
@@ -407,8 +408,6 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  
-  // Limpiamos el reproductor de la dinámica musical al salir
   iframeChallenge.src = "";
 
   document.getElementById("challengeContent").innerHTML = "";
