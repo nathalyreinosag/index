@@ -137,12 +137,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
     <!-- Botón visible de Activar Música -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" disabled onclick="toggleMusic()" style="font-size:20px; padding:16px 38px; opacity:0.6;">⏳ CARGANDO MÚSICA...</button>
-      
-      <!-- Contenedor del reproductor totalmente invisible sin afectar su funcionamiento interno -->
-      <div style="position:absolute; left:-9999px; top:-9999px; width:0; height:0; overflow:hidden;">
-        <div id="youtube-player"></div>
-      </div>
+      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
+      <!-- Contenedor donde se inyectará la música de forma invisible -->
+      <div id="audio-container"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -170,50 +167,24 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- API de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let player;
-let isPlaying = false;
-
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('youtube-player', {
-    height: '0',
-    width: '0',
-    videoId: 'P-auj2ElqzI',
-    playerVars: {
-      'autoplay': 0,
-      'controls': 0,
-      'loop': 1,
-      'playlist': 'P-auj2ElqzI'
-    },
-    events: {
-      'onReady': () => {
-        // Habilitar el botón automáticamente cuando la API esté lista
-        const btn = document.getElementById("musicBtn");
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        btn.textContent = "🎵 ACTIVAR MÚSICA";
-      }
-    }
-  });
-}
+let musicActive = false;
 
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
-  if (!player || typeof player.playVideo !== 'function') {
-    return;
-  }
+  const container = document.getElementById("audio-container");
 
-  if (!isPlaying) {
-    player.playVideo();
-    isPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+  if (!musicActive) {
+    // Inyecta el reproductor de manera oculta y con autoplay al hacer clic en el botón
+    container.innerHTML = `<iframe width="0" height="0" src="https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI" frameborder="0" allow="autoplay"></iframe>`;
+    musicActive = true;
+    btn.textContent = "⏸️ DESACTIVAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    player.pauseVideo();
-    isPlaying = false;
+    // Remueve el iframe para detener la música por completo
+    container.innerHTML = "";
+    musicActive = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
     btn.style.color = "#24102f";
