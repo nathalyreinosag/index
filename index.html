@@ -135,7 +135,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón visible de Activar Música original -->
+    <!-- Botón de música original intacto -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
@@ -191,6 +191,7 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
+// Lógica original de tu botón de música sin alteraciones
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
   if (!player || typeof player.getPlayerState !== 'function') return;
@@ -217,7 +218,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista de canciones para "Caiga en la nota" (índice 0)
+// Lista de canciones agregada exclusivamente para "Caiga en la nota"
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -344,7 +345,7 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota" (índice 0), reproducimos una canción aleatoria de la lista
+  // Ajuste exclusivo de la dinámica "Caiga en la nota" (índice 0): reproduce aleatorio de la lista
   if (selectedIndex === 0) {
     if (player && typeof player.loadVideoById === 'function') {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
@@ -425,11 +426,6 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  // Al volver a la ruleta, si la música estaba activada por el botón principal, volvemos a la canción base del menú
-  if (isPlaying && player && typeof player.loadVideoById === 'function') {
-    player.loadVideoById('P-auj2ElqzI');
-  }
 }
 </script>
 </body>
