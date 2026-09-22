@@ -335,18 +335,20 @@ function startChallenge(){
   
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
-  // 0: Caiga en la nota (Tiene música propia)
+  // Si estamos en Caiga en la nota (0) o Adivina el nombre de la canción (1):
+  // Pausamos el mix de fondo poniendo su src en vacío para que se detenga por completo.
+  if (selectedIndex === 0 || selectedIndex === 1) {
+    if (isMusicActive) {
+      iframeMain.src = ""; // Detiene el mix principal
+    }
+  }
+
+  // Ahora asignamos la música propia si es la dinámica 0
   if (selectedIndex === 0) {
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
-  } 
-  // 1: Adivina el nombre de la canción (Tiene música propia para tararear/adivinar, pausamos el mix de fondo)
-  else if (selectedIndex === 1) {
+  } else {
     iframeChallenge.src = "";
-  } 
-  // 2 y 3: Ruleta de palabras y Adivina la canción con emojis (NO tienen música propia, el mix principal sigue sonando fluido)
-  else {
-    // No hacemos nada con la música para que continúe sonando sin interrupciones
   }
 
   renderChallenge(selectedIndex);
@@ -377,6 +379,62 @@ function renderChallenge(i){
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
       <p style="font-size:20px;">La palabra secreta es:</p>
+      <div class="word">${word}</div>
+      <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
+    `;
+  } else {
+    const idx = Math.floor(Math.random() * emojiList.length);
+    currentAnswer = songTitles[idx];
+    box.innerHTML = `
+      <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
+      <div class="emoji-song">${emojiList[idx]}</div>
+      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
+      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
+    `;
+  }
+}
+
+function revealEmojiSong(){
+  const a = document.getElementById("emojiAnswer");
+  if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentAnswer; }
+}
+
+function startTimer(){
+  clearInterval(timer);
+  let seconds = 10;
+  const t = document.getElementById("timer");
+  const bar = document.getElementById("bar");
+  t.textContent = seconds;
+  bar.style.width = "100%";
+  timer = setInterval(()=>{
+    seconds--;
+    t.textContent = seconds;
+    bar.style.width = (seconds * 10) + "%";
+    if(seconds <= 0){
+      clearInterval(timer);
+    }
+  }, 1000);
+}
+
+function backHome(){
+  clearInterval(timer);
+  iframeChallenge.src = "";
+
+  // Si veníamos de una dinámica musical (0 o 1) y el mix estaba activo antes, lo retomamos
+  if (selectedIndex === 0 || selectedIndex === 1) {
+    if (wasMusicPlayingBeforeChallenge) {
+      iframeMain.src = MIX_EMBED_URL;
+      isMusicActive = true;
+    }
+  }
+
+  document.getElementById("challengeContent").innerHTML = "";
+  document.getElementById("challenge").classList.remove("active");
+  document.getElementById("home").classList.add("active");
+}
+</script>
+</body>
+</html>      <p style="font-size:20px;">La palabra secreta es:</p>
       <div class="word">${word}</div>
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
