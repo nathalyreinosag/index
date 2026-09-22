@@ -363,6 +363,7 @@ function startCaigaEnLaNotaLoop() {
   
   iframeChallenge.src = playUrl;
   
+  // Ciclo ajustado a 2 minutos (120,000 ms) sonando, pausa, y vuelve a sonar sucesivamente
   const playDuration = 120000; // 2 minutos
   const pauseDuration = 15000;  // 15 segundos de pausa antes de reactivar
   const totalCycle = playDuration + pauseDuration;
@@ -428,7 +429,8 @@ function renderChallenge(i){
 
   if(i === 0){
     box.innerHTML = `
-      <div style="font-size:75px; margin:20px 0;">🎵🎤🔥</div>
+      <p style="font-size:22px;">🎵 ¡Atento! Suena una canción aleatoria por 2 minutos, se pausa y vuelve a sonar sucesivamente.</p>
+      <div style="font-size:60px; margin:20px 0;">🎤🔥</div>
     `;
   } else if(i === 1){
     box.innerHTML = `
