@@ -175,7 +175,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
 
 let isMusicActive = false;
-let wasMusicPlayingBeforeChallenge = false; // Variable para recordar el estado de la música
+let wasMusicPlayingBeforeChallenge = false;
 const iframe = document.getElementById("youtube-audio-frame");
 
 // Control del botón principal de música
@@ -324,14 +324,18 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Guardamos si la música estaba sonando antes de entrar al desafío
+  // Guardamos si la música principal estaba activa
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
+  // Lógica exacta según la opción de la ruleta seleccionada:
+  // 0: Caiga en la nota -> cambia a una canción de nota
+  // 1: Adivina la canción -> mantenemos el comportamiento anterior
+  // 2: Ruleta de palabras -> pausa la música si sonaba
+  // 3: Adivina con emojis -> pausa la música si sonaba
   if (selectedIndex === 0) {
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else if (selectedIndex === 2 || selectedIndex === 3) {
-    // Si es "Ruleta de palabras" (2) o "Adivina con emojis" (3), pausamos el iframe si estaba sonando
     iframe.src = "";
   } else {
     iframe.src = "";
@@ -405,13 +409,19 @@ function startTimer(){
 function backHome(){
   clearInterval(timer);
   
-  // Si la música estaba activa antes del desafío, la retomamos al volver a la ruleta
+  // Al volver al inicio, si la música principal estaba activa antes de entrar al desafío, se restablece
   if (wasMusicPlayingBeforeChallenge) {
     iframe.src = MIX_EMBED_URL;
     isMusicActive = true;
+    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
+    document.getElementById("musicBtn").style.background = "#ff5c8a";
+    document.getElementById("musicBtn").style.color = "#fff";
   } else {
     iframe.src = "";
     isMusicActive = false;
+    document.getElementById("musicBtn").textContent = "🎵 ACTIVAR MÚSICA";
+    document.getElementById("musicBtn").style.background = "#ffd54a";
+    document.getElementById("musicBtn").style.color = "#24102f";
   }
 
   document.getElementById("challengeContent").innerHTML = "";
