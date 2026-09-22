@@ -135,13 +135,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música principal con el Mix configurado -->
+    <!-- Botón de música integrado con iframe nativo para evitar bloqueos del navegador -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" onclick="toggleMusic()" disabled style="font-size:20px; padding:16px 38px;">⏳ CARGANDO MÚSICA...</button>
+      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor de YouTube -->
-      <div style="width:0; height:0; overflow:hidden; display:inline-block;">
-        <div id="youtube-player"></div>
+      <!-- Contenedor del reproductor de YouTube mediante iframe HTML5 -->
+      <div id="player-container" style="display:none; width:0; height:0; overflow:hidden;">
+        <iframe id="youtube-iframe" width="0" height="0" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
     </div>
 
@@ -170,51 +170,25 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- Script oficial de la API de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
-
 <script>
-let player;
 let isPlaying = false;
 
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('youtube-player', {
-    height: '0',
-    width: '0',
-    playerVars: {
-      'autoplay': 0,
-      'loop': 1,
-      'listType': 'playlist',
-      'list': 'RDCLAK5uy_kX8_2t6-J40sY00p_2_7-Y8Y1wX0z', // Identificador dinámico de mix adaptado al ID provisto
-      'playlist': 'P-auj2ElqzI',
-      'enablejsapi': 1,
-      'origin': window.location.origin
-    },
-    events: {
-      'onReady': onPlayerReady
-    }
-  });
-}
-
-function onPlayerReady(event) {
-  const btn = document.getElementById("musicBtn");
-  btn.disabled = false;
-  btn.textContent = "🎵 ACTIVAR MÚSICA";
-}
-
-// Función de activación de música intacta
+// Función de activación de música usando iframe nativo (sin restricciones de navegador)
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
-  if (!player || typeof player.getPlayerState !== 'function') return;
+  const container = document.getElementById("player-container");
+  const iframe = document.getElementById("youtube-iframe");
 
   if (!isPlaying) {
-    player.playVideo();
+    container.style.display = "block";
+    iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    player.pauseVideo();
+    iframe.src = "";
+    container.style.display = "none";
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
@@ -356,15 +330,13 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce aleatoriamente de la lista de canciones individuales
+  // Si cae en "Caiga en la nota", reproduce aleatoriamente de la lista de canciones individuales mediante iframe
   if (selectedIndex === 0) {
-    if (player && typeof player.loadVideoById === 'function') {
-      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-      player.loadVideoById({
-        'videoId': randomSong.id,
-        'startSeconds': randomSong.start
-      });
-    }
+    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    const container = document.getElementById("player-container");
+    const iframe = document.getElementById("youtube-iframe");
+    container.style.display = "block";
+    iframe.src = `https://www.youtube.com/embed/${randomSong.id}?autoplay=1&start=${randomSong.start}`;
   }
 
   renderChallenge(selectedIndex);
