@@ -154,8 +154,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto en la misma página para el reproductor de fondo -->
-      <div id="ambientPlayer" style="display:none; width:0; height:0;"></div>
+      <!-- Contenedor oculto exclusivamente para la música ambiental -->
+      <div id="ambientPlayer" style="display:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -183,15 +183,15 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- API de YouTube cargada de forma asíncrona -->
+<!-- API de YouTube -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
 let bgPlayer = null;
 let isPlaying = false;
-let ytApiReady = false;
+let ytReady = false;
 
-// Esta función la llama automáticamente la API de YouTube cuando está lista
+// Esta función se ejecuta automáticamente cuando carga el script de YouTube
 function onYouTubeIframeAPIReady() {
   bgPlayer = new YT.Player('ambientPlayer', {
     height: '0',
@@ -205,7 +205,7 @@ function onYouTubeIframeAPIReady() {
     },
     events: {
       'onReady': () => {
-        ytApiReady = true;
+        ytReady = true;
       }
     }
   });
@@ -214,21 +214,25 @@ function onYouTubeIframeAPIReady() {
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
   
-  if (!ytApiReady || !bgPlayer) {
-    alert("El reproductor se está cargando, por favor intenta de nuevo en un segundo.");
+  if (!ytReady || !bgPlayer) {
+    alert("El reproductor ambiental aún está cargando, intenta de nuevo en un segundo.");
     return;
   }
 
-  if (!isPlaying) {
-    bgPlayer.unMute();
-    bgPlayer.setVolume(100);
-    bgPlayer.playVideo();
-    isPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-  } else {
-    bgPlayer.pauseVideo();
-    isPlaying = false;
-    btn.textContent = "🎵 ACTIVAR MÚSICA";
+  try {
+    if (!isPlaying) {
+      bgPlayer.unMute();
+      bgPlayer.setVolume(100);
+      bgPlayer.playVideo();
+      isPlaying = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    } else {
+      bgPlayer.pauseVideo();
+      isPlaying = false;
+      btn.textContent = "🎵 ACTIVAR MÚSICA";
+    }
+  } catch (e) {
+    console.error("Error al controlar la música:", e);
   }
 }
 
@@ -268,24 +272,30 @@ function initYTPlayer(videoId, startTime = "0") {
     challengePlayer.destroy();
   }
 
-  challengePlayer = new YT.Player('youtubePlayerElement', {
-    height: '320',
-    width: '100%',
-    videoId: videoId,
-    playerVars: {
-      'autoplay': 1,
-      'start': startSeconds,
-      'playsinline': 1,
-      'mute': 0
-    },
-    events: {
-      'onReady': (event) => {
-        event.target.unMute();
-        event.target.setVolume(100);
-        event.target.playVideo();
-      }
+  // Pequeño retraso para asegurar que el DOM del reto esté renderizado
+  setTimeout(() => {
+    const element = document.getElementById('youtubePlayerElement');
+    if (element) {
+      challengePlayer = new YT.Player('youtubePlayerElement', {
+        height: '320',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          'autoplay': 1,
+          'start': startSeconds,
+          'playsinline': 1,
+          'mute': 0
+        },
+        events: {
+          'onReady': (event) => {
+            event.target.unMute();
+            event.target.setVolume(100);
+            event.target.playVideo();
+          }
+        }
+      });
     }
-  });
+  }, 100);
 }
 
 const wheel = document.getElementById("wheel");
