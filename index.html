@@ -126,16 +126,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .emoji-song{font-size:70px;letter-spacing:15px;margin:20px 0;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
 .spark{font-size:28px;margin-bottom:5px;}
-.player-container{
-  width:100%;
-  max-width:720px;
-  margin:15px auto;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 12px 30px rgba(0,0,0,.6);
-  background:#000;
-}
-#youtubePlayerElement{width:100%;height:320px;}
 
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
@@ -149,15 +139,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
-    <p>¡Gira la ruleta y acepta el desafío musical!</p>
 
-    <!-- Botón de Activar Música con tu enlace de YouTube -->
     <div style="margin:20px auto;text-align:center;">
-      <button type="button" id="ambientMusicBtn" onclick="toggleAmbientYouTube()" style="font-size:18px;padding:14px 34px;background:#ffd54a;color:#24102f;font-weight:bold;cursor:pointer;">
+      <button type="button" id="ambientBtn" onclick="toggleAmbientMusic()" style="font-size:18px;padding:14px 32px;background:#ffd54a;color:#24102f;cursor:pointer;font-weight:bold;">
         🎵 ACTIVAR MÚSICA AMBIENTAL
       </button>
-      <!-- Contenedor donde se cargará el reproductor de YouTube al hacer clic -->
-      <div id="ambientYouTubeContainer" style="max-width:380px;margin:15px auto;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.5);display:none;">
+      <!-- Reproductor de YouTube oculto para que no estorbe visualmente -->
+      <div style="position:absolute; top:-9999px; left:-9999px;">
         <div id="ambientYTPlayer"></div>
       </div>
     </div>
@@ -189,25 +177,20 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let challengePlayer = null;
 let ambientYTPlayer = null;
 let isAmbientPlaying = false;
-let noteInterval = null;
 
-// Controlador del botón de música ambiental con tu enlace de YouTube
-function toggleAmbientYouTube() {
-  const btn = document.getElementById("ambientMusicBtn");
-  const container = document.getElementById("ambientYouTubeContainer");
+function toggleAmbientMusic() {
+  const btn = document.getElementById("ambientBtn");
 
   if (!ambientYTPlayer) {
-    container.style.display = "block";
     ambientYTPlayer = new YT.Player('ambientYTPlayer', {
-      height: '180',
-      width: '100%',
+      height: '1',
+      width: '1',
       videoId: 'P-auj2ElqzI',
       playerVars: {
         'autoplay': 1,
-        'controls': 1,
+        'controls': 0,
         'playsinline': 1
       },
       events: {
