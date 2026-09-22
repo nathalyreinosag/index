@@ -139,9 +139,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Video oculto con dimensiones en 0 para que no interfiera ni se vea visualmente -->
+      <!-- Contenedor para el reproductor de YouTube API -->
       <div style="width:0; height:0; overflow:hidden; display:inline-block;">
-        <iframe id="youtube-player" width="0" height="0" src="" frameborder="0" allow="autoplay"></iframe>
+        <div id="youtube-player"></div>
       </div>
     </div>
 
@@ -170,24 +170,40 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
+<!-- API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
+let player;
 let isPlaying = false;
 let wasPlayingBeforeChallenge = false;
 
+// Cargar el reproductor de YouTube mediante la API oficial
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtube-player', {
+    height: '0',
+    width: '0',
+    videoId: 'P-auj2ElqzI',
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': 'P-auj2ElqzI'
+    }
+  });
+}
+
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
-  const player = document.getElementById("youtube-player");
+  if (!player || typeof player.getPlayerState !== 'function') return;
 
   if (!isPlaying) {
-    // Asigna tu enlace con autoplay al hacer clic para cumplir con los permisos del navegador
-    player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+    player.playVideo();
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    // Limpia la fuente del iframe para detener la reproducción por completo
-    player.src = "";
+    player.pauseVideo();
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
@@ -312,13 +328,12 @@ function startChallenge(){
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
   // Pausar música si es Caiga en la nota (0), Adivina la canción (1) o Adivina con emojis (3)
-  if (selectedIndex !== 2) {
+  if (selectedIndex !== 2 && player && typeof player.pauseVideo === 'function') {
     wasPlayingBeforeChallenge = isPlaying;
     if (isPlaying) {
-      const player = document.getElementById("youtube-player");
-      const btn = document.getElementById("musicBtn");
-      player.src = "";
+      player.pauseVideo();
       isPlaying = false;
+      const btn = document.getElementById("musicBtn");
       btn.textContent = "🎵 ACTIVAR MÚSICA";
       btn.style.background = "#ffd54a";
       btn.style.color = "#24102f";
@@ -395,12 +410,11 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar la música al volver si estaba sonando antes
-  if (wasPlayingBeforeChallenge && !isPlaying) {
-    const player = document.getElementById("youtube-player");
-    const btn = document.getElementById("musicBtn");
-    player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+  // Reanudar la música en el mismo segundo donde se quedó al volver al menú principal
+  if (wasPlayingBeforeChallenge && !isPlaying && player && typeof player.playVideo === 'function') {
+    player.playVideo();
     isPlaying = true;
+    const btn = document.getElementById("musicBtn");
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
