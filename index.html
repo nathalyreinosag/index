@@ -135,11 +135,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música original -->
+    <!-- Botón de música general -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor del reproductor con opacidad y visibilidad real para evitar bloqueos del navegador -->
+      <!-- Contenedor del reproductor de YouTube (oculto de forma segura) -->
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
         <div id="youtube-player"></div>
       </div>
@@ -181,17 +181,17 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
     height: '200',
     width: '200',
-    videoId: 'P-auj2ElqzI',
+    videoId: 'AMTAQ-AJS4Y', // Mix principal asignado al botón de activar música
     playerVars: {
       'autoplay': 0,
       'loop': 1,
-      'playlist': 'P-auj2ElqzI',
+      'playlist': 'AMTAQ-AJS4Y',
       'enablejsapi': 1
     }
   });
 }
 
-// Función de activación de música del botón principal (reproduce tu Mix)
+// Función de activación de música del botón principal
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
   if (!player || typeof player.playVideo !== 'function') return;
@@ -218,7 +218,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista de canciones individuales para la dinámica "Caiga en la nota"
+// Lista completa de canciones individuales configuradas exclusivamente para "Caiga en la nota"
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -230,10 +230,9 @@ const noteSongs = [
   { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 },
   { title: "ChocQuibTown - Nuqui (Te Quiero Para Mi)", id: "EzbzWerC9AM", start: 10 },
   { title: "Miguel Bosé - Morenamía", id: "ljO63sL2CWc", start: 10 },
-  { title: "Vilma Palma e Vampiros - Auto Rojo", id: "95kf6cCasfg", start: 30 },
+  { title: "Vilma Palma - Auto Rojo", id: "95kf6cCasfg", start: 30 },
   { title: "Canción Extra 1", id: "kwwdY1bp-Ck", start: 0 },
-  { title: "Canción Extra 2", id: "gS9MTt3FOgw", start: 0 },
-  { title: "Chino y Nacho - Andas En Mi Cabeza", id: "AMTAQ-AJS4Y", start: 0 }
+  { title: "Canción Extra 2", id: "gS9MTt3FOgw", start: 0 }
 ];
 
 let selectedIndex = 0;
@@ -345,7 +344,7 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce una canción aleatoria de la lista con su segundo exacto
+  // Si cae en "Caiga en la nota", reproduce aleatoriamente una de las canciones individuales con su respectivo segundo de inicio
   if (selectedIndex === 0) {
     if (player && typeof player.loadVideoById === 'function') {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
