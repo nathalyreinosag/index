@@ -137,7 +137,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR PRINCIPAL DEL MIX (Añadido enablejsapi=1 para control de pausa/reanudación) -->
+<!-- REPRODUCTOR PRINCIPAL DEL MIX -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
@@ -338,8 +338,10 @@ function startChallenge(){
   // SOLO PARA DINÁMICA 0 ("Caiga en la nota") o DINÁMICA 1 ("Adivina el nombre de la canción")
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (isMusicActive) {
-      // Pausamos el mix mediante comando de YouTube API sin perder el segundo en el que iba
-      iframeMain.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      // Forzamos la pausa enviando el comando por postMessage de forma segura
+      try {
+        iframeMain.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      } catch(e) {}
     }
     
     // Si es Caiga en la nota (0), ponemos canción aleatoria propia
@@ -423,10 +425,12 @@ function backHome(){
   clearInterval(timer);
   iframeChallenge.src = "";
 
-  // Si veníamos de Caiga en la nota (0) o Adivina el nombre de la canción (1) y el mix estaba activo, lo reanudamos desde donde iba
+  // Si veníamos de Caiga en la nota (0) o Adivina el nombre de la canción (1) y el mix estaba activo, lo reanudamos
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
-      iframeMain.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      try {
+        iframeMain.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      } catch(e) {}
     }
   }
 
