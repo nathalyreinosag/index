@@ -154,10 +154,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor iframe directo sin depender de la API de YouTube -->
-      <div id="ambientContainer" style="display:none; margin-top:15px;">
-        <iframe id="bgIframe" width="100" height="100" src="" frameborder="0" allow="autoplay"></iframe>
-      </div>
+      <!-- Contenedor dinámico HTML5 para el Mix de YouTube -->
+      <div id="ambientContainer" style="display:none; margin-top:15px; width:1px; height:1px; opacity:0; overflow:hidden;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -185,30 +183,29 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- API de YouTube (solo para los retos de canciones) -->
+<!-- API de YouTube oficial para los retos -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
 let isPlaying = false;
 
+// IDs de tu mix de música ambiental (puedes agregar los IDs de YouTube separados por comas)
+const ambientPlaylist = "P-auj2ElqzI"; 
+
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
   const container = document.getElementById('ambientContainer');
-  const iframe = document.getElementById('bgIframe');
 
   if (!isPlaying) {
-    // Inyectamos el iframe con autoplay directo al hacer clic por primera vez
-    if (!iframe.src) {
-      iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
-    } else {
-      // Si ya tenía src, forzamos recarga con autoplay
-      iframe.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
-    }
+    // Inyectamos dinámicamente el iframe de HTML5 con el mix configurado y autoplay
+    container.style.display = "block";
+    container.innerHTML = `<iframe width="100" height="100" src="https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}" frameborder="0" allow="autoplay"></iframe>`;
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    // Para pausar de raíz sin complicaciones, limpiamos el src del iframe deteniendo el audio por completo
-    iframe.src = "";
+    // Destruimos el iframe vaciando el contenedor para cortar la música de raíz
+    container.innerHTML = "";
+    container.style.display = "none";
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
@@ -458,8 +455,6 @@ function startTimer(){
     bar.style.width = (seconds * 10) + "%";
     if(seconds <= 0){
       clearInterval(timer);
-      t.textContent = "⏰";
-      bar.style.width = "0%";
     }
   }, 1000);
 }
