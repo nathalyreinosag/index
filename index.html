@@ -150,12 +150,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <div style="margin:20px auto;text-align:center;">
+    <div style="margin:20px auto;text-align:center;position:relative;">
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto exclusivamente para la música ambiental -->
-      <div id="ambientPlayer" style="display:none;"></div>
+      <!-- Contenedor oculto correctamente para YouTube (sin usar display:none) -->
+      <div style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none;">
+        <div id="ambientPlayer"></div>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -193,8 +195,8 @@ let ytReady = false;
 
 function onYouTubeIframeAPIReady() {
   bgPlayer = new YT.Player('ambientPlayer', {
-    height: '0',
-    width: '0',
+    height: '1',
+    width: '1',
     videoId: 'P-auj2ElqzI',
     playerVars: {
       'autoplay': 0,
@@ -213,8 +215,8 @@ function onYouTubeIframeAPIReady() {
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
   
-  if (!ytReady || !bgPlayer) {
-    alert("El reproductor ambiental aún está cargando, intenta de nuevo en un segundo.");
+  if (!ytReady || !bgPlayer || typeof bgPlayer.playVideo !== 'function') {
+    alert("El reproductor ambiental está cargando. Por favor, espera un segundo y vuelve a hacer clic.");
     return;
   }
 
@@ -268,7 +270,7 @@ function initYTPlayer(videoId, startTime = "0") {
   }
 
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
-    challengePlayer.destroy();
+    try { challengePlayer.destroy(); } catch(err){}
   }
 
   setTimeout(() => {
@@ -293,7 +295,7 @@ function initYTPlayer(videoId, startTime = "0") {
         }
       });
     }
-  }, 100);
+  }, 150);
 }
 
 const wheel = document.getElementById("wheel");
@@ -432,7 +434,9 @@ function renderChallenge(i){
     initYTPlayer(currentSong.url, "0");
 
   } else if(i === 2){
-    if (challengePlayer && typeof challengePlayer.destroy === 'function') { challengePlayer.destroy(); }
+    if (challengePlayer && typeof challengePlayer.destroy === 'function') {
+      try { challengePlayer.destroy(); } catch(err){}
+    }
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
@@ -487,7 +491,7 @@ function backHome(){
   clearInterval(timer);
 
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
-    challengePlayer.destroy();
+    try { challengePlayer.destroy(); } catch(err){}
   }
 
   document.getElementById("challengeContent").innerHTML = "";
