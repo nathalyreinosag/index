@@ -148,8 +148,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
+<!-- Contenedor oculto para la lista de reproducción de fondo -->
 <div style="display:none;">
-  <iframe id="ambientIframe" src="" allow="autoplay"></iframe>
+  <div id="ambientPlayerElement"></div>
 </div>
 
 <section id="home" class="screen active">
@@ -190,29 +191,50 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let ambientPlaying = false;
 let userActivatedMusic = false;
-// Nuevos parámetros de tu lista de reproducción de YouTube
+let ambientPlayer = null;
 const ambientId = "P-auj2ElqzI";
 const ambientList = "RDKafxrlgKvJo";
 
 let challengePlayer = null;
 let volumeTimeouts = [];
 
+// Inicializar API de YouTube cuando cargue el script
+function onYouTubeIframeAPIReady() {
+  ambientPlayer = new YT.Player('ambientPlayerElement', {
+    height: '1',
+    width: '1',
+    videoId: ambientId,
+    playerVars: {
+      'autoplay': 0,
+      'listType': 'playlist',
+      'list': ambientList,
+      'loop': 1,
+      'playsinline': 1,
+      'enablejsapi': 1
+    },
+    events: {
+      'onReady': (event) => {
+        event.target.setVolume(100);
+      }
+    }
+  });
+}
+
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
-  const iframe = document.getElementById("ambientIframe");
+
+  if(!ambientPlayer) return;
 
   if(!ambientPlaying){
     userActivatedMusic = true;
-    if(!iframe.src || iframe.src === "" || iframe.src === window.location.href){
-      iframe.src = `https://www.youtube.com/embed/${ambientId}?list=${ambientList}&autoplay=1&loop=1&enablejsapi=1`;
-    } else {
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
+    ambientPlayer.unMute();
+    ambientPlayer.setVolume(100);
+    ambientPlayer.playVideo();
     ambientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
     userActivatedMusic = false;
-    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    ambientPlayer.pauseVideo();
     ambientPlaying = false;
     btn.textContent = "▶️ ACTIVAR MÚSICA";
   }
@@ -391,11 +413,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying){
-    const iframe = document.getElementById("ambientIframe");
-    try {
-      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-    } catch(e) {}
+  if(ambientPlaying && ambientPlayer){
+    ambientPlayer.pauseVideo();
   }
 
   const c = challenges[selectedIndex];
@@ -518,12 +537,9 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  if(userActivatedMusic){
-    const iframe = document.getElementById("ambientIframe");
+  if(userActivatedMusic && ambientPlayer){
     ambientPlaying = true;
-    try {
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    } catch(e) {}
+    ambientPlayer.playVideo();
   }
 }
 </script>
