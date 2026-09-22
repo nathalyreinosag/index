@@ -187,6 +187,7 @@ const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop
 let isMusicActive = false;
 let wasMusicPlayingBeforeChallenge = false;
 let noteLoopTimer = null;
+let volumeControlTimers = [];
 const iframeMain = document.getElementById("youtube-audio-frame");
 const iframeChallenge = document.getElementById("challenge-audio-frame");
 
@@ -355,6 +356,31 @@ function startChallenge(){
   renderChallenge(selectedIndex);
 }
 
+function clearVolumeTimers() {
+  volumeControlTimers.forEach(t => clearTimeout(t));
+  volumeControlTimers = [];
+}
+
+function setupVolumeControlForSong() {
+  clearVolumeTimers();
+  
+  // A los 1 minuto y 10 segundos (70,000 ms), baja el volumen a 15%
+  let t1 = setTimeout(() => {
+    try {
+      iframeChallenge.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[15]}', '*');
+    } catch(e) {}
+  }, 70000);
+
+  // A los 1 minuto y 30 segundos (90,000 ms - es decir, 20 segundos después de bajarlo), sube el volumen de nuevo al 100%
+  let t2 = setTimeout(() => {
+    try {
+      iframeChallenge.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+    } catch(e) {}
+  }, 90000);
+
+  volumeControlTimers.push(t1, t2);
+}
+
 function startCaigaEnLaNotaLoop() {
   if (noteLoopTimer) clearInterval(noteLoopTimer);
   
@@ -362,6 +388,7 @@ function startCaigaEnLaNotaLoop() {
   const playUrl = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1&enablejsapi=1`;
   
   iframeChallenge.src = playUrl;
+  setupVolumeControlForSong();
   
   const playDuration = 120000; // 2 minutos
   const pauseDuration = 15000;  // 15 segundos de pausa antes de reactivar
@@ -371,11 +398,13 @@ function startCaigaEnLaNotaLoop() {
     // Pausar tras 2 minutos
     setTimeout(() => {
       iframeChallenge.src = "";
+      clearVolumeTimers();
     }, playDuration);
     
     // Activar de nuevo a los 15 segundos adicionales de pausa
     setTimeout(() => {
       iframeChallenge.src = playUrl;
+      setupVolumeControlForSong();
     }, totalCycle);
   }, totalCycle);
 }
@@ -482,6 +511,7 @@ function startTimer(){
 function backHome(){
   clearInterval(timer);
   if (noteLoopTimer) clearInterval(noteLoopTimer);
+  clearVolumeTimers();
   iframeChallenge.src = "";
 
   if (selectedIndex === 0 || selectedIndex === 1) {
