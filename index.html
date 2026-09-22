@@ -214,14 +214,18 @@ function toggleMusic() {
   }
 }
 
-// Base de datos general y unificada con todas las canciones aleatorias
-const allChallengeSongs = [
-  { title:"Todo Lo Fue", artist:"Selección Caiga en la Nota", url:"kwwdY1bp-Ck", time:0, emojis:"🎶✨🎵" },
-  { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", time:0, emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", time:0, emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", time:0, emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", time:0, emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", time:0, emojis:"🌙🐺💚" }
+// Canciones originales para "Caiga en la nota"
+const noteSongs = [
+  { title: "Todo Lo Fue", url: "kwwdY1bp-Ck", time: "0:00" }
+];
+
+// Canciones originales para adivinar y emojis
+const generalSongs = [
+  { title: "AMARGURA", artist: "Karol G", url: "fEWhm_TVvUw", emojis: "🌺🔥🎵" },
+  { title: "PROVENZA", artist: "Karol G", url: "ca48oMV59LU", emojis: "🌺🌊☀️" },
+  { title: "QLONA", artist: "Karol G & Peso Pluma", url: "BeUOBoSPWvA", emojis: "💎💋🔥" },
+  { title: "CLASSY 101", artist: "Feid & Young Miko", url: "cD5T1Y4b7wA", emojis: "🕶️🟢🔥" },
+  { title: "LUNA", artist: "Feid & ATL Jacob", url: "ZA7ZKB8Mo9k", emojis: "🌙🐺💚" }
 ];
 
 const challenges = [
@@ -235,7 +239,15 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function initYTPlayer(videoId, startTime = 0, isNoteChallenge = false) {
+function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
+  let startSeconds = 0;
+  if(typeof startTime === "string" && startTime.includes(":")) {
+    const parts = startTime.split(":");
+    startSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  } else {
+    startSeconds = parseInt(startTime) || 0;
+  }
+
   if (challengePlayer && typeof challengePlayer.destroy === 'function') {
     try { challengePlayer.destroy(); } catch(err){}
   }
@@ -250,7 +262,7 @@ function initYTPlayer(videoId, startTime = 0, isNoteChallenge = false) {
         videoId: videoId,
         playerVars: {
           'autoplay': 1,
-          'start': startTime,
+          'start': startSeconds,
           'playsinline': 1,
           'mute': 0
         },
@@ -401,29 +413,27 @@ function renderChallenge(i){
   clearInterval(noteInterval);
 
   if(i === 0){
-    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
+    currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b></p>
       <div class="player-container">
         <div id="youtubePlayerElement"></div>
       </div>
-      <button onclick="playCurrentSong()" style="margin-top:12px;font-size:16px;padding:10px 24px;">▶️ REPRODUCIR MÚSICA</button>
     `;
-    initYTPlayer(currentSong.url, 0, true);
+    initYTPlayer(currentSong.url, currentSong.time, true);
 
   } else if(i === 1){
-    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
+    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
     box.innerHTML = `
-      <p style="font-size:20px;">🎧 Escucha la intro y adivina el título o artista.</p>
+      <p style="font-size:20px;">🎧 Escucha un fragmento y adivina el título.</p>
       <div class="player-container"><div id="youtubePlayerElement"></div></div>
-      <button onclick="playCurrentSong()" style="margin-top:12px;font-size:16px;padding:10px 24px;">▶️ REPRODUCIR MÚSICA</button>
       <div class="timer" id="timer">10</div>
       <div class="progress"><div class="bar" id="bar"></div></div>
       <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
       <button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button>
       <div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>
     `;
-    initYTPlayer(currentSong.url, 0, false);
+    initYTPlayer(currentSong.url, "0", false);
 
   } else if(i === 2){
     if (challengePlayer && typeof challengePlayer.destroy === 'function') {
@@ -437,25 +447,16 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
+    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
       <div class="emoji-song">${currentSong.emojis}</div>
-      <button onclick="playCurrentSong()" style="margin-bottom:12px;font-size:16px;padding:10px 24px;">▶️ REPRODUCIR MÚSICA</button>
       <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
       <div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
       <div id="emojiMusic" style="margin-top:15px;"><div id="youtubePlayerElement"></div></div>
       <button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>
     `;
-    initYTPlayer(currentSong.url, 0, false);
-  }
-}
-
-function playCurrentSong() {
-  if (challengePlayer && typeof challengePlayer.playVideo === 'function') {
-    challengePlayer.unMute();
-    challengePlayer.setVolume(100);
-    challengePlayer.playVideo();
+    initYTPlayer(currentSong.url, "0", false);
   }
 }
 
