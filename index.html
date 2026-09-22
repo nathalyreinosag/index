@@ -142,7 +142,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -155,8 +154,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto para el reproductor de fondo -->
-      <div id="ambientPlayer" style="display:none;"></div>
+      <!-- Contenedor oculto en la misma página para el reproductor de fondo -->
+      <div id="ambientPlayer" style="display:none; width:0; height:0;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -184,13 +183,16 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
+<!-- API de YouTube cargada de forma asíncrona -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
 let bgPlayer = null;
-let isMusicPlaying = false;
+let isPlaying = false;
+let ytApiReady = false;
 
+// Esta función la llama automáticamente la API de YouTube cuando está lista
 function onYouTubeIframeAPIReady() {
-  // Inicializamos el reproductor oculto para el mix de fondo (P-auj2ElqzI)
   bgPlayer = new YT.Player('ambientPlayer', {
     height: '0',
     width: '0',
@@ -200,26 +202,32 @@ function onYouTubeIframeAPIReady() {
       'controls': 0,
       'loop': 1,
       'playlist': 'P-auj2ElqzI'
+    },
+    events: {
+      'onReady': () => {
+        ytApiReady = true;
+      }
     }
   });
 }
 
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
-  if (!bgPlayer || typeof bgPlayer.playVideo !== 'function') {
-    alert('El reproductor se está cargando, por favor intenta de nuevo en un segundo.');
+  
+  if (!ytApiReady || !bgPlayer) {
+    alert("El reproductor se está cargando, por favor intenta de nuevo en un segundo.");
     return;
   }
 
-  if (!isMusicPlaying) {
+  if (!isPlaying) {
     bgPlayer.unMute();
     bgPlayer.setVolume(100);
     bgPlayer.playVideo();
-    isMusicPlaying = true;
+    isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
     bgPlayer.pauseVideo();
-    isMusicPlaying = false;
+    isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
 }
