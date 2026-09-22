@@ -214,16 +214,14 @@ function toggleMusic() {
   }
 }
 
-const noteSongs = [
-  { title:"Todo Lo Fue", artist:"Selección Caiga en la Nota", url:"kwwdY1bp-Ck", time:"0:00" }
-];
-
-const generalSongs = [
-  { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", emojis:"🌙🐺💚" }
+// Base de datos general y unificada para todos los retos musicales
+const allChallengeSongs = [
+  { title:"Todo Lo Fue", artist:"Selección Caiga en la Nota", url:"kwwdY1bp-Ck", time:"0:00", emojis:"🎶✨🎵" },
+  { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", time:"0:00", emojis:"🌺🔥🎵" },
+  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", time:"0:00", emojis:"🌺🌊☀️" },
+  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", time:"0:00", emojis:"💎💋🔥" },
+  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", time:"0:00", emojis:"🕶️🟢🔥" },
+  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", time:"0:00", emojis:"🌙🐺💚" }
 ];
 
 const challenges = [
@@ -274,22 +272,9 @@ function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
               noteInterval = setInterval(() => {
                 if (challengePlayer && typeof challengePlayer.getCurrentTime === 'function') {
                   const t = challengePlayer.getCurrentTime();
-                  const mod = t % 10; // Ciclo de 10 segundos (cada 10s se repite el patrón)
-                  
-                  // A los 15s, 25s, 35s, etc. (mod entre 15 y 20 de forma lógica usando ciclo de 10 o evaluando rangos)
-                  // Módulo exacto para bloques de 10 segundos: de 5s a 10s equivale a los segundos 15, 25, 35... (o ajustado al patrón 15-20)
-                  // Evaluemos segundo exacto respecto a múltiplos de 10:
-                  // 15s -> t%10 está entre 5 y 6. 20s -> t%10 está entre 0 y 1.
-                  
-                  let secondInBlock = t % 10;
-                  
-                  // Activar sonido a los 15s (que corresponde a segundo 5 del bloque de 10 si empezamos en 0 o analizando el tiempo global)
-                  // Usemos validación directa con los segundos globales de forma limpia:
                   let currentSecFloor = Math.floor(t);
                   
-                  // Patrón repetitivo consecutivo:
-                  // Activar sonido (100%): en los segundos que terminen en 5 (15, 25, 35, 45...)
-                  // Silenciar (0%): en los segundos múltiplos de 10 (20, 30, 40, 50...)
+                  // Patrón repetitivo consecutivo: Activar a los 15s (25, 35...) y silenciar a los 20s (30, 40...)
                   if (currentSecFloor % 10 === 5) {
                     challengePlayer.setVolume(100);
                   } else if (currentSecFloor % 10 === 0) {
@@ -429,7 +414,7 @@ function renderChallenge(i){
   clearInterval(noteInterval);
 
   if(i === 0){
-    currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b></p>
       <div class="player-container">
@@ -439,7 +424,7 @@ function renderChallenge(i){
     initYTPlayer(currentSong.url, currentSong.time, true);
 
   } else if(i === 1){
-    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
+    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>
       <div class="player-container"><div id="youtubePlayerElement"></div></div>
@@ -463,7 +448,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
+    currentSong = allChallengeSongs[Math.floor(Math.random() * allChallengeSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
       <div class="emoji-song">${currentSong.emojis}</div>
