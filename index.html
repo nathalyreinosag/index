@@ -137,7 +137,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- REPRODUCTOR PRINCIPAL DEL MIX -->
+<!-- REPRODUCTOR PRINCIPAL DEL MIX (Añadido enablejsapi=1 para control de pausa/reanudación) -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
@@ -182,7 +182,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI&enablejsapi=1";
 
 let isMusicActive = false;
 let wasMusicPlayingBeforeChallenge = false;
@@ -335,15 +335,22 @@ function startChallenge(){
   
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
-  // SOLO PARA "Caiga en la nota" (Índice 0): Se pausa el mix y suena canción aleatoria
-  if (selectedIndex === 0) {
+  // SOLO PARA DINÁMICA 0 ("Caiga en la nota") o DINÁMICA 1 ("Adivina el nombre de la canción")
+  if (selectedIndex === 0 || selectedIndex === 1) {
     if (isMusicActive) {
-      iframeMain.src = ""; 
+      // Pausamos el mix mediante comando de YouTube API sin perder el segundo en el que iba
+      iframeMain.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
     }
-    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-    iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
+    
+    // Si es Caiga en la nota (0), ponemos canción aleatoria propia
+    if (selectedIndex === 0) {
+      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+      iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
+    } else {
+      iframeChallenge.src = "";
+    }
   } else {
-    // Para las demás dinámicas (1, 2 y 3), el mix principal SIGUE SONANDO de fondo y no se pausa
+    // Para Ruleta de palabras (2) y Emojis (3), el mix principal SIGUE SONANDO de fondo
     iframeChallenge.src = "";
   }
 
@@ -365,7 +372,7 @@ function renderChallenge(i){
     `;
   } else if(i === 1){
     box.innerHTML = `
-      <p style="font-size:22px;">🎧 Tararea o describe una canción para que los demás adivinen.</p>
+      <p style="font-size:22px;">🎧 Tararea o describe una canción para que los demás adivinen el título.</p>
       <div class="timer" id="timer">10</div>
       <div class="progress"><div class="bar" id="bar"></div></div>
       <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
@@ -416,11 +423,10 @@ function backHome(){
   clearInterval(timer);
   iframeChallenge.src = "";
 
-  // Si veníamos de Caiga en la nota (0) y el mix estaba activo antes, lo retomamos
-  if (selectedIndex === 0) {
+  // Si veníamos de Caiga en la nota (0) o Adivina el nombre de la canción (1) y el mix estaba activo, lo reanudamos desde donde iba
+  if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
-      iframeMain.src = MIX_EMBED_URL;
-      isMusicActive = true;
+      iframeMain.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     }
   }
 
