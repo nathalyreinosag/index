@@ -172,6 +172,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
 <script>
 let isPlaying = false;
+let wasPlayingBeforeChallenge = false;
 
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
@@ -267,14 +268,10 @@ function spin(){
   document.getElementById("result").classList.remove("show");
 
   const slice = 2 * Math.PI / challenges.length;
-  
-  // Seleccionamos un índice al azar de forma totalmente equitativa
   selectedIndex = Math.floor(Math.random() * challenges.length);
 
   const start = rotation;
-  const fullTurns = (Math.floor(Math.random() * 4) + 6) * 2 * Math.PI; // Entre 6 y 9 vueltas completas
-  
-  // Calculamos el ángulo exacto para que el puntero (arriba: -Math.PI/2) caiga en el centro de la opción elegida
+  const fullTurns = (Math.floor(Math.random() * 4) + 6) * 2 * Math.PI;
   const targetOffset = -Math.PI / 2 - (selectedIndex * slice + slice / 2);
   const normalizedTarget = (targetOffset % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
   const currentNormalized = (start % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
@@ -320,6 +317,21 @@ function startChallenge(){
   document.getElementById("challenge").classList.add("active");
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
+  
+  // Si no es la dinámica 2 ("Ruleta de palabras", que es el índice 2), pausamos la música
+  if (selectedIndex !== 2) {
+    wasPlayingBeforeChallenge = isPlaying;
+    if (isPlaying) {
+      const player = document.getElementById("youtube-player");
+      const btn = document.getElementById("musicBtn");
+      player.src = "";
+      isPlaying = false;
+      btn.textContent = "🎵 ACTIVAR MÚSICA";
+      btn.style.background = "#ffd54a";
+      btn.style.color = "#24102f";
+    }
+  }
+
   renderChallenge(selectedIndex);
 }
 
@@ -389,6 +401,17 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
+
+  // Si la música estaba sonando antes de entrar al desafío, la reanudamos al volver
+  if (wasPlayingBeforeChallenge && !isPlaying) {
+    const player = document.getElementById("youtube-player");
+    const btn = document.getElementById("musicBtn");
+    player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
+    isPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    btn.style.background = "#ff5c8a";
+    btn.style.color = "#fff";
+  }
 }
 </script>
 </body>
