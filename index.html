@@ -186,6 +186,7 @@ const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop
 
 let isMusicActive = false;
 let wasMusicPlayingBeforeChallenge = false;
+let noteLoopTimer = null;
 const iframeMain = document.getElementById("youtube-audio-frame");
 const iframeChallenge = document.getElementById("challenge-audio-frame");
 
@@ -343,8 +344,7 @@ function startChallenge(){
     }
     
     if (selectedIndex === 0) {
-      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-      iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
+      startCaigaEnLaNotaLoop();
     } else {
       iframeChallenge.src = "";
     }
@@ -355,7 +355,28 @@ function startChallenge(){
   renderChallenge(selectedIndex);
 }
 
-// LISTA ACTUALIZADA DE EMOJIS Y NOMBRES (INCLUYENDO NUEVOS CLÁSIOS)
+function startCaigaEnLaNotaLoop() {
+  if (noteLoopTimer) clearInterval(noteLoopTimer);
+  
+  const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+  const playUrl = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1&enablejsapi=1`;
+  
+  iframeChallenge.src = playUrl;
+  
+  // Ciclo: suena 20s, pausa, a los 15s vuelve a activar y así sucesivamente
+  noteLoopTimer = setInterval(() => {
+    // Pausar tras 20 segundos
+    setTimeout(() => {
+      iframeChallenge.src = "";
+    }, 20000);
+    
+    // Activar de nuevo a los 15 segundos adicionales (total 35s por ciclo)
+    setTimeout(() => {
+      iframeChallenge.src = playUrl;
+    }, 35000);
+  }, 35000);
+}
+
 const emojiDatabase = [
   { emojis: "👸🏰", name: "Princesa" },
   { emojis: "❤️💔", name: "Corazón Partío" },
@@ -404,7 +425,7 @@ function renderChallenge(i){
 
   if(i === 0){
     box.innerHTML = `
-      <p style="font-size:22px;">🎵 ¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.</p>
+      <p style="font-size:22px;">🎵 ¡Atento! Suena una canción aleatoria por 20 segundos, se pausa y vuelve a sonar sucesivamente.</p>
       <div style="font-size:60px; margin:20px 0;">🎤🔥</div>
     `;
   } else if(i === 1){
@@ -458,6 +479,7 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
+  if (noteLoopTimer) clearInterval(noteLoopTimer);
   iframeChallenge.src = "";
 
   if (selectedIndex === 0 || selectedIndex === 1) {
