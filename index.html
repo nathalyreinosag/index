@@ -135,9 +135,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música independiente con tu mix principal -->
+    <!-- Botón de música independiente con control de estado -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
+      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;" disabled>⏳ CARGANDO MÚSICA...</button>
       
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
         <div id="youtube-player"></div>
@@ -175,6 +175,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let player;
 let isPlaying = false;
+let isPlayerReady = false;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtube-player', {
@@ -186,14 +187,24 @@ function onYouTubeIframeAPIReady() {
       'loop': 1,
       'playlist': 'P-auj2ElqzI',
       'enablejsapi': 1
+    },
+    events: {
+      'onReady': onPlayerReady
     }
   });
 }
 
+function onPlayerReady(event) {
+  isPlayerReady = true;
+  const btn = document.getElementById("musicBtn");
+  btn.disabled = false;
+  btn.textContent = "🎵 ACTIVAR MÚSICA";
+}
+
 // Función de activación de música del botón principal
 function toggleMusic() {
+  if (!isPlayerReady) return;
   const btn = document.getElementById("musicBtn");
-  if (!player || typeof player.playVideo !== 'function') return;
 
   if (!isPlaying) {
     player.playVideo();
@@ -217,7 +228,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista exclusiva para la dinámica "Caiga en la nota" con los enlaces y segundos exactos que enviaste
+// Lista exclusiva para la dinámica "Caiga en la nota" con los enlaces y segundos exactos
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -344,14 +355,17 @@ function startChallenge(){
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
   // Si cae en "Caiga en la nota", reproduce aleatoriamente una de las canciones individuales con su segundo exacto
-  if (selectedIndex === 0) {
-    if (player && typeof player.loadVideoById === 'function') {
-      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-      player.loadVideoById({
-        'videoId': randomSong.id,
-        'startSeconds': randomSong.start
-      });
-    }
+  if (selectedIndex === 0 && isPlayerReady) {
+    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    player.loadVideoById({
+      'videoId': randomSong.id,
+      'startSeconds': randomSong.start
+    });
+    isPlaying = true;
+    const btn = document.getElementById("musicBtn");
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    btn.style.background = "#ff5c8a";
+    btn.style.color = "#fff";
   }
 
   renderChallenge(selectedIndex);
