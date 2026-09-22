@@ -147,10 +147,19 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
+<!-- AUDIO DE AMBIENTE NATIVO -->
+<audio id="ambientAudio" loop preload="auto">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
+
+    <div style="margin:15px auto 15px;text-align:center;">
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -178,11 +187,34 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
+let ambientPlaying = false;
+let userActivatedMusic = false;
 let challengePlayer = null;
 let volumeTimeouts = [];
 
 function onYouTubeIframeAPIReady() {
   // Inicialización de YouTube API lista
+}
+
+function toggleAmbientMusic(){
+  const audio = document.getElementById("ambientAudio");
+  const btn = document.getElementById("musicBtn");
+
+  if(!ambientPlaying){
+    audio.play().then(() => {
+      ambientPlaying = true;
+      userActivatedMusic = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    }).catch(error => {
+      console.log("Error al reproducir audio:", error);
+      alert("Haz clic de nuevo para autorizar el audio.");
+    });
+  } else {
+    audio.pause();
+    ambientPlaying = false;
+    userActivatedMusic = false;
+    btn.textContent = "▶️ ACTIVAR MÚSICA";
+  }
 }
 
 const noteSongs = [
@@ -368,6 +400,10 @@ function showResult(){
 }
 
 function startChallenge(){
+  if(ambientPlaying){
+    document.getElementById("ambientAudio").pause();
+  }
+
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -487,6 +523,11 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
+
+  if(userActivatedMusic){
+    ambientPlaying = true;
+    document.getElementById("ambientAudio").play();
+  }
 }
 </script>
 </body>
