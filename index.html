@@ -142,6 +142,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -154,7 +155,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <audio id="bgAudio" src="https://www.youtube.com/watch?v=P-auj2ElqzI" preload="auto" loop></audio>
+      <!-- Contenedor oculto para el reproductor de fondo -->
+      <div id="ambientPlayer" style="display:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -182,31 +184,44 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
-let isPlaying = false;
+let bgPlayer = null;
+let isMusicPlaying = false;
+
+function onYouTubeIframeAPIReady() {
+  // Inicializamos el reproductor oculto para el mix de fondo (P-auj2ElqzI)
+  bgPlayer = new YT.Player('ambientPlayer', {
+    height: '0',
+    width: '0',
+    videoId: 'P-auj2ElqzI',
+    playerVars: {
+      'autoplay': 0,
+      'controls': 0,
+      'loop': 1,
+      'playlist': 'P-auj2ElqzI'
+    }
+  });
+}
 
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
-  const audio = document.getElementById('bgAudio');
+  if (!bgPlayer || typeof bgPlayer.playVideo !== 'function') {
+    alert('El reproductor se está cargando, por favor intenta de nuevo en un segundo.');
+    return;
+  }
 
-  if (!isPlaying) {
-    audio.play().then(() => {
-      isPlaying = true;
-      btn.textContent = "⏸️ PAUSAR MÚSICA";
-    }).catch(error => {
-      console.log("Error al reproducir:", error);
-      window.open("https://www.youtube.com/watch?v=P-auj2ElqzI", "_blank");
-    });
+  if (!isMusicPlaying) {
+    bgPlayer.unMute();
+    bgPlayer.setVolume(100);
+    bgPlayer.playVideo();
+    isMusicPlaying = true;
+    btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    audio.pause();
-    isPlaying = false;
+    bgPlayer.pauseVideo();
+    isMusicPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
-}
-
-function onYouTubeIframeAPIReady() {
 }
 
 const noteSongs = [
