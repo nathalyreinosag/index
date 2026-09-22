@@ -324,18 +324,18 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Guardamos si la música principal estaba activa al iniciar el desafío
+  // Guardamos si el mix principal estaba sonando antes de entrar
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
   if (selectedIndex === 0) {
-    // Caiga en la nota: suena la canción propia
+    // 1. Caiga en la nota: guarda estado y suena la canción propia
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else if (selectedIndex === 1) {
-    // Adivina la canción: pausa el mix principal
+    // 2. Adivina la canción: guarda estado y pausa el mix principal
     iframe.src = "";
   } else {
-    // Ruleta de palabras y Adivina con emojis: el mix principal debe sonar de fondo
+    // 3 y 4 (Ruleta de palabras / Emojis): No tienen música propia, el mix principal sigue sonando normal
     if (wasMusicPlayingBeforeChallenge) {
       iframe.src = MIX_EMBED_URL;
     }
@@ -409,21 +409,23 @@ function startTimer(){
 function backHome(){
   clearInterval(timer);
   
-  // Al salir de las dinámicas con música (Caiga en la nota o Adivina la canción), 
-  // si el mix estaba activado antes, se retoma; de lo contrario se apaga.
-  if (wasMusicPlayingBeforeChallenge) {
-    iframe.src = MIX_EMBED_URL;
-    isMusicActive = true;
-    document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
-    document.getElementById("musicBtn").style.background = "#ff5c8a";
-    document.getElementById("musicBtn").style.color = "#fff";
-  } else {
-    iframe.src = "";
-    isMusicActive = false;
-    document.getElementById("musicBtn").textContent = "🎵 ACTIVAR MÚSICA";
-    document.getElementById("musicBtn").style.background = "#ffd54a";
-    document.getElementById("musicBtn").style.color = "#24102f";
+  // Solo si estábamos en una dinámica con música propia (0 o 1), restauramos el estado anterior del mix principal
+  if (selectedIndex === 0 || selectedIndex === 1) {
+    if (wasMusicPlayingBeforeChallenge) {
+      iframe.src = MIX_EMBED_URL;
+      isMusicActive = true;
+      document.getElementById("musicBtn").textContent = "⏸️ PAUSAR MÚSICA";
+      document.getElementById("musicBtn").style.background = "#ff5c8a";
+      document.getElementById("musicBtn").style.color = "#fff";
+    } else {
+      iframe.src = "";
+      isMusicActive = false;
+      document.getElementById("musicBtn").textContent = "🎵 ACTIVAR MÚSICA";
+      document.getElementById("musicBtn").style.background = "#ffd54a";
+      document.getElementById("musicBtn").style.color = "#24102f";
+    }
   }
+  // Si estabas en la 2 o 3, el mix nunca se alteró al salir, por lo que sigue su curso sin tocar nada.
 
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
