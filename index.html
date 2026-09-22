@@ -178,6 +178,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div id="challengeIcon" class="challenge-icon"></div>
     <h2 id="challengeTitle" style="font-size:40px;"></h2>
     <div id="challengeContent" class="challenge-box"></div>
+    <div id="challengeActionBtn" style="margin-bottom:15px;"></div>
     <button onclick="backHome()" style="font-size:18px;padding:14px 30px;">🎡 VOLVER A LA RULETA</button>
   </div>
 </section>
@@ -231,7 +232,7 @@ const noteSongs = [
   { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 }
 ];
 
-// Canciones para "Adivina el nombre de la canción" (Índice 1) - Suenan continuas y normales sin cronómetro
+// Canciones para "Adivina el nombre de la canción" (Índice 1)
 const guessSongs = [
   { title: "Pista 1", id: "yRUqUJta_rw", start: 0 },
   { title: "Pista 2", id: "fYGSv0e6zWA", start: 0 },
@@ -365,7 +366,7 @@ function startChallenge(){
     if (selectedIndex === 0) {
       startDynamicLoop(noteSongs, 120000, 15000, true);  
     } else if (selectedIndex === 1) {
-      playSpecificSong(guessSongs, false); // Reproduce continua y normal sin alteraciones ni pausas
+      playSpecificSong(guessSongs, false);
     }
   } else {
     stopChallengePlayer();
@@ -511,18 +512,22 @@ let currentAnswer = "";
 
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
+  const actionBtnBox = document.getElementById("challengeActionBtn");
   clearInterval(timer);
+  actionBtnBox.innerHTML = "";
 
   if(i === 0){
     box.innerHTML = `
       <div style="font-size:75px; margin:20px 0;">🎵🎤🔥</div>
       <p style="font-size:20px;">¡Escucha la canción y continúa su letra!</p>
     `;
+    actionBtnBox.innerHTML = `<button onclick="playSpecificSong(noteSongs, true)" style="font-size:18px;padding:14px 30px;background:#ff5c8a;color:#fff;">🔀 Siguiente Canción</button>`;
   } else if(i === 1){
     box.innerHTML = `
       <div style="font-size:75px; margin:10px 0;">🎧🎶🔥</div>
       <p style="font-size:22px;">Escucha la pista musical aleatoria y adivina el nombre de la canción.</p>
     `;
+    actionBtnBox.innerHTML = `<button onclick="playSpecificSong(guessSongs, false)" style="font-size:18px;padding:14px 30px;background:#7c5cff;color:#fff;">🔀 Siguiente Canción</button>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
@@ -531,15 +536,17 @@ function renderChallenge(i){
       <div class="word">${word}</div>
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
+    actionBtnBox.innerHTML = `<button onclick="renderChallenge(2)" style="font-size:18px;padding:14px 30px;background:#00bfa6;color:#fff;">🔀 Otra Palabra</button>`;
   } else {
     const item = emojiDatabase[Math.floor(Math.random() * emojiDatabase.length)];
     currentAnswer = item.name;
     box.innerHTML = `
       <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
       <div class="emoji-song">${item.emojis}</div>
-      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
-      <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
+      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;margin-bottom:15px;">💡 REVELAR RESPUESTA</button>
+      <div id="emojiAnswer" style="display:none;margin-top:10px;font-size:30px;font-weight:900;color:#ffd54a"></div>
     `;
+    actionBtnBox.innerHTML = `<button onclick="renderChallenge(3)" style="font-size:18px;padding:14px 30px;background:#ff9f43;color:#fff;">🔀 Siguientes Emojis</button>`;
   }
 }
 
@@ -562,6 +569,7 @@ function backHome(){
   }
 
   document.getElementById("challengeContent").innerHTML = "";
+  document.getElementById("challengeActionBtn").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 }
