@@ -189,7 +189,6 @@ let isMusicActive = false;
 let wasMusicPlayingBeforeChallenge = false;
 let noteLoopTimer = null;
 let volumeCheckInterval = null;
-let guessSongTimeout = null;
 let challengePlayer = null;
 let currentSongData = null;
 
@@ -215,7 +214,7 @@ function toggleMainMusic() {
 
 const challenges = [
   { name:["Caiga en", "la nota"], emoji:"🎵", desc:"¡Atento! Suena una canción aleatoria y debes continuarla o cantarla.", color:"#ff5c8a" },
-  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Escucha la canción durante 10 segundos y adivina el título exacto.", color:"#7c5cff" },
+  { name:["Adivina el nombre", "de la canción"], emoji:"🔎", desc:"Escucha la canción aleatoria y adivina el título exacto.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada en pantalla.", color:"#00bfa6" },
   { name:["Adivina la canción", "con emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
@@ -225,14 +224,14 @@ const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
   { title: "Los Auténticos Decadentes - Mil Horas", id: "1To_Wz5RWi0", start: 0 },
-  { title: "Rikarena - Когда El Amor Se Daña", id: "MB4o_V8AZa4", start: 23 },
+  { title: "Rikarena - Cuando El Amor Se Daña", id: "MB4o_V8AZa4", start: 23 },
   { title: "Eddy Herrera - Pégame Tu Vicio", id: "yWSQxGppcFA", start: 15 },
   { title: "Bacilos - Caraluna", id: "-zgDXIi1uYw", start: 0 },
   { title: "Los de Adentro - Una Canción", id: "Q9W5uIMAbb8", start: 25 },
   { title: "Carlos Baute - Colgando en tus manos", id: "qExd-3oCTl4", start: 10 }
 ];
 
-// Canciones exclusivas para "Adivina el nombre de la canción" con los IDs que proporcionaste
+// Canciones para "Adivina el nombre de la canción" (Índice 1) - Suenan continuas y normales sin cronómetro
 const guessSongs = [
   { title: "Pista 1", id: "yRUqUJta_rw", start: 0 },
   { title: "Pista 2", id: "fYGSv0e6zWA", start: 0 },
@@ -366,7 +365,7 @@ function startChallenge(){
     if (selectedIndex === 0) {
       startDynamicLoop(noteSongs, 120000, 15000, true);  
     } else if (selectedIndex === 1) {
-      playGuessSongOnce(guessSongs); // Reproduce 10 segundos y pausa
+      playSpecificSong(guessSongs, false); // Reproduce continua y normal sin alteraciones ni pausas
     }
   } else {
     stopChallengePlayer();
@@ -405,6 +404,7 @@ function startVolumeTracker() {
 }
 
 function playSpecificSong(songsList, enableVolumeChanges) {
+  stopVolumeTracker();
   currentSongData = songsList[Math.floor(Math.random() * songsList.length)];
   
   if (!challengePlayer) {
@@ -424,8 +424,6 @@ function playSpecificSong(songsList, enableVolumeChanges) {
           event.target.playVideo();
           if (enableVolumeChanges) {
             startVolumeTracker();
-          } else {
-            stopVolumeTracker();
           }
         }
       }
@@ -439,65 +437,13 @@ function playSpecificSong(songsList, enableVolumeChanges) {
       challengePlayer.setVolume(100);
       if (enableVolumeChanges) {
         startVolumeTracker();
-      } else {
-        stopVolumeTracker();
       }
-    }
-  }
-}
-
-// Reproduce una canción aleatoria por 10 segundos y luego la pausa automáticamente
-function playGuessSongOnce(songsList) {
-  if (guessSongTimeout) clearTimeout(guessSongTimeout);
-  stopVolumeTracker();
-  
-  currentSongData = songsList[Math.floor(Math.random() * songsList.length)];
-  
-  if (!challengePlayer) {
-    challengePlayer = new YT.Player('youtube-challenge-player', {
-      height: '200',
-      width: '200',
-      videoId: currentSongData.id,
-      playerVars: {
-        'autoplay': 1,
-        'start': currentSongData.start,
-        'enablejsapi': 1,
-        'origin': window.location.origin
-      },
-      events: {
-        'onReady': (event) => {
-          event.target.setVolume(100);
-          event.target.playVideo();
-          
-          // Cronómetro de 10 segundos para pausar
-          guessSongTimeout = setTimeout(() => {
-            if (challengePlayer && typeof challengePlayer.pauseVideo === 'function') {
-              challengePlayer.pauseVideo();
-            }
-          }, 10000);
-        }
-      }
-    });
-  } else {
-    if (typeof challengePlayer.loadVideoById === 'function') {
-      challengePlayer.loadVideoById({
-        videoId: currentSongData.id,
-        startSeconds: currentSongData.start
-      });
-      challengePlayer.setVolume(100);
-      
-      guessSongTimeout = setTimeout(() => {
-        if (challengePlayer && typeof challengePlayer.pauseVideo === 'function') {
-          challengePlayer.pauseVideo();
-        }
-      }, 10000);
     }
   }
 }
 
 function stopChallengePlayer() {
   stopVolumeTracker();
-  if (guessSongTimeout) clearTimeout(guessSongTimeout);
   if (challengePlayer && typeof challengePlayer.stopVideo === 'function') {
     challengePlayer.stopVideo();
   }
@@ -574,8 +520,8 @@ function renderChallenge(i){
     `;
   } else if(i === 1){
     box.innerHTML = `
-      <div style="font-size:75px; margin:10px 0;">⏱️🎶🎧</div>
-      <p style="font-size:22px;">La canción sonará por 10 segundos y se pausará automáticamente. ¡Adivina el título!</p>
+      <div style="font-size:75px; margin:10px 0;">🎧🎶🔥</div>
+      <p style="font-size:22px;">Escucha la pista musical aleatoria y adivina el nombre de la canción.</p>
     `;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
