@@ -147,17 +147,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- Reproductor oculto de YouTube para la música de ambiente -->
-<div style="display:none;"><div id="ambientPlayerElement"></div></div>
-
 <section id="home" class="screen active">
   <div class="card">
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
-
-    <div style="margin:15px auto 15px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-    </div>
 
     <div class="wheel-wrap">
       <div class="pointer"></div>
@@ -185,51 +178,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let ambientPlaying = false;
-let userActivatedMusic = false;
-let ambientPlayer = null;
-const ambientId = "P-auj2ElqzI"; // Canción exacta configurada
-
 let challengePlayer = null;
 let volumeTimeouts = [];
 
 function onYouTubeIframeAPIReady() {
-  ambientPlayer = new YT.Player('ambientPlayerElement', {
-    height: '1',
-    width: '1',
-    videoId: ambientId,
-    playerVars: {
-      'autoplay': 0,
-      'loop': 1,
-      'playlist': ambientId, // Obliga a YouTube a repetir este mismo video en bucle sin cambiar de mezcla
-      'playsinline': 1,
-      'enablejsapi': 1
-    },
-    events: {
-      'onReady': (event) => {
-        event.target.setVolume(100);
-      }
-    }
-  });
-}
-
-function toggleAmbientMusic(){
-  const btn = document.getElementById("musicBtn");
-  if(!ambientPlayer) return;
-
-  if(!ambientPlaying){
-    ambientPlayer.unMute();
-    ambientPlayer.setVolume(100);
-    ambientPlayer.playVideo();
-    ambientPlaying = true;
-    userActivatedMusic = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-  } else {
-    ambientPlayer.pauseVideo();
-    ambientPlaying = false;
-    userActivatedMusic = false;
-    btn.textContent = "▶️ ACTIVAR MÚSICA";
-  }
+  // Inicialización de YouTube API lista
 }
 
 const noteSongs = [
@@ -415,10 +368,6 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(ambientPlaying && ambientPlayer){
-    ambientPlayer.pauseVideo();
-  }
-
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -538,11 +487,6 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  if(userActivatedMusic && ambientPlayer){
-    ambientPlaying = true;
-    ambientPlayer.playVideo();
-  }
 }
 </script>
 </body>
