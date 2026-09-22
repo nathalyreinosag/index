@@ -143,6 +143,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<!-- Cargamos la API de YouTube correctamente -->
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
@@ -157,7 +158,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:15px auto 15px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;" disabled>⏳ CARGANDO MÚSICA...</button>
     </div>
 
     <div class="wheel-wrap">
@@ -195,6 +196,7 @@ const ambientList = "RDKafxrlgKvJo";
 let challengePlayer = null;
 let volumeTimeouts = [];
 
+// Esta función la llama automáticamente YouTube cuando la API está lista
 function onYouTubeIframeAPIReady() {
   ambientPlayer = new YT.Player('ambientPlayerElement', {
     height: '1',
@@ -211,6 +213,10 @@ function onYouTubeIframeAPIReady() {
     events: {
       'onReady': (event) => {
         event.target.setVolume(100);
+        // Habilitamos el botón de música una vez cargado el reproductor
+        const btn = document.getElementById("musicBtn");
+        btn.disabled = false;
+        btn.textContent = "▶️ ACTIVAR MÚSICA";
       }
     }
   });
@@ -220,7 +226,7 @@ function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
 
   if(!ambientPlayer || typeof ambientPlayer.playVideo !== 'function'){
-    alert("El reproductor de fondo aún se está cargando, por favor intenta en un segundo.");
+    alert("El reproductor aún se está conectando, por favor espera un momento.");
     return;
   }
 
