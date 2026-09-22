@@ -143,7 +143,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<!-- Cargamos la API de YouTube correctamente -->
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
@@ -158,7 +157,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:15px auto 15px;text-align:center;">
-      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;" disabled>⏳ CARGANDO MÚSICA...</button>
+      <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
     </div>
 
     <div class="wheel-wrap">
@@ -196,7 +195,6 @@ const ambientList = "RDKafxrlgKvJo";
 let challengePlayer = null;
 let volumeTimeouts = [];
 
-// Esta función la llama automáticamente YouTube cuando la API está lista
 function onYouTubeIframeAPIReady() {
   ambientPlayer = new YT.Player('ambientPlayerElement', {
     height: '1',
@@ -213,10 +211,6 @@ function onYouTubeIframeAPIReady() {
     events: {
       'onReady': (event) => {
         event.target.setVolume(100);
-        // Habilitamos el botón de música una vez cargado el reproductor
-        const btn = document.getElementById("musicBtn");
-        btn.disabled = false;
-        btn.textContent = "▶️ ACTIVAR MÚSICA";
       }
     }
   });
@@ -225,10 +219,7 @@ function onYouTubeIframeAPIReady() {
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
 
-  if(!ambientPlayer || typeof ambientPlayer.playVideo !== 'function'){
-    alert("El reproductor aún se está conectando, por favor espera un momento.");
-    return;
-  }
+  if(!ambientPlayer) return;
 
   if(!ambientPlaying){
     userActivatedMusic = true;
@@ -279,7 +270,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Suena la canción, se baja el volumen a 0% a los 20 segundos para que cantes, y a los 10 segundos sube al 100% para verificar.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -453,20 +444,22 @@ function renderChallenge(i){
         <div id="youtubePlayerElement"></div>
       </div>
       <div class="lyrics" style="margin-top:15px">
-        <strong>⚡ DINÁMICA ACTIVA:</strong><br>Se reproduce una canción y se pausa de repente a los 20 segundos; el participante debe continuar cantando exactamente la letra a partir de ese momento, y a los 10 segundos se reanudará para verificar.
+        <strong>⚡ DINÁMICA ACTIVA:</strong><br>A los 20 segundos el volumen bajará al 0% para que cantes, y a los 10 segundos volverá al 100% para verificar si caíste en la nota exacta.
       </div>
     `;
 
     initYTPlayer(currentSong.url, currentSong.time, (player) => {
       let t1 = setTimeout(() => {
-        if(player && typeof player.pauseVideo === 'function') {
-          player.pauseVideo();
+        if(player && typeof player.setVolume === 'function') {
+          player.unMute();
+          player.setVolume(0);
         }
       }, 20000);
 
       let t2 = setTimeout(() => {
-        if(player && typeof player.playVideo === 'function') {
-          player.playVideo();
+        if(player && typeof player.setVolume === 'function') {
+          player.unMute();
+          player.setVolume(100);
         }
       }, 30000);
 
