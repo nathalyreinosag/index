@@ -137,21 +137,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 }
 #youtubePlayerElement{width:100%;height:320px;}
 
-/* Contenedor del mix de fondo */
-#mixContainer {
-  margin: 15px auto;
-  max-width: 450px;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  display: none;
-}
-#mixFrame {
-  width: 100%;
-  height: 140px;
-  border: 0;
-}
-
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
@@ -166,14 +151,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- BOTÓN DE ACTIVAR MÚSICA Y REPRODUCTOR DEL MIX -->
-    <div style="margin:15px auto;text-align:center;">
-      <button id="musicBtn" onclick="toggleMixMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
-      
-      <!-- Reproductor por iframe directo (garantiza reproducción inmediata) -->
-      <div id="mixContainer">
-        <iframe id="mixFrame" src="" allow="autoplay"></iframe>
-      </div>
+    <!-- BOTÓN DE ACTIVAR MÚSICA (Abre el mix sin bloqueos de YouTube) -->
+    <div style="margin:20px auto;text-align:center;">
+      <a href="https://www.youtube.com/watch?v=P-auj2ElqzI" target="_blank" style="text-decoration:none;">
+        <button type="button" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
+          🎵 ABRIR MIX DE LA OFI EN YOUTUBE
+        </button>
+      </a>
+      <p style="font-size:14px;opacity:0.8;margin-top:8px;">Haz clic para reproducir el mix en una pestaña y disfruta la ruleta aquí abajo 👇</p>
     </div>
 
     <div class="wheel-wrap">
@@ -202,34 +187,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-let mixPlaying = false;
-let userActivatedMix = false;
 let challengePlayer = null;
 
 function onYouTubeIframeAPIReady() {
-  // API lista para los retos
-}
-
-function toggleMixMusic(){
-  const btn = document.getElementById("musicBtn");
-  const container = document.getElementById("mixContainer");
-  const frame = document.getElementById("mixFrame");
-
-  if(!mixPlaying){
-    container.style.display = "block";
-    // Cargamos el enlace con autoplay=1 para forzar la reproducción inmediata
-    frame.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&enablejsapi=1";
-    mixPlaying = true;
-    userActivatedMix = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
-  } else {
-    // Al pausar limpiamos el src para detener completamente el audio del mix
-    frame.src = "";
-    container.style.display = "none";
-    mixPlaying = false;
-    userActivatedMix = false;
-    btn.textContent = "▶️ ACTIVAR MÚSICA";
-  }
+  // API lista para los retos de canciones individuales
 }
 
 const noteSongs = [
@@ -388,12 +349,6 @@ function showResult(){
 }
 
 function startChallenge(){
-  if(mixPlaying){
-    // Pausamos el mix al entrar al reto
-    document.getElementById("mixFrame").src = "";
-    document.getElementById("mixContainer").style.display = "none";
-  }
-
   const c = challenges[selectedIndex];
   document.getElementById("home").classList.remove("active");
   document.getElementById("challenge").classList.add("active");
@@ -491,13 +446,6 @@ function backHome(){
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
-
-  if(userActivatedMix){
-    // Reanudamos el mix al volver a casa
-    document.getElementById("mixContainer").style.display = "block";
-    document.getElementById("mixFrame").src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&enablejsapi=1";
-    mixPlaying = true;
-  }
 }
 </script>
 </body>
