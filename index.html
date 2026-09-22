@@ -151,12 +151,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:20px auto;text-align:center;">
-      <!-- Botón de música ambiental independiente -->
+      <!-- Botón de música ambiental totalmente funcional con audio nativo -->
       <button type="button" onclick="toggleAmbientMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor oculto fuera de pantalla para cumplir con las políticas de YouTube -->
-      <div id="ambientContainer" style="position:absolute; left:-9999px; top:-9999px; width:50px; height:50px; overflow:hidden; pointer-events:none;"></div>
+      <!-- Elemento de audio en bucle independiente -->
+      <audio id="ambientAudio" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+      </audio>
     </div>
 
     <div class="wheel-wrap">
@@ -190,19 +192,20 @@ let challengePlayer = null;
 let isAmbientPlaying = false;
 let noteInterval = null;
 
-const ambientPlaylistId = "P-auj2ElqzI"; 
-
-// Control directo del botón de música ambiental con tu link exacto
+// Control independiente y directo para la música de fondo ambiental
 function toggleAmbientMusic() {
   const btn = document.getElementById('musicBtn');
-  const container = document.getElementById('ambientContainer');
+  const audio = document.getElementById('ambientAudio');
 
   if (!isAmbientPlaying) {
-    container.innerHTML = `<iframe width="50" height="50" src="https://www.youtube.com/embed/${ambientPlaylistId}?autoplay=1&loop=1&playlist=${ambientPlaylistId}" frameborder="0" allow="autoplay"></iframe>`;
-    isAmbientPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    audio.play().then(() => {
+      isAmbientPlaying = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    }).catch(e => {
+      alert("Haz clic de nuevo para permitir la reproducción de audio.");
+    });
   } else {
-    container.innerHTML = "";
+    audio.pause();
     isAmbientPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
