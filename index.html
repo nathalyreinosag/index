@@ -150,12 +150,14 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
+    <!-- Panel de control de música ambiental garantizado -->
     <div style="margin:20px auto;text-align:center;">
-      <p style="font-size:16px;margin-bottom:8px;">🎵 Reproductor de Música Ambiental:</p>
-      <!-- Contenedor visible y funcional exigido por las políticas de YouTube para evitar bloqueos -->
-      <div style="max-width:400px;margin:0 auto;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.5);">
-        <iframe width="100%" height="180" src="https://www.youtube.com/embed/P-auj2ElqzI" title="Mix Ambient" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
+      <button type="button" onclick="toggleAmbientMusic()" id="ambientBtn" style="font-size:18px;padding:14px 32px;background:#ffd54a;color:#24102f;cursor:pointer;font-weight:bold;">
+        🎵 ACTIVAR MÚSICA AMBIENTAL
+      </button>
+      <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+      </audio>
     </div>
 
     <div class="wheel-wrap">
@@ -187,6 +189,25 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script>
 let challengePlayer = null;
 let noteInterval = null;
+let isPlayingAmbient = false;
+
+function toggleAmbientMusic() {
+  const audio = document.getElementById("bgMusic");
+  const btn = document.getElementById("ambientBtn");
+
+  if (!isPlayingAmbient) {
+    audio.play().then(() => {
+      isPlayingAmbient = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA AMBIENTAL";
+    }).catch(err => {
+      alert("Haz clic nuevamente para permitir la reproducción.");
+    });
+  } else {
+    audio.pause();
+    isPlayingAmbient = false;
+    btn.textContent = "🎵 ACTIVAR MÚSICA AMBIENTAL";
+  }
+}
 
 const noteSongs = [
   { title: "Todo Lo Fue", url: "kwwdY1bp-Ck", time: "0:00" }
