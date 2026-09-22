@@ -134,6 +134,8 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<!-- Cargamos la API de YouTube -->
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -142,9 +144,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
 </div>
 
-<!-- REPRODUCTOR PARA "CAIGA EN LA NOTA" -->
+<!-- CONTENEDOR PARA EL REPRODUCTOR OFICIAL DE "CAIGA EN LA NOTA" -->
 <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
-  <iframe id="challenge-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
+  <div id="youtube-challenge-player"></div>
 </div>
 
 <section id="home" class="screen active">
@@ -188,8 +190,10 @@ let isMusicActive = false;
 let wasMusicPlayingBeforeChallenge = false;
 let noteLoopTimer = null;
 let volumeControlTimers = [];
+let challengePlayer = null;
+let currentSongData = null;
+
 const iframeMain = document.getElementById("youtube-audio-frame");
-const iframeChallenge = document.getElementById("challenge-audio-frame");
 
 function toggleMainMusic() {
   const btn = document.getElementById("musicBtn");
@@ -347,10 +351,10 @@ function startChallenge(){
     if (selectedIndex === 0) {
       startCaigaEnLaNotaLoop();
     } else {
-      iframeChallenge.src = "";
+      stopChallengePlayer();
     }
   } else {
-    iframeChallenge.src = "";
+    stopChallengePlayer();
   }
 
   renderChallenge(selectedIndex);
@@ -364,31 +368,66 @@ function clearVolumeTimers() {
 function setupVolumeControlForSong() {
   clearVolumeTimers();
   
-  // A los 1 minuto y 10 segundos (70,000 ms), baja el volumen a 15%
+  // A los 1 minuto y 10 segundos (70,000 ms), baja el volumen al 15%
   let t1 = setTimeout(() => {
-    try {
-      iframeChallenge.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[15]}', '*');
-    } catch(e) {}
+    if (challengePlayer && typeof challengePlayer.setVolume === 'function') {
+      challengePlayer.setVolume(15);
+    }
   }, 70000);
 
-  // A los 1 minuto y 30 segundos (90,000 ms - es decir, 20 segundos después de bajarlo), sube el volumen de nuevo al 100%
+  // A los 1 minuto y 30 segundos (90,000 ms - 20 segundos después), sube el volumen al 100%
   let t2 = setTimeout(() => {
-    try {
-      iframeChallenge.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
-    } catch(e) {}
+    if (challengePlayer && typeof challengePlayer.setVolume === 'function') {
+      challengePlayer.setVolume(100);
+    }
   }, 90000);
 
   volumeControlTimers.push(t1, t2);
 }
 
+function playRandomNoteSong() {
+  currentSongData = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+  
+  if (!challengePlayer) {
+    challengePlayer = new YT.Player('youtube-challenge-player', {
+      height: '200',
+      width: '200',
+      videoId: currentSongData.id,
+      playerVars: {
+        'autoplay': 1,
+        'start': currentSongData.start,
+        'enablejsapi': 1
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.setVolume(100);
+          event.target.playVideo();
+          setupVolumeControlForSong();
+        }
+      }
+    });
+  } else {
+    if (typeof challengePlayer.loadVideoById === 'function') {
+      challengePlayer.loadVideoById({
+        videoId: currentSongData.id,
+        startSeconds: currentSongData.start
+      });
+      challengePlayer.setVolume(100);
+      setupVolumeControlForSong();
+    }
+  }
+}
+
+function stopChallengePlayer() {
+  if (challengePlayer && typeof challengePlayer.stopVideo === 'function') {
+    challengePlayer.stopVideo();
+  }
+}
+
 function startCaigaEnLaNotaLoop() {
   if (noteLoopTimer) clearInterval(noteLoopTimer);
   
-  const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-  const playUrl = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1&enablejsapi=1`;
-  
-  iframeChallenge.src = playUrl;
-  setupVolumeControlForSong();
+  playRandomNoteSong();
   
   const playDuration = 120000; // 2 minutos
   const pauseDuration = 15000;  // 15 segundos de pausa antes de reactivar
@@ -397,14 +436,13 @@ function startCaigaEnLaNotaLoop() {
   noteLoopTimer = setInterval(() => {
     // Pausar tras 2 minutos
     setTimeout(() => {
-      iframeChallenge.src = "";
+      stopChallengePlayer();
       clearVolumeTimers();
     }, playDuration);
     
-    // Activar de nuevo a los 15 segundos adicionales de pausa
+    // Activar de nuevo tras la pausa
     setTimeout(() => {
-      iframeChallenge.src = playUrl;
-      setupVolumeControlForSong();
+      playRandomNoteSong();
     }, totalCycle);
   }, totalCycle);
 }
@@ -512,7 +550,7 @@ function backHome(){
   clearInterval(timer);
   if (noteLoopTimer) clearInterval(noteLoopTimer);
   clearVolumeTimers();
-  iframeChallenge.src = "";
+  stopChallengePlayer();
 
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
