@@ -324,18 +324,18 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Guardamos el estado actual del mix antes de entrar al desafío
+  // Guardamos si la música principal estaba activa al iniciar el desafío
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
   if (selectedIndex === 0) {
-    // 1. Caiga en la nota: suena la canción de nota (pausa el mix de fondo)
+    // Caiga en la nota: suena la canción propia
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else if (selectedIndex === 1) {
-    // 2. Adivina la canción: no tiene música propia, pero como pide pausa, pausamos el mix de fondo
+    // Adivina la canción: pausa el mix principal
     iframe.src = "";
   } else {
-    // 3 y 4: Ruleta de palabras / Adivina con emojis -> El mix de fondo debe sonar
+    // Ruleta de palabras y Adivina con emojis: el mix principal debe sonar de fondo
     if (wasMusicPlayingBeforeChallenge) {
       iframe.src = MIX_EMBED_URL;
     }
@@ -409,7 +409,8 @@ function startTimer(){
 function backHome(){
   clearInterval(timer);
   
-  // Al volver a la ruleta, si el mix estaba activo originalmente, lo restauramos
+  // Al salir de las dinámicas con música (Caiga en la nota o Adivina la canción), 
+  // si el mix estaba activado antes, se retoma; de lo contrario se apaga.
   if (wasMusicPlayingBeforeChallenge) {
     iframe.src = MIX_EMBED_URL;
     isMusicActive = true;
