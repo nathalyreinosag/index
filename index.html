@@ -154,9 +154,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor visible para cumplir con las políticas de reproducción del navegador -->
-      <div id="ambientContainer" style="display:none; margin:15px auto; width:280px; height:160px; border-radius:12px; overflow:hidden; border:2px solid rgba(255,255,255,0.2);">
-        <iframe id="ambientIframe" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media"></iframe>
+      <!-- Contenedor oculto pero gestionado de forma nativa por la API de YouTube -->
+      <div id="ambientContainer" style="display:none; width:0; height:0; overflow:hidden;">
+        <div id="ambientPlayerElement"></div>
       </div>
     </div>
 
@@ -188,24 +188,50 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
+let ambientPlayer = null;
 let isPlaying = false;
 let noteInterval = null;
 
 const ambientPlaylist = "P-auj2ElqzI"; 
 
+// Inicialización global para la API de YouTube
+function onYouTubeIframeAPIReady() {
+  // El reproductor ambiental se precarga de manera invisible
+  ambientPlayer = new YT.Player('ambientPlayerElement', {
+    height: '1',
+    width: '1',
+    videoId: ambientPlaylist,
+    playerVars: {
+      'autoplay': 0,
+      'loop': 1,
+      'playlist': ambientPlaylist,
+      'playsinline': 1,
+      'enablejsapi': 1
+    },
+    events: {
+      'onReady': (event) => {
+        event.target.setVolume(100);
+      }
+    }
+  });
+}
+
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
   const container = document.getElementById('ambientContainer');
-  const iframe = document.getElementById('ambientIframe');
 
   if (!isPlaying) {
     container.style.display = "block";
-    iframe.src = `https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}`;
+    if (ambientPlayer && typeof ambientPlayer.playVideo === 'function') {
+      ambientPlayer.unMute();
+      ambientPlayer.playVideo();
+    }
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    iframe.src = "";
-    container.style.display = "none";
+    if (ambientPlayer && typeof ambientPlayer.pauseVideo === 'function') {
+      ambientPlayer.pauseVideo();
+    }
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
