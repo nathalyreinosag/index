@@ -135,11 +135,11 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música para activar el Mix -->
+    <!-- Botón de música que activa tu Mix exacto -->
     <div style="margin:25px auto; text-align:center;">
       <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor oculto del reproductor para el Mix y las canciones -->
+      <!-- Reproductor integrado oculto -->
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
         <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
       </div>
@@ -171,13 +171,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </section>
 
 <script>
-// ⚠️ TU ENLACE DE MIX DE YOUTUBE (Modifica esta variable con tu lista/mix completo)
-const MIX_EMBED_URL = "https://www.youtube.com/embed/videoseries?list=RDAMTAQ-AJS4Y&autoplay=1&loop=1";
+// 🎵 Enlace del Mix configurado con tu URL: youtube.com/watch?v=P-auj2ElqzI
+const MIX_EMBED_URL = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
 
 let isMusicActive = false;
 const iframe = document.getElementById("youtube-audio-frame");
 
-// Control del botón de activar/pausar el mix principal
+// Control del botón de activar/pausar tu mix
 function toggleMainMusic() {
   const btn = document.getElementById("musicBtn");
   
@@ -203,7 +203,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// 🎶 Lista exclusiva para la dinámica "Caiga en la nota" con IDs y segundos exactos configurados
+// 🎶 Canciones configuradas para la dinámica "Caiga en la nota" con ID y segundo exacto
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -323,12 +323,11 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // CORRECCIÓN EXACTA: Si cae en "Caiga en la nota" (índice 0), reproduce aleatoriamente una canción de la lista con su segundo exacto
+  // Si cae en "Caiga en la nota" (índice 0), cambia a una canción aleatoria con su segundo exacto
   if (selectedIndex === 0) {
     const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   } else {
-    // Si es otro reto, limpia la música del reproductor para no mezclar
     iframe.src = "";
   }
 
@@ -399,7 +398,6 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  // Al volver a la ruleta, reseteamos el reproductor y dejamos listo el botón para tu mix
   iframe.src = "";
   isMusicActive = false;
   const btn = document.getElementById("musicBtn");
