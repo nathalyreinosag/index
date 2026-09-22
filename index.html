@@ -137,17 +137,18 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   box-shadow:0 12px 30px rgba(0,0,0,.6);
   background:#000;
 }
-iframe{width:100%;height:320px;border:0;display:block;}
+#youtubePlayerElement{width:100%;height:320px;}
 
 @keyframes pop{
   0%{transform:scale(.85);opacity:0;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
+<!-- Cargamos la API de YouTube oficiales -->
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<!-- Iframe oculto en segundo plano exclusivamente para la música de fondo -->
 <div style="display:none;">
   <iframe id="ambientIframe" src="" allow="autoplay"></iframe>
 </div>
@@ -158,7 +159,6 @@ iframe{width:100%;height:320px;border:0;display:block;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
     <p class="subtitle">¡Gira la ruleta, descubre tu desafío y pasa un buen rato! 🎶</p>
 
-    <!-- Único botón para activar/pausar -->
     <div style="margin:15px auto 15px;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
     </div>
@@ -192,7 +192,8 @@ iframe{width:100%;height:320px;border:0;display:block;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 const ambientId = "LypslWGSvSI";
-let volumeTimeout = null;
+let challengePlayer = null;
+let volumeTimeouts = [];
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -215,7 +216,6 @@ function toggleAmbientMusic(){
   }
 }
 
-// Lista exclusiva para "Caiga en la nota"
 const noteSongs = [
   { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51" },
   { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03" },
@@ -231,7 +231,6 @@ const noteSongs = [
   { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" }
 ];
 
-// Canciones para las demás dinámicas
 const generalSongs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
   { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
@@ -241,7 +240,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se le baja el volumen de repente; el participante debe continuar cantando y al minuto se verifica.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Suena la canción, se baja el volumen a 0% a los 20 segundos para que cantes, y a los 10 segundos sube al 100% para verificar.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -251,7 +250,12 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function youtubePlayer(videoId, startTime = "0", enableApi = false){
+function clearAllTimeouts() {
+  volumeTimeouts.forEach(t => clearTimeout(t));
+  volumeTimeouts = [];
+}
+
+function initYTPlayer(videoId, startTime = "0", onReadyCallback) {
   let startSeconds = 0;
   if(startTime.includes(":")) {
     const parts = startTime.split(":");
@@ -259,14 +263,28 @@ function youtubePlayer(videoId, startTime = "0", enableApi = false){
   } else {
     startSeconds = parseInt(startTime) || 0;
   }
-  
-  let apiParam = enableApi ? "&enablejsapi=1" : "";
-  
-  return `
-    <div class="player-container" id="songPlayerContainer">
-      <iframe id="activeSongIframe" src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSeconds}${apiParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-  `;
+
+  if (challengePlayer && typeof challengePlayer.destroy === 'function') {
+    challengePlayer.destroy();
+  }
+
+  challengePlayer = new YT.Player('youtubePlayerElement', {
+    height: '320',
+    width: '100%',
+    videoId: videoId,
+    playerVars: {
+      'autoplay': 1,
+      'start': startSeconds,
+      'playsinline': 1
+    },
+    events: {
+      'onReady': (event) => {
+        event.target.setVolume(100);
+        event.target.playVideo();
+        if(onReadyCallback) onReadyCallback(event.target);
+      }
+    }
+  });
 }
 
 const wheel = document.getElementById("wheel");
@@ -387,30 +405,53 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
-  if(volumeTimeout) clearTimeout(volumeTimeout);
+  clearAllTimeouts();
 
   if(i === 0){
     currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>
-      ${youtubePlayer(currentSong.url, currentSong.time, true)}
+      <div class="player-container">
+        <div id="youtubePlayerElement"></div>
+      </div>
       <div class="lyrics" style="margin-top:15px">
-        <strong>🔉 BAJADA DE VOLUMEN AUTOMÁTICA:</strong><br>Se reproduce la canción y a los 20 segundos el volumen bajará al 5% para que cantes; luego podrás verificar si caíste en la nota exacta.
+        <strong>⚡ DINÁMICA ACTIVA:</strong><br>A los 20 segundos el volumen bajará al 0% para que cantes, y a los 10 segundos volverá al 100% para verificar si caíste en la nota exacta.
       </div>
     `;
 
-    // A los 20 segundos (20000 ms), bajamos el volumen del reproductor de YouTube a 5
-    volumeTimeout = setTimeout(() => {
-      const activeFrame = document.getElementById("activeSongIframe");
-      if(activeFrame) {
-        activeFrame.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[5]}', '*');
-      }
-    }, 20000);
+    initYTPlayer(currentSong.url, currentSong.time, (player) => {
+      // A los 20 segundos bajamos volumen a 0%
+      let t1 = setTimeout(() => {
+        if(player && typeof player.setVolume === 'function') {
+          player.setVolume(0);
+        }
+      }, 20000);
+
+      // A los 30 segundos (20s + 10s de canto) subimos volumen a 100%
+      let t2 = setTimeout(() => {
+        if(player && typeof player.setVolume === 'function') {
+          player.setVolume(100);
+        }
+      }, 30000);
+
+      volumeTimeouts.push(t1, t2);
+    });
 
   } else if(i === 1){
     currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
-    box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
+    box.innerHTML = `
+      <p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>
+      <div class="player-container"><div id="youtubePlayerElement"></div></div>
+      <div class="timer" id="timer">10</div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button>
+      <button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button>
+      <div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>
+    `;
+    initYTPlayer(currentSong.url, "0");
+
   } else if(i === 2){
+    if (challengePlayer && typeof challengePlayer.destroy === 'function') { challengePlayer.destroy(); }
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
     const word = words[Math.floor(Math.random() * words.length)];
     box.innerHTML = `
@@ -420,7 +461,15 @@ function renderChallenge(i){
     `;
   } else {
     currentSong = generalSongs[Math.floor(Math.random() * generalSongs.length)];
-    box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
+    box.innerHTML = `
+      <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
+      <div class="emoji-song">${currentSong.emojis}</div>
+      <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
+      <div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
+      <div id="emojiMusic" style="margin-top:15px;"><div id="youtubePlayerElement"></div></div>
+      <button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>
+    `;
+    initYTPlayer(currentSong.url, "0");
   }
 }
 
@@ -431,9 +480,7 @@ function revealSong(){
 
 function revealEmojiSong(){
   const a = document.getElementById("emojiAnswer");
-  const m = document.getElementById("emojiMusic");
   if(a){ a.style.display = "block"; a.textContent = "🎉 " + currentSong.title + " — " + currentSong.artist; }
-  if(m){ m.innerHTML = youtubePlayer(currentSong.url); }
 }
 
 function startTimer(){
@@ -457,20 +504,13 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  if(volumeTimeout) clearTimeout(volumeTimeout);
-  
-  // Al salir restablecemos el volumen a 100 por si acaso
-  const activeFrame = document.getElementById("activeSongIframe");
-  if(activeFrame) {
-    try {
-      activeFrame.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
-    } catch(e) {}
+  clearAllTimeouts();
+
+  if (challengePlayer && typeof challengePlayer.destroy === 'function') {
+    challengePlayer.destroy();
   }
 
   document.getElementById("challengeContent").innerHTML = "";
-  const emojiMusic = document.getElementById("emojiMusic");
-  if(emojiMusic) emojiMusic.innerHTML = "";
-  
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
