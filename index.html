@@ -154,8 +154,10 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Contenedor dinámico HTML5 para el Mix de YouTube -->
-      <div id="ambientContainer" style="display:none; margin-top:15px; width:1px; height:1px; opacity:0; overflow:hidden;"></div>
+      <!-- Contenedor iframe fijo para control por postMessage (evita que se reinicie al pausar/reanudar) -->
+      <div id="ambientContainer" style="display:none; margin-top:15px; width:1px; height:1px; opacity:0; overflow:hidden;">
+        <iframe id="ambientIframe" width="100" height="100" src="" frameborder="0" allow="autoplay"></iframe>
+      </div>
     </div>
 
     <div class="wheel-wrap">
@@ -196,15 +198,19 @@ const ambientPlaylist = "P-auj2ElqzI";
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
   const container = document.getElementById('ambientContainer');
+  const iframe = document.getElementById('ambientIframe');
 
   if (!isPlaying) {
     container.style.display = "block";
-    container.innerHTML = `<iframe width="100" height="100" src="https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}" frameborder="0" allow="autoplay"></iframe>`;
+    if (!iframe.src.includes(ambientPlaylist)) {
+      iframe.src = `https://www.youtube.com/embed/${ambientPlaylist}?enablejsapi=1&autoplay=1&loop=1&playlist=${ambientPlaylist}`;
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    container.innerHTML = "";
-    container.style.display = "none";
+    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
@@ -371,10 +377,16 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Pausar música ambiental al entrar al reto si estaba sonando
-  musicWasPlayingBeforeChallenge = isPlaying;
-  if (isPlaying) {
-    document.getElementById('ambientContainer').innerHTML = "";
+  // EXCEPCIÓN: Si es la dinámica "Adivina la canción" (índice 1), NO pausamos la música ambiental
+  if (selectedIndex === 1) {
+    musicWasPlayingBeforeChallenge = false;
+  } else {
+    // Para las demás dinámicas, pausamos la música ambiental sin perder el segundo actual
+    musicWasPlayingBeforeChallenge = isPlaying;
+    if (isPlaying) {
+      const iframe = document.getElementById('ambientIframe');
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
   }
 
   const c = challenges[selectedIndex];
@@ -475,9 +487,10 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Reanudar música ambiental al volver si estaba activa antes del reto
+  // Reanudar la música ambiental exactamente donde iba al volver a la ruleta (si estaba activa antes)
   if (musicWasPlayingBeforeChallenge) {
-    document.getElementById('ambientContainer').innerHTML = `<iframe width="100" height="100" src="https://www.youtube.com/embed/${ambientPlaylist}?autoplay=1&loop=1&playlist=${ambientPlaylist}" frameborder="0" allow="autoplay"></iframe>`;
+    const iframe = document.getElementById('ambientIframe');
+    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
   }
 }
 </script>
