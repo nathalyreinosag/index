@@ -142,7 +142,6 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   100%{transform:scale(1);opacity:1;}
 }
 </style>
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -155,7 +154,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
       <button type="button" onclick="toggleMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <div id="ambientPlayerContainer" style="display:none; width:0; height:0; overflow:hidden;"></div>
+      <audio id="bgAudio" src="https://www.youtube.com/watch?v=P-auj2ElqzI" preload="auto" loop></audio>
     </div>
 
     <div class="wheel-wrap">
@@ -183,36 +182,31 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
-let ambientPlayer = null;
 let isPlaying = false;
-
-function onYouTubeIframeAPIReady() {
-  ambientPlayer = new YT.Player('ambientPlayerContainer', {
-    height: '1',
-    width: '1',
-    videoId: 'P-auj2ElqzI',
-    playerVars: {
-      'autoplay': 0,
-      'controls': 0
-    }
-  });
-}
 
 function toggleMusic() {
   const btn = document.getElementById('musicBtn');
-  if (!ambientPlayer) return;
+  const audio = document.getElementById('bgAudio');
 
   if (!isPlaying) {
-    ambientPlayer.playVideo();
-    isPlaying = true;
-    btn.textContent = "⏸️ PAUSAR MÚSICA";
+    audio.play().then(() => {
+      isPlaying = true;
+      btn.textContent = "⏸️ PAUSAR MÚSICA";
+    }).catch(error => {
+      console.log("Error al reproducir:", error);
+      window.open("https://www.youtube.com/watch?v=P-auj2ElqzI", "_blank");
+    });
   } else {
-    ambientPlayer.pauseVideo();
+    audio.pause();
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
+}
+
+function onYouTubeIframeAPIReady() {
 }
 
 const noteSongs = [
