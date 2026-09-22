@@ -190,7 +190,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
 
 <script>
 let ambientPlaying = false;
-let userActivatedMusic = false; // Guarda si el usuario decidió prender la música
+let userActivatedMusic = false;
 const ambientId = "LypslWGSvSI";
 
 function toggleAmbientMusic(){
@@ -214,14 +214,26 @@ function toggleAmbientMusic(){
   }
 }
 
+// Canciones actualizadas exclusivamente para la dinámica "Caiga en la nota"
+const noteSongs = [
+  { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51", emojis:"🎧🔥" },
+  { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03", emojis:"💍❤️" },
+  { title:"Devuélveme a mi Chica", artist:"Hombres G", url:"LgQYPqr9Rho", time:"0:00", emojis:"🎸🕶️" },
+  { title:"Mil Horas", artist:"Los Abuelos de la Nada", url:"1To_Wz5RWi0", time:"0:00", emojis:"🌸⏰" },
+  { title:"Cuando El AMOR Se Daña", artist:"Rikarena", url:"MB4o_V8AZa4", time:"0:23", emojis:"💔🎶" },
+  { title:"Pégame Tu VICIO", artist:"Eddy Herrera", url:"yWSQxGppcFA", time:"0:15", emojis:"🕺🔥" },
+  { title:"Caraluna", artist:"Bacilos", url:"-zgDXIi1uYw", time:"0:00", emojis:"🌕🌊" },
+  { title:"Una Cancion", artist:"Los de Adentro", url:"Q9W5uIMAbb8", time:"0:25", emojis:"🎸🎤" },
+  { title:"Colgando en tus manos", artist:"Carlos Baute", url:"qExd-3oCTl4", time:"0:10", emojis:"🤝✨" },
+  { title:"Nuqui (Te Quiero Para Mi)", artist:"ChocQuibTown", url:"EzbzWerC9AM", time:"0:10", emojis:"🌴☀️" },
+  { title:"Morenamia", artist:"Miguel Bosé", url:"ljO63sL2CWc", time:"0:10", emojis:"🌹🔥" },
+  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30", emojis:"🚗💨" }
+];
+
+// O si prefieres mantener otras canciones para el resto de modalidades (puedes dejarlas o adaptarlas):
 const songs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
-  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
-  { title:"QLONA", artist:"Karol G & Peso Pluma", url:"BeUOBoSPWvA", emojis:"💎💋🔥" },
-  { title:"CLASSY 101", artist:"Feid & Young Miko", url:"cD5T1Y4b7wA", emojis:"🕶️🟢🔥" },
-  { title:"LUNA", artist:"Feid & ATL Jacob", url:"ZA7ZKB8Mo9k", emojis:"🌙🐺💚" },
-  { title:"Aventurero", artist:"Yeison Jiménez", url:"mxGwsZGEXuM", emojis:"🤠🐎🍻" },
-  { title:"El Desmadre", artist:"Yeison Jiménez", url:"IORcue9-6tw", emojis:"🥃🎵🤠" }
+  { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" }
 ];
 
 const challenges = [
@@ -235,14 +247,22 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-function pickSong(){
-  return songs[Math.floor(Math.random() * songs.length)];
+function pickSong(list){
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-function youtubePlayer(videoId){
+function youtubePlayer(videoId, startTime = "0"){
+  // Convertir formato tipo "0:51" a segundos si es necesario, o pasar el parámetro start de YouTube
+  let startSeconds = 0;
+  if(startTime.includes(":")) {
+    const parts = startTime.split(":");
+    startSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  } else {
+    startSeconds = parseInt(startTime) || 0;
+  }
   return `
     <div class="player-container" id="songPlayerContainer">
-      <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSeconds}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
   `;
 }
@@ -347,7 +367,6 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Si la música de fondo estaba sonando, la pausamos en segundo plano sin perder su posición
   if(ambientPlaying){
     const iframe = document.getElementById("ambientIframe");
     try {
@@ -366,11 +385,12 @@ function startChallenge(){
 function renderChallenge(i){
   const box = document.getElementById("challengeContent");
   clearInterval(timer);
-  currentSong = pickSong();
 
   if(i === 0){
-    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>Pausa la canción en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
+    currentSong = pickSong(noteSongs);
+    box.innerHTML = `<p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>${youtubePlayer(currentSong.url, currentSong.time)}<div class="lyrics" style="margin-top:15px"><strong>⏸️ DINÁMICA:</strong><br>La canción inicia cerca del minuto sugerido (${currentSong.time}). Pausa en cualquier momento y reta a tus compañeros a continuar la letra exacta.</div>`;
   } else if(i === 1){
+    currentSong = pickSong(songs);
     box.innerHTML = `<p style="font-size:20px;">🎧 Escucha la canción y adivina el título o artista.</p>${youtubePlayer(currentSong.url)}<div class="timer" id="timer">10</div><div class="progress"><div class="bar" id="bar"></div></div><button onclick="startTimer()" style="font-size:18px;padding:14px 30px;">▶️ INICIAR CRONÓMETRO</button><button class="secondary" onclick="revealSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR</button><div id="answer" style="display:none;margin-top:15px;font-size:28px;font-weight:900;color:#ffd54a"></div>`;
   } else if(i === 2){
     const words = ["AMOR", "NOCHE", "BAILAR", "CORAZÓN", "FUEGO", "VIDA", "BESO", "SOL", "FIESTA", "LOCURA"];
@@ -381,6 +401,7 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
+    currentSong = pickSong(songs);
     box.innerHTML = `<p style="font-size:20px;">¿Qué canción representan estos emojis?</p><div class="emoji-song">${currentSong.emojis}</div><button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button><div id="emojiAnswer" style="display:none;margin:15px;font-size:30px;font-weight:900;color:#ffd54a"></div><div id="emojiMusic"></div><button class="secondary" style="margin-top:15px;font-size:18px;padding:14px 30px;" onclick="renderChallenge(3)">🔄 OTRO reto</button>`;
   }
 }
@@ -425,7 +446,6 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Al regresar a la ruleta, si el usuario la tenía activada, se reanuda exactamente donde se quedó
   if(userActivatedMusic){
     const iframe = document.getElementById("ambientIframe");
     ambientPlaying = true;
