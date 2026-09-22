@@ -188,21 +188,24 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 let ambientPlayer = null;
-const ambientId = "P-auj2ElqzI"; // ID de la canción de ambiente configurada
-const ambientList = "RDKafxrlgKvJo"; // Lista de reproducción opcional
+
+// ==========================================
+// 🎵 CONFIGURA TU CANCIÓN DE AMBIENTE AQUÍ 🎵
+// ==========================================
+const ambientId = "PON_AQUI_EL_ID_DE_YOUTUBE"; // Ejemplo: "dQw4w9WgXcQ"
+const ambientList = ""; 
 
 let challengePlayer = null;
 let volumeTimeouts = [];
 
 function onYouTubeIframeAPIReady() {
-  // Inicializa el reproductor oculto de ambiente al cargar la página de forma segura
   ambientPlayer = new YT.Player('ambientPlayerElement', {
     height: '1',
     width: '1',
     videoId: ambientId,
     playerVars: {
       'autoplay': 0,
-      'listType': 'playlist',
+      'listType': ambientList ? 'playlist' : '',
       'list': ambientList,
       'loop': 1,
       'playsinline': 1,
