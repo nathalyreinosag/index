@@ -248,7 +248,17 @@ const noteSongs = [
   { title:"Colgando en tus manos", artist:"Carlos Baute", url:"qExd-3oCTl4", time:"0:10" },
   { title:"Nuqui (Te Quiero Para Mi)", artist:"ChocQuibTown", url:"EzbzWerC9AM", time:"0:10" },
   { title:"Morenamia", artist:"Miguel Bosé", url:"ljO63sL2CWc", time:"0:10" },
-  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" }
+  { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" },
+  { title:"Tema 1 (Caiga en la nota)", artist:"Selección Especial", url:"aPQN_xOCfvg", time:"0:00" },
+  { title:"Tema 2 (Caiga en la nota)", artist:"Selección Especial", url:"fVWQ3tq8VU0", time:"0:00" },
+  { title:"Tema 3 (Caiga en la nota)", artist:"Selección Especial", url:"PIoPVz0499c", time:"0:00" },
+  { title:"Querida", artist:"Juan Gabriel", url:"o3J3nrdS2_c", time:"0:00" },
+  { title:"A Esa", artist:"Pimpinela", url:"vdFCr0XOu7o", time:"0:00" },
+  { title:"Tarde Lo Conocí", artist:"Patricia Teherán", url:"iN_5sKv_l74", time:"0:00" },
+  { title:"Olvídala", artist:"Binomio De Oro De América", url:"yry3rgGlRUw", time:"0:24" },
+  { title:"Adiós Amor", artist:"Christian Nodal", url:"ETLoTxVVvjM", time:"0:00" },
+  { title:"Qué Agonía", artist:"Yuridia, Ángela Aguilar", url:"hjFV7gh_lI8", time:"0:00" },
+  { title:"Rata De Dos Patas", artist:"Paquita la del Barrio", url:"VuyvT9inAf8", time:"0:00" }
 ];
 
 const generalSongs = [
@@ -260,7 +270,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Suena la canción, se baja el volumen a 0% a los 20 segundos para que cantes, y a los 10 segundos sube al 100% para verificar.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -434,22 +444,20 @@ function renderChallenge(i){
         <div id="youtubePlayerElement"></div>
       </div>
       <div class="lyrics" style="margin-top:15px">
-        <strong>⚡ DINÁMICA ACTIVA:</strong><br>A los 20 segundos el volumen bajará al 0% para que cantes, y a los 10 segundos volverá al 100% para verificar si caíste en la nota exacta.
+        <strong>⚡ DINÁMICA ACTIVA:</strong><br>Se reproduce una canción y se pausa de repente a los 20 segundos; el participante debe continuar cantando exactamente la letra a partir de ese momento, y a los 10 segundos se reanudará para verificar.
       </div>
     `;
 
     initYTPlayer(currentSong.url, currentSong.time, (player) => {
       let t1 = setTimeout(() => {
-        if(player && typeof player.setVolume === 'function') {
-          player.unMute();
-          player.setVolume(0);
+        if(player && typeof player.pauseVideo === 'function') {
+          player.pauseVideo();
         }
       }, 20000);
 
       let t2 = setTimeout(() => {
-        if(player && typeof player.setVolume === 'function') {
-          player.unMute();
-          player.setVolume(100);
+        if(player && typeof player.playVideo === 'function') {
+          player.playVideo();
         }
       }, 30000);
 
