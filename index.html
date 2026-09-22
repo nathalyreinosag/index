@@ -400,8 +400,8 @@ function showResult(){
 }
 
 function startChallenge(){
-  // Excepción: "Adivina la canción" (índice 1) no pausa la música ambiental
-  if (selectedIndex === 1) {
+  // Excepción: "Adivina la canción" (índice 1) y "Ruleta de palabras" (índice 2) no pausan la música ambiental
+  if (selectedIndex === 1 || selectedIndex === 2) {
     musicWasPlayingBeforeChallenge = false;
   } else {
     musicWasPlayingBeforeChallenge = isPlaying;
