@@ -188,12 +188,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 let ambientPlayer = null;
-
-// ==========================================
-// 🎵 CONFIGURA TU CANCIÓN DE AMBIENTE AQUÍ 🎵
-// ==========================================
-const ambientId = "PON_AQUI_EL_ID_DE_YOUTUBE"; // Ejemplo: "dQw4w9WgXcQ"
-const ambientList = ""; 
+const ambientId = "P-auj2ElqzI"; // Canción exacta configurada
 
 let challengePlayer = null;
 let volumeTimeouts = [];
@@ -205,9 +200,8 @@ function onYouTubeIframeAPIReady() {
     videoId: ambientId,
     playerVars: {
       'autoplay': 0,
-      'listType': ambientList ? 'playlist' : '',
-      'list': ambientList,
       'loop': 1,
+      'playlist': ambientId, // Obliga a YouTube a repetir este mismo video en bucle sin cambiar de mezcla
       'playsinline': 1,
       'enablejsapi': 1
     },
