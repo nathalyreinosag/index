@@ -192,7 +192,7 @@ iframe{width:100%;height:320px;border:0;display:block;}
 let ambientPlaying = false;
 let userActivatedMusic = false;
 const ambientId = "LypslWGSvSI";
-let stopTimeout = null; // Variable para controlar el corte automático a los 20 segundos
+let stopTimeout = null;
 
 function toggleAmbientMusic(){
   const btn = document.getElementById("musicBtn");
@@ -215,7 +215,7 @@ function toggleAmbientMusic(){
   }
 }
 
-// Lista exclusiva para "Caiga en la nota" con sus tiempos de inicio exactos
+// Lista exclusiva para "Caiga en la nota"
 const noteSongs = [
   { title:"Andas En Mi Cabeza", artist:"Chino y Nacho ft. Daddy Yankee", url:"AMTAQ-AJS4Y", time:"0:51" },
   { title:"Cásate Conmigo", artist:"Silvestre Dangond, Nicky Jam", url:"cpN78ZjnCZY", time:"1:03" },
@@ -231,7 +231,7 @@ const noteSongs = [
   { title:"Auto Rojo", artist:"Vilma Palma", url:"95kf6cCasfg", time:"0:30" }
 ];
 
-// Canciones para las demás dinámicas (ej. emojis, adivinar)
+// Canciones para las demás dinámicas
 const generalSongs = [
   { title:"AMARGURA", artist:"Karol G", url:"fEWhm_TVvUw", emojis:"🌺🔥🎵" },
   { title:"PROVENZA", artist:"Karol G", url:"ca48oMV59LU", emojis:"🌺🌊☀️" },
@@ -241,7 +241,7 @@ const generalSongs = [
 ];
 
 const challenges = [
-  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"La canción suena por 20 segundos y se detiene para continuar la letra.", color:"#ff5c8a" },
+  { name:["Caiga en", "la nota"], emoji:"🎵", desc:"Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.", color:"#ff5c8a" },
   { name:["Adivina", "la canción"], emoji:"🔎", desc:"Escucha un fragmento y descubre el título.", color:"#7c5cff" },
   { name:["Ruleta de", "palabras"], emoji:"🎰", desc:"Canta una canción que contenga la palabra seleccionada.", color:"#00bfa6" },
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Descifra la canción representada por los emojis.", color:"#ff9f43" }
@@ -390,17 +390,15 @@ function renderChallenge(i){
   if(stopTimeout) clearTimeout(stopTimeout);
 
   if(i === 0){
-    // Dinámica: Caiga en la nota (usa exclusivamente noteSongs)
     currentSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
     box.innerHTML = `
       <p style="font-size:20px;">🎵 Suena: <b>${currentSong.title}</b> de <em>${currentSong.artist}</em></p>
       ${youtubePlayer(currentSong.url, currentSong.time, true)}
       <div class="lyrics" style="margin-top:15px">
-        <strong>⏱️ AUTOMÁTICO:</strong><br>La canción sonará por <b>20 segundos</b> y se pausará sola. ¡Prepárate para continuar la letra!
+        <strong>⏸️ DINÁMICA:</strong><br>Se reproduce una canción y se pausa de repente; el participante debe continuar cantando exactamente la letra a partir de ese momento.
       </div>
     `;
 
-    // Programar para que a los 20 segundos (20000 ms) se pause automáticamente
     stopTimeout = setTimeout(() => {
       const activeFrame = document.getElementById("activeSongIframe");
       if(activeFrame) {
