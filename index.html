@@ -151,12 +151,12 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
     <div style="margin:20px auto;text-align:center;">
-      <!-- Botón de música ambiental totalmente independiente -->
+      <!-- Botón de música ambiental independiente -->
       <button type="button" onclick="toggleAmbientMusic()" id="musicBtn" style="padding:16px 38px;font-size:20px;background:#ffd54a;color:#24102f;cursor:pointer;">
         🎵 ACTIVAR MÚSICA
       </button>
-      <!-- Elemento oculto limpio para la API de YouTube ambiental -->
-      <div id="ambientPlayerDiv" style="display:none;"></div>
+      <!-- Contenedor oculto fuera de pantalla para cumplir con las políticas de YouTube -->
+      <div id="ambientContainer" style="position:absolute; left:-9999px; top:-9999px; width:50px; height:50px; overflow:hidden; pointer-events:none;"></div>
     </div>
 
     <div class="wheel-wrap">
@@ -187,48 +187,22 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
 let challengePlayer = null;
-let ambientPlayer = null;
 let isAmbientPlaying = false;
 let noteInterval = null;
 
 const ambientPlaylistId = "P-auj2ElqzI"; 
 
-// Callback global de la API de YouTube
-function onYouTubeIframeAPIReady() {
-  ambientPlayer = new YT.Player('ambientPlayerDiv', {
-    height: '1',
-    width: '1',
-    videoId: ambientPlaylistId,
-    playerVars: {
-      'autoplay': 0,
-      'loop': 1,
-      'playlist': ambientPlaylistId,
-      'controls': 0
-    },
-    events: {
-      'onReady': (event) => {
-        event.target.setVolume(100);
-      }
-    }
-  });
-}
-
-// Control exclusivo del botón de música ambiental
+// Control directo del botón de música ambiental con tu link exacto
 function toggleAmbientMusic() {
   const btn = document.getElementById('musicBtn');
-  
-  if (!ambientPlayer) {
-    alert("El reproductor ambiental aún se está cargando, intenta de nuevo en un segundo.");
-    return;
-  }
+  const container = document.getElementById('ambientContainer');
 
   if (!isAmbientPlaying) {
-    ambientPlayer.unMute();
-    ambientPlayer.playVideo();
+    container.innerHTML = `<iframe width="50" height="50" src="https://www.youtube.com/embed/${ambientPlaylistId}?autoplay=1&loop=1&playlist=${ambientPlaylistId}" frameborder="0" allow="autoplay"></iframe>`;
     isAmbientPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
   } else {
-    ambientPlayer.pauseVideo();
+    container.innerHTML = "";
     isAmbientPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
   }
@@ -257,7 +231,7 @@ let currentSong = null;
 let selectedIndex = 0;
 let timer = null;
 
-// Gestor exclusivo para los retos de la ruleta (totalmente separado del botón ambiental)
+// Gestor de YouTube exclusivo para los retos de la ruleta
 function initYTPlayer(videoId, startTime = "0", isNoteChallenge = false) {
   let startSeconds = 0;
   if(typeof startTime === "string" && startTime.includes(":")) {
