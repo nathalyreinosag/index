@@ -147,7 +147,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 </head>
 <body>
 
-<!-- AUDIO DE AMBIENTE ESTABLE NATIVO -->
+<!-- AUDIO DE AMBIENTE ESTABLE NATIVO ORIGINAL -->
 <audio id="ambientAudio" loop preload="auto">
   <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
 </audio>
@@ -157,7 +157,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- BOTÓN DE ACTIVAR MÚSICA FUNCIONAL -->
+    <!-- BOTÓN DE ACTIVAR MÚSICA -->
     <div style="margin:15px auto;text-align:center;">
       <button id="musicBtn" onclick="toggleAmbientMusic()" style="padding:14px 35px;font-size:18px;">▶️ ACTIVAR MÚSICA</button>
     </div>
@@ -394,7 +394,7 @@ function renderChallenge(i){
       <div class="player-container">
         <div id="youtubePlayerElement"></div>
       </div>
-      <button class="secondary" style="margin-top:15px;font-size:18px;padding:12px 25px;" onclick="renderChallenge(0)">🔄 Otra vez / Recargar canción</button>
+      <button class="secondary" style="margin-top:15px;font-size:18px;padding:12px 25px;" onclick="renderChallenge(0)">🔄 Recargar canción</button>
     `;
     initYTPlayer(currentSong.url, currentSong.time);
 
