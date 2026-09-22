@@ -135,14 +135,13 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música para tu mix -->
+    <!-- Botón de música para activar el Mix -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;" disabled>⏳ CARGANDO MIX...</button>
+      <button type="button" id="musicBtn" onclick="toggleMainMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
       
-      <!-- Contenedor oculto exclusivo para el mix principal -->
+      <!-- Contenedor oculto del reproductor para el Mix y las canciones del reto -->
       <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0;">
-        <div id="main-mix-player"></div>
-        <div id="challenge-player"></div>
+        <iframe id="youtube-audio-frame" src="" width="200" height="200" frameborder="0" allow="autoplay"></iframe>
       </div>
     </div>
 
@@ -171,71 +170,26 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   </div>
 </section>
 
-<!-- Script oficial de la API de YouTube -->
-<script src="https://www.youtube.com/iframe_api"></script>
-
 <script>
-let mainPlayer;
-let challengePlayer;
-let isMainReady = false;
-let isChallengeReady = false;
-let isMainPlaying = false;
+// ⚠️ TU ENLACE DE MIX DE YOUTUBE (Configúralo aquí abajo)
+const MIX_EMBED_URL = "https://www.youtube.com/embed/videoseries?list=RDAMTAQ-AJS4Y&autoplay=1&loop=1";
 
-// ⚠️ PEGA AQUÍ EL ENLACE O ID DE TU MIX DE YOUTUBE (Ejemplo: si tu enlace es youtube.com/watch?v=ABC123xyz, pon solo 'ABC123xyz')
-const USER_MIX_ID = 'AMTAQ-AJS4Y'; 
+let isMusicActive = false;
+const iframe = document.getElementById("youtube-audio-frame");
 
-function onYouTubeIframeAPIReady() {
-  // Reproductor para el mix principal del botón
-  mainPlayer = new YT.Player('main-mix-player', {
-    height: '200',
-    width: '200',
-    videoId: USER_MIX_ID,
-    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': USER_MIX_ID, 'enablejsapi': 1 },
-    events: {
-      'onReady': () => {
-        isMainReady = true;
-        checkReadyState();
-      }
-    }
-  });
-
-  // Reproductor independiente para la dinámica "Caiga en la nota"
-  challengePlayer = new YT.Player('challenge-player', {
-    height: '200',
-    width: '200',
-    videoId: 'cpN78ZjnCZY',
-    playerVars: { 'autoplay': 0, 'enablejsapi': 1 },
-    events: {
-      'onReady': () => {
-        isChallengeReady = true;
-        checkReadyState();
-      }
-    }
-  });
-}
-
-function checkReadyState() {
-  if (isMainReady && isChallengeReady) {
-    const btn = document.getElementById("musicBtn");
-    btn.disabled = false;
-    btn.textContent = "🎵 ACTIVAR MÚSICA";
-  }
-}
-
-// Control del botón de activar música
+// Control del botón de activar/pausar música (Mix principal)
 function toggleMainMusic() {
-  if (!isMainReady) return;
   const btn = document.getElementById("musicBtn");
-
-  if (!isMainPlaying) {
-    mainPlayer.playVideo();
-    isMainPlaying = true;
+  
+  if (!isMusicActive) {
+    iframe.src = MIX_EMBED_URL;
+    isMusicActive = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
-    mainPlayer.pauseVideo();
-    isMainPlaying = false;
+    iframe.src = ""; // Detiene la reproducción
+    isMusicActive = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
     btn.style.background = "#ffd54a";
     btn.style.color = "#24102f";
@@ -249,6 +203,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
+// 🎶 Lista exclusiva para la dinámica "Caiga en la nota" con ID y segundo exacto
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -368,18 +323,10 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", pausamos el mix principal y reproducimos la canción del reto
+  // Si cae en "Caiga en la nota" (índice 0), reproduce una canción aleatoria de la lista con su segundo exacto
   if (selectedIndex === 0) {
-    if (isMainPlaying && isMainReady) {
-      mainPlayer.pauseVideo();
-    }
-    if (isChallengeReady) {
-      const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
-      challengePlayer.loadVideoById({
-        'videoId': randomSong.id,
-        'startSeconds': randomSong.start
-      });
-    }
+    const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
+    iframe.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
   }
 
   renderChallenge(selectedIndex);
@@ -449,10 +396,14 @@ function startTimer(){
 
 function backHome(){
   clearInterval(timer);
-  // Al volver, detenemos el reproductor de retos y si el usuario quiere retomar el mix
-  if (isChallengeReady) {
-    challengePlayer.stopVideo();
-  }
+  // Al volver a la ruleta, el reproductor se detiene o puedes reactivar el mix con el botón
+  iframe.src = "";
+  isMusicActive = false;
+  const btn = document.getElementById("musicBtn");
+  btn.textContent = "🎵 ACTIVAR MÚSICA";
+  btn.style.background = "#ffd54a";
+  btn.style.color = "#24102f";
+
   document.getElementById("challengeContent").innerHTML = "";
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
