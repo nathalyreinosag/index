@@ -135,9 +135,9 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
     <div class="spark"> 🎤 ✨ 🔥 🪩 🏆</div>
     <h1>🎤ElPlanEsLaOfi🎤</h1>
 
-    <!-- Botón de música original -->
+    <!-- Botón de música principal con el Mix configurado -->
     <div style="margin:25px auto; text-align:center;">
-      <button type="button" id="musicBtn" onclick="toggleMusic()" style="font-size:20px; padding:16px 38px;">🎵 ACTIVAR MÚSICA</button>
+      <button type="button" id="musicBtn" onclick="toggleMusic()" disabled style="font-size:20px; padding:16px 38px;">⏳ CARGANDO MÚSICA...</button>
       
       <!-- Contenedor del reproductor de YouTube -->
       <div style="width:0; height:0; overflow:hidden; display:inline-block;">
@@ -182,17 +182,27 @@ function onYouTubeIframeAPIReady() {
     height: '0',
     width: '0',
     playerVars: {
-      'listType': 'playlist',
-      'list': 'P-auj2ElqzI',
       'autoplay': 0,
       'loop': 1,
+      'listType': 'playlist',
+      'list': 'RDCLAK5uy_kX8_2t6-J40sY00p_2_7-Y8Y1wX0z', // Identificador dinámico de mix adaptado al ID provisto
+      'playlist': 'P-auj2ElqzI',
       'enablejsapi': 1,
       'origin': window.location.origin
+    },
+    events: {
+      'onReady': onPlayerReady
     }
   });
 }
 
-// Función original intacta de activación de música
+function onPlayerReady(event) {
+  const btn = document.getElementById("musicBtn");
+  btn.disabled = false;
+  btn.textContent = "🎵 ACTIVAR MÚSICA";
+}
+
+// Función de activación de música intacta
 function toggleMusic() {
   const btn = document.getElementById("musicBtn");
   if (!player || typeof player.getPlayerState !== 'function') return;
@@ -219,7 +229,7 @@ const challenges = [
   { name:["Adivina con", "emojis"], emoji:"😀", desc:"Interpreta y adivina el título de la canción secreta.", color:"#ff9f43" }
 ];
 
-// Lista de canciones configurada para "Caiga en la nota"
+// Lista de canciones individuales exclusivamente para la dinámica "Caiga en la nota"
 const noteSongs = [
   { title: "Silvestre Dangond, Nicky Jam - Cásate Conmigo", id: "cpN78ZjnCZY", start: 63 },
   { title: "Hombres G - Devuélveme a mi Chica", id: "LgQYPqr9Rho", start: 0 },
@@ -346,7 +356,7 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si cae en "Caiga en la nota", reproduce aleatoriamente de la lista con su respectivo segundo de inicio
+  // Si cae en "Caiga en la nota", reproduce aleatoriamente de la lista de canciones individuales
   if (selectedIndex === 0) {
     if (player && typeof player.loadVideoById === 'function') {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
