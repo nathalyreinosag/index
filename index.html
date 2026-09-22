@@ -179,12 +179,14 @@ function toggleMusic() {
   const player = document.getElementById("youtube-player");
 
   if (!isPlaying) {
+    // Asigna tu enlace con autoplay al hacer clic para cumplir con los permisos del navegador
     player.src = "https://www.youtube.com/embed/P-auj2ElqzI?autoplay=1&loop=1&playlist=P-auj2ElqzI";
     isPlaying = true;
     btn.textContent = "⏸️ PAUSAR MÚSICA";
     btn.style.background = "#ff5c8a";
     btn.style.color = "#fff";
   } else {
+    // Limpia la fuente del iframe para detener la reproducción por completo
     player.src = "";
     isPlaying = false;
     btn.textContent = "🎵 ACTIVAR MÚSICA";
@@ -267,33 +269,24 @@ function spin(){
   document.getElementById("spinBtn").disabled = true;
   document.getElementById("result").classList.remove("show");
 
-  const slice = 2 * Math.PI / challenges.length;
-  selectedIndex = Math.floor(Math.random() * challenges.length);
-
   const start = rotation;
-  const fullTurns = (Math.floor(Math.random() * 4) + 6) * 2 * Math.PI;
-  const targetOffset = -Math.PI / 2 - (selectedIndex * slice + slice / 2);
-  const normalizedTarget = (targetOffset % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-  const currentNormalized = (start % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-  
-  let diff = normalizedTarget - currentNormalized;
-  if (diff < 0) diff += 2 * Math.PI;
-
-  const target = start + fullTurns + diff;
+  const turns = 7 + Math.random()*3;
+  const target = start + turns * 2 * Math.PI + Math.random()*2*Math.PI;
   const duration = 4200;
   const t0 = performance.now();
 
   function animate(t){
-    const p = Math.min(1, (t - t0) / duration);
-    const ease = 1 - Math.pow(1 - p, 4);
-    rotation = start + (target - start) * ease;
+    const p = Math.min(1, (t-t0)/duration);
+    const ease = 1 - Math.pow(1-p, 4);
+    rotation = start + (target-start)*ease;
     drawWheel();
 
     if(p < 1){
       requestAnimationFrame(animate);
     } else {
-      rotation = target;
-      drawWheel();
+      const slice = 2*Math.PI / challenges.length;
+      let angle = ((-Math.PI/2 - rotation) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+      selectedIndex = Math.floor(angle/slice) % challenges.length;
       showResult();
       spinning = false;
       document.getElementById("spinBtn").disabled = false;
@@ -318,7 +311,7 @@ function startChallenge(){
   document.getElementById("challengeIcon").textContent = c.emoji;
   document.getElementById("challengeTitle").textContent = c.name.join(" ");
   
-  // Si no es la dinámica 2 ("Ruleta de palabras", que es el índice 2), pausamos la música
+  // Pausar música si es Caiga en la nota (0), Adivina la canción (1) o Adivina con emojis (3)
   if (selectedIndex !== 2) {
     wasPlayingBeforeChallenge = isPlaying;
     if (isPlaying) {
@@ -402,7 +395,7 @@ function backHome(){
   document.getElementById("challenge").classList.remove("active");
   document.getElementById("home").classList.add("active");
 
-  // Si la música estaba sonando antes de entrar al desafío, la reanudamos al volver
+  // Reanudar la música al volver si estaba sonando antes
   if (wasPlayingBeforeChallenge && !isPlaying) {
     const player = document.getElementById("youtube-player");
     const btn = document.getElementById("musicBtn");
