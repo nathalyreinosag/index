@@ -125,7 +125,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
   margin:20px 0;
 }
 .bar{height:100%;width:100%;background:#ffd54a;transition:width 1s linear;}
-.emoji-song{font-size:70px;letter-spacing:15px;margin:20px 0;}
+.emoji-song{font-size:60px;letter-spacing:10px;margin:20px 0;word-break:break-all;}
 .word{font-size:65px;font-weight:900;color:#ffd54a;margin:20px 0;}
 .spark{font-size:28px;margin-bottom:5px;}
 
@@ -335,16 +335,13 @@ function startChallenge(){
   
   wasMusicPlayingBeforeChallenge = isMusicActive;
 
-  // SOLO PARA DINÁMICA 0 ("Caiga en la nota") o DINÁMICA 1 ("Adivina el nombre de la canción")
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (isMusicActive) {
-      // Forzamos la pausa enviando el comando por postMessage de forma segura
       try {
         iframeMain.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
       } catch(e) {}
     }
     
-    // Si es Caiga en la nota (0), ponemos canción aleatoria propia
     if (selectedIndex === 0) {
       const randomSong = noteSongs[Math.floor(Math.random() * noteSongs.length)];
       iframeChallenge.src = `https://www.youtube.com/embed/${randomSong.id}?start=${randomSong.start}&autoplay=1`;
@@ -352,15 +349,47 @@ function startChallenge(){
       iframeChallenge.src = "";
     }
   } else {
-    // Para Ruleta de palabras (2) y Emojis (3), el mix principal SIGUE SONANDO de fondo
     iframeChallenge.src = "";
   }
 
   renderChallenge(selectedIndex);
 }
 
-const emojiList = ["🌺🔥🎵", "🌺🌊☀️", "💎💋🔥", "🕶️🟢🔥", "🌙🐺💚"];
-const songTitles = ["AMARGURA - Karol G", "PROVENZA - Karol G", "QLONA - Karol G & Peso Pluma", "CLASSY 101 - Feid", "LUNA - Feid"];
+// LISTA ACTUALIZADA DE EMOJIS Y NOMBRES
+const emojiDatabase = [
+  { emojis: "👸🏰", name: "Princesa" },
+  { emojis: "❤️💔", name: "Corazón Partío" },
+  { emojis: "🐺👩", name: "Loba" },
+  { emojis: "🧟‍♀️🧟🧟‍♂️", name: "Thriller" },
+  { emojis: "👀🐅", name: "Eye of the Tiger" },
+  { emojis: "💃🕺🔥", name: "Danza Kuduro" },
+  { emojis: "❤️📸", name: "Fotografía" },
+  { emojis: "🧳🛫🌎", name: "La Vuelta al Mundo" },
+  { emojis: "🦋⚔️", name: "Mariposa Traicionera" },
+  { emojis: "❤️🚫", name: "Amor Prohibido" },
+  { emojis: "🎵🪶", name: "De Música Ligera" },
+  { emojis: "🐢🚶", name: "Despacito" },
+  { emojis: "🦁🐗🐛", name: "Hakuna Matata" },
+  { emojis: "🫧❤️", name: "Burbujas de amor" },
+  { emojis: "💧🧊", name: "La gota fría" },
+  { emojis: "👍🏻❤️🫵🏻", name: "Me gustas tú" },
+  { emojis: "👠👠👠", name: "Tacones Rojos" },
+  { emojis: "😜👴🏻👴🏻", name: "Mayores" },
+  { emojis: "👗👕💵", name: "Ropa Cara" },
+  { emojis: "🙏🏻🌧️☕", name: "Ojalá llueva Café" },
+  { emojis: "🙂👩🏻👨🏻👩🏻👨🏻", name: "Felices los 4" },
+  { emojis: "😭🌹", name: "Lloran las rosas" },
+  { emojis: "👨🏻🐺🇫🇷", name: "Hombre lobo en parís" },
+  { emojis: "🗣️🗣️👂🏻", name: "Cuéntame al oído" },
+  { emojis: "🍋‍🧂", name: "Limón y sal" },
+  { emojis: "🙈🙉🙊", name: "Ciega sordomuda" },
+  { emojis: "🗣️🫢🗣️", name: "Chismofilia" },
+  { emojis: "👣 🚫 👞", name: "Pies descalzos" },
+  { emojis: "🍲 🐌", name: "Sopa de caracol" },
+  { emojis: "🏙️ 😡", name: "La ciudad de la furia" },
+  { emojis: "💀😈👹", name: "Calaveras y diablitos" }
+];
+
 let currentAnswer = "";
 
 function renderChallenge(i){
@@ -388,11 +417,11 @@ function renderChallenge(i){
       <p style="font-size:20px;">🎤 Canta una canción que contenga esta palabra.</p>
     `;
   } else {
-    const idx = Math.floor(Math.random() * emojiList.length);
-    currentAnswer = songTitles[idx];
+    const item = emojiDatabase[Math.floor(Math.random() * emojiDatabase.length)];
+    currentAnswer = item.name;
     box.innerHTML = `
       <p style="font-size:20px;">¿Qué canción representan estos emojis?</p>
-      <div class="emoji-song">${emojiList[idx]}</div>
+      <div class="emoji-song">${item.emojis}</div>
       <button onclick="revealEmojiSong()" style="font-size:18px;padding:14px 30px;">💡 REVELAR RESPUESTA</button>
       <div id="emojiAnswer" style="display:none;margin-top:15px;font-size:30px;font-weight:900;color:#ffd54a"></div>
     `;
@@ -425,7 +454,6 @@ function backHome(){
   clearInterval(timer);
   iframeChallenge.src = "";
 
-  // Si veníamos de Caiga en la nota (0) o Adivina el nombre de la canción (1) y el mix estaba activo, lo reanudamos
   if (selectedIndex === 0 || selectedIndex === 1) {
     if (wasMusicPlayingBeforeChallenge) {
       try {
