@@ -191,7 +191,6 @@ let bgPlayer = null;
 let isPlaying = false;
 let ytReady = false;
 
-// Esta función se ejecuta automáticamente cuando carga el script de YouTube
 function onYouTubeIframeAPIReady() {
   bgPlayer = new YT.Player('ambientPlayer', {
     height: '0',
@@ -272,7 +271,6 @@ function initYTPlayer(videoId, startTime = "0") {
     challengePlayer.destroy();
   }
 
-  // Pequeño retraso para asegurar que el DOM del reto esté renderizado
   setTimeout(() => {
     const element = document.getElementById('youtubePlayerElement');
     if (element) {
